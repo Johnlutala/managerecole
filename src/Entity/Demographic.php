@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityTrait;
 use App\Repository\DemographicRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: DemographicRepository::class)]
 class Demographic
 {
+    use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -39,6 +41,10 @@ class Demographic
     public function __construct()
     {
         $this->participants = new ArrayCollection();
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int

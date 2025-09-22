@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -9,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: '`user`')]
 class User
 {
+    use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -34,6 +36,14 @@ class User
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?Role $role = null;
+
+    public function __construct()
+    {
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityTrait;
 use App\Repository\PermissionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: PermissionRepository::class)]
 class Permission
 {
+    use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -30,6 +32,10 @@ class Permission
     public function __construct()
     {
         $this->roles = new ArrayCollection();
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int

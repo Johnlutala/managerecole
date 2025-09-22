@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityTrait;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ParticipantRepository::class)]
 class Participant
 {
+    use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -22,6 +24,15 @@ class Participant
     #[ORM\ManyToOne(inversedBy: 'participants')]
     #[ORM\JoinColumn(nullable: false)]
     private ?WorkshopList $workshopList = null;
+
+
+    public function __construct()
+    {
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {

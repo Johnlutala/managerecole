@@ -2,12 +2,14 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\EntityTrait;
 use App\Repository\WorkshopRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: WorkshopRepository::class)]
 class Workshop
 {
+    use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -21,6 +23,14 @@ class Workshop
 
     #[ORM\OneToOne(mappedBy: 'workshop', cascade: ['persist', 'remove'])]
     private ?WorkshopList $workshopList = null;
+
+    public function __construct()
+    {
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
