@@ -38,6 +38,9 @@ class Demographic
     #[ORM\OneToMany(targetEntity: Participant::class, mappedBy: 'demographic')]
     private Collection $participants;
 
+    #[ORM\OneToOne(inversedBy: 'demographic', cascade: ['persist', 'remove'])]
+    private ?Biometric $biometrics = null;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -138,6 +141,18 @@ class Demographic
                 $participant->setDemographic(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getBiometrics(): ?Biometric
+    {
+        return $this->biometrics;
+    }
+
+    public function setBiometrics(?Biometric $biometrics): static
+    {
+        $this->biometrics = $biometrics;
 
         return $this;
     }
