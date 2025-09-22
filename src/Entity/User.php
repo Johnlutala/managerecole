@@ -32,6 +32,9 @@ class User
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?MerchantConfiguration $configuration = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Role $role = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -105,6 +108,18 @@ class User
     public function setConfiguration(?MerchantConfiguration $configuration): static
     {
         $this->configuration = $configuration;
+
+        return $this;
+    }
+
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): static
+    {
+        $this->role = $role;
 
         return $this;
     }
