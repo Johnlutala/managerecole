@@ -25,6 +25,9 @@ class Participant
     #[ORM\JoinColumn(nullable: false)]
     private ?WorkshopList $workshopList = null;
 
+    #[ORM\ManyToOne(inversedBy: 'participants')]
+    private ?Company $company = null;
+
 
     public function __construct()
     {
@@ -71,6 +74,18 @@ class Participant
     public function setWorkshopList(?WorkshopList $workshopList): static
     {
         $this->workshopList = $workshopList;
+
+        return $this;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?Company $company): static
+    {
+        $this->company = $company;
 
         return $this;
     }
