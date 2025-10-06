@@ -3,13 +3,14 @@
 namespace App\Entity;
 
 use App\Entity\Traits\EntityTrait;
-use App\Repository\ParticipantRepository;
+use App\Repository\WorkshopDayRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ParticipantRepository::class)]
-class Participant
+#[ORM\Entity(repositoryClass: WorkshopDayRepository::class)]
+class WorkshopDay
 {
     use EntityTrait;
     #[ORM\Id]
@@ -17,29 +18,23 @@ class Participant
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'participants')]
-    private ?Demographic $demographic = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $subject = null;
 
-    #[ORM\Column(length: 25, nullable: true)]
-    private ?string $phone = null;
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTime $date = null;
 
-
-    #[ORM\ManyToOne(inversedBy: 'participants')]
-    private ?Company $company = null;
+    #[ORM\ManyToOne(inversedBy: 'workshopDays')]
+    private ?Workshop $workshop = null;
 
     /**
      * @var Collection<int, Participation>
      */
-    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'participant')]
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'day')]
     private Collection $participations;
-
 
     public function __construct()
     {
-        $this->code = uniqid();
-        $this->enabled = true;
-        $this->deleted = false;
-        $this->createdAt = new \DateTimeImmutable();
         $this->participations = new ArrayCollection();
     }
 
@@ -48,39 +43,38 @@ class Participant
         return $this->id;
     }
 
-    public function getDemographic(): ?Demographic
+    public function getSubject(): ?string
     {
-        return $this->demographic;
+        return $this->subject;
     }
 
-    public function setDemographic(?Demographic $demographic): static
+    public function setSubject(?string $subject): static
     {
-        $this->demographic = $demographic;
+        $this->subject = $subject;
 
         return $this;
     }
 
-    public function getPhone(): ?string
+    public function getDate(): ?\DateTime
     {
-        return $this->phone;
+        return $this->date;
     }
 
-    public function setPhone(?string $phone): static
+    public function setDate(\DateTime $date): static
     {
-        $this->phone = $phone;
+        $this->date = $date;
 
         return $this;
     }
 
-
-    public function getCompany(): ?Company
+    public function getWorkshop(): ?Workshop
     {
-        return $this->company;
+        return $this->workshop;
     }
 
-    public function setCompany(?Company $company): static
+    public function setWorkshop(?Workshop $workshop): static
     {
-        $this->company = $company;
+        $this->workshop = $workshop;
 
         return $this;
     }
@@ -97,7 +91,7 @@ class Participant
     {
         if (!$this->participations->contains($participation)) {
             $this->participations->add($participation);
-            $participation->setParticipant($this);
+            $participation->setDay($this);
         }
 
         return $this;
@@ -107,8 +101,8 @@ class Participant
     {
         if ($this->participations->removeElement($participation)) {
             // set the owning side to null (unless already changed)
-            if ($participation->getParticipant() === $this) {
-                $participation->setParticipant(null);
+            if ($participation->getDay() === $this) {
+                $participation->setDay(null);
             }
         }
 

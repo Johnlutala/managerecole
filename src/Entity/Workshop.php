@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\Traits\EntityTrait;
 use App\Repository\WorkshopRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,8 +22,6 @@ class Workshop
     private ?string $name = null;
 
 
-    #[ORM\OneToOne(mappedBy: 'workshop', cascade: ['persist', 'remove'])]
-    private ?WorkshopList $workshopList = null;
 
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $description = null;
@@ -35,12 +35,26 @@ class Workshop
     #[ORM\Column(length: 5)]
     private ?string $currency = null;
 
+    /**
+     * @var Collection<int, WorkshopDay>
+     */
+    #[ORM\OneToMany(targetEntity: WorkshopDay::class, mappedBy: 'workshop')]
+    private Collection $workshopDays;
+
+    /**
+     * @var Collection<int, Participation>
+     */
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'workshop')]
+    private Collection $participations;
+
     public function __construct()
     {
         $this->code = uniqid();
         $this->enabled = true;
         $this->deleted = false;
         $this->createdAt = new \DateTimeImmutable();
+        $this->workshopDays = new ArrayCollection();
+        $this->participations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -61,23 +75,6 @@ class Workshop
     }
 
     
-
-    public function getWorkshopList(): ?WorkshopList
-    {
-        return $this->workshopList;
-    }
-
-    public function setWorkshopList(WorkshopList $workshopList): Workshop
-    {
-        // set the owning side of the relation if necessary
-        if ($workshopList->getWorkshop() !== $this) {
-            $workshopList->setWorkshop($this);
-        }
-
-        $this->workshopList = $workshopList;
-
-        return $this;
-    }
 
     public function getDescription(): ?string
     {
@@ -123,6 +120,66 @@ class Workshop
     public function setCurrency(string $currency): static
     {
         $this->currency = $currency;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WorkshopDay>
+     */
+    public function getWorkshopDays(): Collection
+    {
+        return $this->workshopDays;
+    }
+
+    public function addWorkshopDay(WorkshopDay $workshopDay): static
+    {
+        if (!$this->workshopDays->contains($workshopDay)) {
+            $this->workshopDays->add($workshopDay);
+            $workshopDay->setWorkshop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWorkshopDay(WorkshopDay $workshopDay): static
+    {
+        if ($this->workshopDays->removeElement($workshopDay)) {
+            // set the owning side to null (unless already changed)
+            if ($workshopDay->getWorkshop() === $this) {
+                $workshopDay->setWorkshop(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Participation>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(Participation $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setWorkshop($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(Participation $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            // set the owning side to null (unless already changed)
+            if ($participation->getWorkshop() === $this) {
+                $participation->setWorkshop(null);
+            }
+        }
 
         return $this;
     }

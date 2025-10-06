@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\WorkshopList;
+use App\Entity\Participation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<WorkshopList>
+ * @extends ServiceEntityRepository<Participation>
  */
-class WorkshopListRepository extends ServiceEntityRepository
+class ParticipationRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, WorkshopList::class);
+        parent::__construct($registry, Participation::class);
     }
 
     //    /**
-    //     * @return WorkshopList[] Returns an array of WorkshopList objects
+    //     * @return Participation[] Returns an array of Participation objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('w')
-    //            ->andWhere('w.exampleField = :val')
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('w.id', 'ASC')
+    //            ->orderBy('p.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?WorkshopList
+    //    public function findOneBySomeField($value): ?Participation
     //    {
-    //        return $this->createQueryBuilder('w')
-    //            ->andWhere('w.exampleField = :val')
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()
