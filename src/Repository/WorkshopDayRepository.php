@@ -16,6 +16,26 @@ class WorkshopDayRepository extends ServiceEntityRepository
         parent::__construct($registry, WorkshopDay::class);
     }
 
+        /**
+    
+         * @return WorkshopDay[] Returns an array of WorkshopDay objects
+         */
+        public function findActiveByWorkshop($value): array
+        {
+            return $this->createQueryBuilder('w')
+                ->andWhere('w.workshop = :workshop')
+                ->setParameter('workshop', $value)
+                ->andWhere('w.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('w.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->orderBy('w.id', 'ASC')
+                ->setMaxResults(10)
+                ->getQuery()
+                ->getResult();
+    }
+
+
     //    /**
     //     * @return WorkshopDay[] Returns an array of WorkshopDay objects
     //     */

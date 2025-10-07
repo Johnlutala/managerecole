@@ -19,13 +19,15 @@ class WorkshopRepository extends ServiceEntityRepository
         /**
          * @return Workshop[] Returns an array of Workshop objects
          */
-        public function findByActive($value): array
+        public function findActive(): array
         {
             return $this->createQueryBuilder('w')
                 ->andWhere('w.enabled = :enabled')
-                ->setParameter('enabled', $value)
+                ->setParameter('enabled', true)
+                ->andWhere('w.deleted = :deleted')
+                ->setParameter('deleted', false)
                 ->orderBy('w.id', 'ASC')
-                ->setMaxResults(10)
+                // ->setMaxResults(10)
                 ->getQuery()
                 ->getResult()
             ;

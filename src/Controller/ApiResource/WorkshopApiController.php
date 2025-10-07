@@ -6,8 +6,10 @@ use App\Controller\ApiResource\AbstractApiController;
 use App\Dto\CreateWorkshopDto;
 use App\Entity\Workshop;
 use App\Repository\BiometricRepository;
+use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use phpDocumentor\Reflection\Types\Integer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -94,16 +96,19 @@ final class WorkshopApiController extends AbstractApiController
         try {
             
             $queries = $request->query->all();
+            
     
-            if (isset($queries['active'])) {
+            if (isset($queries['active']) && $queries['active'] === 'true') {
                 
-                $workshops = $this->repo->findByActive($queries['active']);
+                $workshops = $this->repo->findActive();
                 $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
+                
                 return new JsonResponse($datas, Response::HTTP_OK, [], true);
                 
             }
             
-            $workshops = $this->repo->findByActive($queries['enabled'] ?? true);
+            $workshops = $this->repo->findAll();
+
             $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
             
             return new JsonResponse($datas, Response::HTTP_OK, [], true);
@@ -120,12 +125,31 @@ final class WorkshopApiController extends AbstractApiController
     
 
     #[Route("/{id}", name:"api_get_one_workshop", methods: ['GET'])]
-    public function getOneWorkshop(int $id): JsonResponse
+    public function getOneWorkshop(
+        string $id,
+        WorkshopDayRepository $workshopDayRepo    
+    ): JsonResponse
     {
         
         try {
-            $workshop = $this->repo->findOneBy(['id' => $id]);
-    
+            $workshop = $this->repo->findOneBy(['id' => intval($id)]);
+            
+            $days = $workshopDayRepo->findActiveByWorkshop($id);
+            $startDate = null;
+            $endDate = null;
+
+            foreach ($days as $day) {
+                $date = $day->getDate();
+                if ($date) {
+                    if ($startDate === null || $date < $startDate) {
+                        $startDate = $date;
+                    }
+                    if ($endDate === null || $date > $endDate || $date === $endDate) {
+                        $endDate = $date;
+                    }
+                }
+            }
+
             if (!$workshop) {
                 
                 return new JsonResponse([
@@ -134,12 +158,15 @@ final class WorkshopApiController extends AbstractApiController
                 ], Response::HTTP_NOT_FOUND);
             }
     
-            $data = $this->serializer->serialize($workshop, 'json', ['groups' => 'workshop:read']);
-            
-            $data['numberOfDays'] = count($workshop->getWorkshopDays());
+            $workshopData = $this->serializer->serialize($workshop, 'json', ['groups' => 'workshop:read']);
+            $workshopArray = json_decode($workshopData, true);
 
-            
-            return new JsonResponse($data, Response::HTTP_OK, [], true);
+            $workshopArray['startDate'] = $startDate ? $startDate->format('d/m/Y') : null;
+            $workshopArray['endDate'] = $endDate ? $endDate->format('d/m/Y') : null;
+            $workshopArray['numberOfDays'] = count($days);
+
+            return new JsonResponse($workshopArray, Response::HTTP_OK);
+
         } catch (\Exception $e) {
             
             return new JsonResponse([
