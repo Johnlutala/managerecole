@@ -117,8 +117,7 @@ final class WorkshopApiController extends AbstractApiController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-
+    
 
     #[Route("/{id}", name:"api_get_one_workshop", methods: ['GET'])]
     public function getOneWorkshop(int $id): JsonResponse
