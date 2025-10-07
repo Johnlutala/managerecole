@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: WorkshopRepository::class)]
 class Workshop
@@ -16,19 +17,20 @@ class Workshop
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['workshop:read'])]
     private ?int $id = null;
-
+    
+    #[Groups(['workshop:read'])]
     #[ORM\Column(length: 255, unique:true)]
     private ?string $name = null;
-
-
-
+    
+    
+    
+    #[Groups(['workshop:read'])]
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $description = null;
-
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $dates = null;
-
+    
+    
     #[ORM\Column]
     private ?float $dailyAmount = null;
 
@@ -88,18 +90,7 @@ class Workshop
         return $this;
     }
 
-    public function getDates(): ?array
-    {
-        return $this->dates;
-    }
-
-    public function setDates(?array $dates): static
-    {
-        $this->dates = $dates;
-
-        return $this;
-    }
-
+    
     public function getDailyAmount(): ?float
     {
         return $this->dailyAmount;

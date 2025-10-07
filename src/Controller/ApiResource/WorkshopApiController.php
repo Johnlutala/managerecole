@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Messenger\Transport\Serialization\Serializer;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -68,7 +69,6 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDescription($data['description'] ?? null);
             $workshop->setDailyAmount($data['dailyAmount']);
             $workshop->setCurrency($data['currency']);
-            $workshop->setDates($data['dates']);
 
             $this->entityManager->persist($workshop);
             $this->entityManager->flush();
@@ -84,6 +84,71 @@ final class WorkshopApiController extends AbstractApiController
                 'message' => 'Erreur lors de la création de l\'atelier: ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    #[Route("/", name:"api_get_workshops", methods: ['GET'])]
+    public function getWorkshops(Request $request): JsonResponse
+    {
+        
+        try {
+            
+            $queries = $request->query->all();
+    
+            if (isset($queries['active'])) {
+                
+                $workshops = $this->repo->findByActive($queries['active']);
+                $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
+                return new JsonResponse($datas, Response::HTTP_OK, [], true);
+                
+            }
+            
+            $workshops = $this->repo->findByActive($queries['enabled'] ?? true);
+            $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
+            
+            return new JsonResponse($datas, Response::HTTP_OK, [], true);
+    
+            
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération des ateliers: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    #[Route("/{id}", name:"api_get_one_workshop", methods: ['GET'])]
+    public function getOneWorkshop(int $id): JsonResponse
+    {
+        
+        try {
+            $workshop = $this->repo->findOneBy(['id' => $id]);
+    
+            if (!$workshop) {
+                
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Atelier non trouvé'
+                ], Response::HTTP_NOT_FOUND);
+            }
+    
+            $data = $this->serializer->serialize($workshop, 'json', ['groups' => 'workshop:read']);
+            
+            $data['numberOfDays'] = count($workshop->getWorkshopDays());
+
+            
+            return new JsonResponse($data, Response::HTTP_OK, [], true);
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération de l\'atelier: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
 
     private function validateWorkshopData(?array $data): array
