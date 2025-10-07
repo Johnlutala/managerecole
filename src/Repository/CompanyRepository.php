@@ -16,6 +16,23 @@ class CompanyRepository extends ServiceEntityRepository
         parent::__construct($registry, Company::class);
     }
 
+        /**
+         * @return Company[] Returns an array of Company objects
+         */
+        public function findEnabled(): array
+        {
+            return $this->createQueryBuilder('c')
+                ->andWhere('c.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('c.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->orderBy('c.id', 'ASC')
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+    
     //    /**
     //     * @return Company[] Returns an array of Company objects
     //     */

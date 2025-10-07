@@ -11,10 +11,15 @@ use App\Repository\BiometricRepository;
 use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 
@@ -30,12 +35,19 @@ final class ParticipantApiController extends AbstractApiController
         ParticipantRepository $repo_,
         DemographicRepository $demoRepo_,
         BiometricRepository $bioRepo_,
-        // plus all the dependencies of the parent class
-        ...$dependencies
+        // Dependencies from AbstractApiController
+        SerializerInterface $serializer,
+        HttpClientInterface $httpClient,
+        TransportInterface $mailer,
+        LoggerInterface $logger,
+        LoggerInterface $handshakeLogger,
+        ValidatorInterface $validator
     )
     {
-        parent::__construct(...$dependencies);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
         $this->repo = $repo_;
+        $this->demoRepo = $demoRepo_;
+        $this->bioRepo = $bioRepo_;
     }
 
     public function getDemographics(
@@ -59,7 +71,7 @@ final class ParticipantApiController extends AbstractApiController
             }
     
             // Vérification des champs requis
-            $required = ['firstname', 'lastname', 'companyId', 'gender', 'phoneContact'];
+            $required = ['firstname', 'lastname', 'gender', 'phoneContact'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
                     return new JsonResponse(['error' => "Le champ '$field' est obligatoire"], Response::HTTP_BAD_REQUEST);
@@ -108,11 +120,13 @@ final class ParticipantApiController extends AbstractApiController
             $participant->setDemographic($demographic);
     
             // Récupération de la société (Company)
-            $company = $entityManager->getRepository(Company::class)->find($data['companyId']);
-            if (!$company) {
-                return new JsonResponse(['error' => 'Company introuvable'], Response::HTTP_BAD_REQUEST);
+            if (isset($data['companyId'])) {
+                $company = $entityManager->getRepository(Company::class)->find($data['companyId']);
+                if ($company) {
+                    $participant->setCompany($company);
+                }
             }
-            $participant->setCompany($company);
+            
     
             // Ajout à la collection de Demographic
             $demographic->addParticipant($participant);

@@ -7,6 +7,7 @@ use App\Repository\CompanyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
 class Company
@@ -15,12 +16,15 @@ class Company
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['company:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['company:read'])]
     private ?string $name = null;
-
+    
     #[ORM\Column(length: 500, nullable: true)]
+    #[Groups(['company:read'])]
     private ?string $description = null;
 
     /**
