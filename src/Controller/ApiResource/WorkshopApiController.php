@@ -5,6 +5,7 @@ namespace App\Controller\ApiResource;
 use App\Controller\ApiResource\AbstractApiController;
 use App\Dto\CreateWorkshopDto;
 use App\Entity\Workshop;
+use App\Entity\WorkshopDay;
 use App\Repository\BiometricRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
@@ -71,6 +72,17 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDescription($data['description'] ?? null);
             $workshop->setDailyAmount($data['dailyAmount']);
             $workshop->setCurrency($data['currency']);
+
+            // Création des jours d'atelier
+            foreach ($data['dates'] as $dateString) {
+                $date = \DateTime::createFromFormat('d/m/Y', $dateString);
+                if ($date) {
+                    $workshopDay = new WorkshopDay();
+                    $workshopDay->setDate($date);
+                    $workshopDay->setWorkshop($workshop);
+                    $this->entityManager->persist($workshopDay);
+                }
+            }
 
             $this->entityManager->persist($workshop);
             $this->entityManager->flush();

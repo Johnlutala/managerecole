@@ -36,6 +36,10 @@ class WorkshopDay
     public function __construct()
     {
         $this->participations = new ArrayCollection();
+        $this->code = uniqid();
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
