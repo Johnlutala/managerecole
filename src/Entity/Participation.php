@@ -28,6 +28,16 @@ class Participation
     #[ORM\Column]
     private ?bool $isPresent = null;
 
+
+    public function __construct()
+    {
+        $this->code = uniqid();        
+        $this->isPresent = false;
+        $this->enabled = true;
+        $this->deleted = false;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
