@@ -148,13 +148,36 @@ final class WorkshopApiController extends AbstractApiController
                 'createdAt' => 'DESC'
             ], 3);
 
-            $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
-            $workshopArray = json_decode($datas, true);
-            // $workshopArray['participants'] = count($workshops->getParticipations());
             
-            return new JsonResponse($datas, Response::HTTP_OK, [], true);
-    
-            
+            // Préparer les données des ateliers avec startDate et endDate
+            $workshopsData = [];
+            foreach ($workshops as $workshop) {
+                $startDate = null;
+                $endDate = null;
+                $dates = $workshop->getWorkshopDays()->map(fn($day) => $day->getDate())->toArray();
+                
+                foreach ($dates as $date) {
+                    if ($date) {
+                        if ($startDate === null || $date < $startDate) {
+                            $startDate = $date;
+                        }
+                        if ($endDate === null || $date > $endDate) {
+                            $endDate = $date;
+                        }
+                    }
+                }
+                
+                $workshopsData[] = [
+                    'id' => $workshop->getId(),
+                    'name' => $workshop->getName(),
+                    'description' => $workshop->getDescription(),
+                    'startDate' => $startDate ? $startDate->format('d/m/Y') : null,
+                    'endDate' => $endDate ? $endDate->format('d/m/Y') : null
+                ];
+            }
+
+            return new JsonResponse($workshopsData, Response::HTTP_OK);
+
         } catch (\Exception $e) {
             
             return new JsonResponse([
@@ -199,7 +222,7 @@ final class WorkshopApiController extends AbstractApiController
 
             $workshop->setUpdatedAt(new \DateTime());
             $workshop->setEnabled(false);
-            
+
             $this->entityManager->persist($workshop);
             $this->entityManager->flush();
 
