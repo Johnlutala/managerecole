@@ -7,10 +7,12 @@ use App\Entity\Biometric;
 use App\Entity\Company;
 use App\Entity\Demographic;
 use App\Entity\Participant;
+use App\Entity\Participation;
 use App\Repository\BiometricRepository;
 use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\WorkshopDayRepository;
+use App\Repository\WorkshopRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -61,7 +63,8 @@ final class ParticipantApiController extends AbstractApiController
     #[Route('/with-biometrics', name: 'api_create_participant_with_bio', methods: ['POST'])]
     public function createWithBiometrics(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        WorkshopRepository $workshopRepo
     ): JsonResponse {
         try {
             // Récupération et décodage des données JSON
@@ -125,6 +128,29 @@ final class ParticipantApiController extends AbstractApiController
                 $company = $entityManager->getRepository(Company::class)->find($data['companyId']);
                 if ($company) {
                     $participant->setCompany($company);
+                }
+            }
+
+
+            // Création des participations aux ateliers (Workshop)
+            if (isset($data['workshopId'])) {
+                
+                $workshop = $workshopRepo->findOneBy(['id' => $data['workshopId']]);
+
+                if (!$workshop) {
+                    return new JsonResponse([
+                        'code' => "1",
+                        'message' => "Atelier  non trouvé pour l'ID fourni"
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+                
+                foreach ($workshop->getWorkshopDays() as $day) {
+                    
+                    $participation = new Participation();
+                    $participation->setParticipant($participant);
+                    $participation->setWorkshop($workshop);
+                    $participation->setDay($day);
+                    $entityManager->persist($participation);
                 }
             }
             
