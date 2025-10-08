@@ -165,6 +165,61 @@ final class WorkshopApiController extends AbstractApiController
     }
     
 
+    #[Route("/close", name:"api_close_one_workshop", methods: ['POST'])]
+    public function closeOneWorkshop(
+        Request $request    
+    ): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            
+            $workshop = $this->repo->findOneBy(['id' => $data['id']]);
+
+            if (!$workshop) {
+                
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Atelier non trouvé'
+                ], Response::HTTP_NOT_FOUND);
+            }
+        
+            // Désactiver les participations et les jours associés
+            foreach ($workshop->getWorkshopDays() as $day) {
+
+                foreach ($day->getParticipations() as $participation) {
+                    $participation->setEnabled(false);
+                    $participation->setUpdatedAt(new \DateTime());
+                    $this->entityManager->persist($participation);
+                }
+                
+                $day->setEnabled(false);
+                $day->setUpdatedAt(new \DateTime());
+                $this->entityManager->persist($day);
+            }
+
+            $workshop->setUpdatedAt(new \DateTime());
+            $workshop->setEnabled(false);
+            
+            $this->entityManager->persist($workshop);
+            $this->entityManager->flush();
+
+
+            return new JsonResponse([
+                'code' => "0",
+                'message' => 'Atelier clôturé avec succès'
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération de l\'atelier: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+    
+
     #[Route("/{id}", name:"api_get_one_workshop", methods: ['GET'])]
     public function getOneWorkshop(
         string $id,

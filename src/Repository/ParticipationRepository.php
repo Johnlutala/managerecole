@@ -16,6 +16,22 @@ class ParticipationRepository extends ServiceEntityRepository
         parent::__construct($registry, Participation::class);
     }
 
+        
+        public function findOneByParticipantAndDay($workshopDay, $participant): ?Participation
+        {
+            return $this->createQueryBuilder('p')
+                ->andWhere('p.participant = :participant')
+                ->setParameter('participant', $participant)
+                ->andWhere('p.day = :day')
+                ->setParameter('day', $workshopDay)
+                ->andWhere('p.deleted = :deleted')
+                ->setParameter('deleted', false)
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        }
+
     //    /**
     //     * @return Participation[] Returns an array of Participation objects
     //     */

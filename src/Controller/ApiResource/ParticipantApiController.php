@@ -11,6 +11,7 @@ use App\Entity\Participation;
 use App\Repository\BiometricRepository;
 use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
+use App\Repository\ParticipationRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -206,6 +207,7 @@ final class ParticipantApiController extends AbstractApiController
     public function setAttendance(
         Request $request,
         WorkshopDayRepository $workshopDayRepo,
+        ParticipationRepository $participationRepo,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -222,7 +224,7 @@ final class ParticipantApiController extends AbstractApiController
                 }
         
             // Vérification des champs requis
-            $required = ['participantId', 'workshopId', 'workshopDayId', 'biometrics'];
+            $required = ['participantId', 'workshopDayId', 'biometrics'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
                     return new JsonResponse([
@@ -233,14 +235,39 @@ final class ParticipantApiController extends AbstractApiController
             }
 
             $participant = $this->repo->findOneBy(['id' => $data['participantId']]);
-            $workshopDayId = $workshopDayRepo->findOneBy(['id' => $data['workshopDayId']]);
+            $workshopDay = $workshopDayRepo->findOneBy(['id' => $data['workshopDayId']]);
+
+            
+
+            if (!$participant || !$workshopDay) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => "Participant ou jour d'atelier non trouvé pour les ID fournis"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $participation = $participationRepo->findOneByParticipantAndDay($workshopDay, $participant);
+
+            //dd($participation);
+
+            if (!$participation) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => "Aucune participation trouvée pour le participant et le jour d'atelier spécifiés"
+                ], Response::HTTP_BAD_REQUEST);
+            }
     
-    
+            $participation->setIsPresent(true);
+            $participation->setUpdatedAt(new \DateTime());
+
+            $entityManager->persist($participation);
+            $entityManager->flush();
     
             // Création de l'entité Participant
     
             return new JsonResponse([
-                'message' => 'Participant créé avec succès'
+                'code' => "0",
+                'message' => 'Présence mise à jour avec succès'
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
