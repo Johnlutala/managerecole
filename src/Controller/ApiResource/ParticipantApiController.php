@@ -10,6 +10,7 @@ use App\Entity\Participant;
 use App\Repository\BiometricRepository;
 use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
+use App\Repository\WorkshopDayRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -172,5 +173,57 @@ final class ParticipantApiController extends AbstractApiController
         return new JsonResponse([
             'message' => 'Participant créé avec succès'
         ], Response::HTTP_OK);
+    }
+    
+
+    #[Route('/set-attendance', name: 'api_set_participant_attendance', methods: ['POST'])]
+    public function setAttendance(
+        Request $request,
+        WorkshopDayRepository $workshopDayRepo,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+
+        try {
+            
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                    return new JsonResponse([
+                        'code' => "1",
+                        'message' => 'Données JSON invalides'
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+        
+            // Vérification des champs requis
+            $required = ['participantId', 'workshopId', 'workshopDayId', 'biometrics'];
+            foreach ($required as $field) {
+                if (empty($data[$field])) {
+                    return new JsonResponse([
+                        'code' => "1",
+                        'message' => "Le champ '$field' est obligatoire"
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+            $participant = $this->repo->findOneBy(['id' => $data['participantId']]);
+            $workshopDayId = $workshopDayRepo->findOneBy(['id' => $data['workshopDayId']]);
+    
+    
+    
+            // Création de l'entité Participant
+    
+            return new JsonResponse([
+                'message' => 'Participant créé avec succès'
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la mise à jour : ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

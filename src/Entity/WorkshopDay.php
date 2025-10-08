@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: WorkshopDayRepository::class)]
 class WorkshopDay
@@ -16,12 +17,14 @@ class WorkshopDay
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['workshopday:read'])]
     private ?int $id = null;
-
+    
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $subject = null;
-
+    
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['workshopday:read'])]
     private ?\DateTime $date = null;
 
     #[ORM\ManyToOne(inversedBy: 'workshopDays')]

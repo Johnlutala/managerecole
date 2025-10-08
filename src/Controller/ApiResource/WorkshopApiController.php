@@ -134,6 +134,35 @@ final class WorkshopApiController extends AbstractApiController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    #[Route("/latest", name:"api_get_latest_workshops", methods: ['GET'])]
+    public function getLatestWorkshops(Request $request): JsonResponse
+    {
+        
+        try {
+            
+            $workshops = $this->repo->findAll([
+                'enabled' => true,
+                'deleted' => false,
+                'createdAt' => 'DESC'
+            ], 3);
+
+            $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
+            $workshopArray = json_decode($datas, true);
+            // $workshopArray['participants'] = count($workshops->getParticipations());
+            
+            return new JsonResponse($datas, Response::HTTP_OK, [], true);
+    
+            
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération des ateliers: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
     
 
     #[Route("/{id}", name:"api_get_one_workshop", methods: ['GET'])]
@@ -178,6 +207,48 @@ final class WorkshopApiController extends AbstractApiController
             $workshopArray['numberOfDays'] = count($days);
 
             return new JsonResponse($workshopArray, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération de l\'atelier: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
+    }
+    
+
+    #[Route("/{id}/days", name:"api_get_one_workshop_days", methods: ['GET'])]
+    public function getWorkshopDays(
+        string $id,
+        WorkshopDayRepository $workshopDayRepo    
+    ): JsonResponse
+    {
+        
+        try {
+            $workshop = $this->repo->findOneBy(['id' => intval($id)]);
+            
+            if (!$workshop) {
+                
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Atelier non trouvé'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $days = $workshopDayRepo->findActiveByWorkshop($workshop);
+    
+            $data = $this->serializer->serialize($days, 'json', ['groups' => 'workshopday:read']);
+            $dataArray = json_decode($data, true);
+                foreach ($dataArray as &$day) {
+                    if (isset($day['date'])) {
+                        $date = new \DateTime($day['date']);
+                        $day['date'] = $date->format('d/m/Y');
+                    }
+                }
+
+            return new JsonResponse($dataArray, Response::HTTP_OK);
 
         } catch (\Exception $e) {
             
