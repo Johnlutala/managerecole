@@ -5,29 +5,38 @@ namespace App\Entity;
 use App\Entity\Traits\EntityTrait;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User 
 {
     use EntityTrait;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
-
+    
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 255, unique:true)]
     private ?string $username = null;
-
+    
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $password = null;
-
+    
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 100, unique:true)]
     private ?string $email = null;
-
+    
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $firstname = null;
-
+    
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $lastname = null;
 

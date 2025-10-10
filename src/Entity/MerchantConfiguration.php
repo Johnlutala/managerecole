@@ -7,6 +7,7 @@ use App\Repository\MerchantConfigurationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: MerchantConfigurationRepository::class)]
 class MerchantConfiguration
@@ -15,9 +16,11 @@ class MerchantConfiguration
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['configuration:read'])]
     private ?int $id = null;
-
+    
     #[ORM\Column(length: 255, unique:true)]
+    #[Groups(['configuration:read'])]
     private ?string $shortcode = null;
 
     #[ORM\Column(length: 500, nullable: true)]

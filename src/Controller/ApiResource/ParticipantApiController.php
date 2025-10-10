@@ -72,7 +72,10 @@ final class ParticipantApiController extends AbstractApiController
             $data = json_decode($request->getContent(), true);
     
             if (!$data) {
-                return new JsonResponse(['error' => 'Données JSON invalides'], Response::HTTP_BAD_REQUEST);
+                return new JsonResponse([
+                    'code' => '1',
+                    'message' => 'Données JSON invalides'
+                ], Response::HTTP_BAD_REQUEST);
             }
     
             // Vérification des champs requis
