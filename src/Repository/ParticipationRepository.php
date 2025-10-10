@@ -32,6 +32,25 @@ class ParticipationRepository extends ServiceEntityRepository
             ;
         }
 
+        /**
+         * @return Participation[] Returns an array of Participation objects
+         */
+        public function findActivePerWorkshopDay($workshopDay): array
+        {
+            return $this->createQueryBuilder('p')
+                ->andWhere('p.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('p.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->andWhere('p.day = :day')
+                ->setParameter('day', $workshopDay)
+                ->orderBy('p.id', 'ASC')
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+
     //    /**
     //     * @return Participation[] Returns an array of Participation objects
     //     */

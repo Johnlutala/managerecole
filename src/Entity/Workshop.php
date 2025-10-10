@@ -49,6 +49,9 @@ class Workshop
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'workshop')]
     private Collection $participations;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isEnded = null;
+
     public function __construct()
     {
         $this->code = uniqid();
@@ -171,6 +174,18 @@ class Workshop
                 $participation->setWorkshop(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isEnded(): ?bool
+    {
+        return $this->isEnded;
+    }
+
+    public function setIsEnded(?bool $isEnded): static
+    {
+        $this->isEnded = $isEnded;
 
         return $this;
     }

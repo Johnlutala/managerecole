@@ -7,6 +7,7 @@ use App\Repository\ParticipantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ParticipantRepository::class)]
 class Participant
@@ -15,12 +16,14 @@ class Participant
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['participant:read'])]
     private ?int $id = null;
-
+    
     #[ORM\ManyToOne(inversedBy: 'participants')]
     private ?Demographic $demographic = null;
-
+    
     #[ORM\Column(length: 25, nullable: true)]
+    #[Groups(['participant:read'])]
     private ?string $phone = null;
 
 

@@ -217,11 +217,11 @@ final class ParticipantApiController extends AbstractApiController
             $data = json_decode($request->getContent(), true);
 
             if (!$data) {
-                    return new JsonResponse([
-                        'code' => "1",
-                        'message' => 'Données JSON invalides'
-                    ], Response::HTTP_BAD_REQUEST);
-                }
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Données JSON invalides'
+                ], Response::HTTP_BAD_REQUEST);
+            }
         
             // Vérification des champs requis
             $required = ['participantId', 'workshopDayId', 'biometrics'];
@@ -278,5 +278,55 @@ final class ParticipantApiController extends AbstractApiController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+
+    #[Route('/attendance/{workshopDayId}', name: 'api_get_attendance_per_day', methods: ['GET'])]
+    public function getParticipants(
+        int $workshopDayId,
+        Request $request,
+        WorkshopDayRepository $workshopDayRepo,
+        ParticipationRepository $participationRepo
+    ): JsonResponse
+    {
+        try {
+            
+            // Checks if the workshopDay exists
+            $workshopDay = $workshopDayRepo->findOneBy(['id' => intval($workshopDayId)]);
+
+
+            if (!$workshopDay) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => "Jour d'atelier non trouvé pour l'ID fourni"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $attendances = $participationRepo->findActivePerWorkshopDay($workshopDay);
+            $participantsArray = [];
+
+            foreach ($attendances as $attendance) {
+                $participant = $attendance->getParticipant();
+                $demographic = $participant->getDemographic();
+
+                $participantsArray[] = [
+                    'id' => $participant->getId(),
+                    'phone' => $participant->getPhone(),
+                    'fullname' => $demographic ? trim($demographic->getFirstname() . ' ' . $demographic->getLastname() . ' ' . $demographic->getMiddlename()) : null,
+                    'isPresent' => $attendance->isPresent(),
+                    'participantId' => $participant->getId(),
+                ];
+            }
+            
+
+            return new JsonResponse($participantsArray, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Une erreur est survenue ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

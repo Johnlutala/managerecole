@@ -3,7 +3,6 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Dto\CreateWorkshopDto;
 use App\Entity\Workshop;
 use App\Entity\WorkshopDay;
 use App\Repository\BiometricRepository;
@@ -14,7 +13,6 @@ use phpDocumentor\Reflection\Types\Integer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Messenger\Transport\Serialization\Serializer;
@@ -22,8 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-
-
+use App\Service\WorkshopListGeneration;
 
 #[Route('/api/rest/v1/workshops')]
 final class WorkshopApiController extends AbstractApiController
@@ -190,13 +187,14 @@ final class WorkshopApiController extends AbstractApiController
 
     #[Route("/close", name:"api_close_one_workshop", methods: ['POST'])]
     public function closeOneWorkshop(
-        Request $request    
+        Request $request,
+        WorkshopListGeneration $workshopListGen    
     ): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true);
             
-            $workshop = $this->repo->findOneBy(['id' => $data['id']]);
+            $workshop = $this->repo->findOneBy(['id' => $data['workshopId']]);
 
             if (!$workshop) {
                 
@@ -205,9 +203,16 @@ final class WorkshopApiController extends AbstractApiController
                     'message' => 'Atelier non trouvé'
                 ], Response::HTTP_NOT_FOUND);
             }
+
+            // Générer la liste des participants
+            $finalList = $workshopListGen->generateList($workshop);
+
+            //dd($finalList);
+
+
         
             // Désactiver les participations et les jours associés
-            foreach ($workshop->getWorkshopDays() as $day) {
+            /* foreach ($workshop->getWorkshopDays() as $day) {
 
                 foreach ($day->getParticipations() as $participation) {
                     $participation->setEnabled(false);
@@ -221,14 +226,15 @@ final class WorkshopApiController extends AbstractApiController
             }
 
             $workshop->setUpdatedAt(new \DateTime());
+            $workshop->setIsEnded(true);
             $workshop->setEnabled(false);
 
             $this->entityManager->persist($workshop);
-            $this->entityManager->flush();
+            $this->entityManager->flush(); */
 
 
             return new JsonResponse([
-                'code' => "0",
+                'data' => $finalList,
                 'message' => 'Atelier clôturé avec succès'
             ], Response::HTTP_OK);
 
