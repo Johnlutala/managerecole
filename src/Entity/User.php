@@ -34,8 +34,6 @@ class User
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?MerchantConfiguration $configuration = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Role $role = null;
 
     public function __construct()
     {
@@ -122,15 +120,4 @@ class User
         return $this;
     }
 
-    public function getRole(): ?Role
-    {
-        return $this->role;
-    }
-
-    public function setRole(?Role $role): static
-    {
-        $this->role = $role;
-
-        return $this;
-    }
 }
