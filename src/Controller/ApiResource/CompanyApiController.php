@@ -3,15 +3,12 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Entity\Biometric;
 use App\Entity\Company;
-use App\Entity\Demographic;
-use App\Entity\Participant;
 use App\Repository\BiometricRepository;
 use App\Repository\CompanyRepository;
 use App\Repository\DemographicRepository;
-use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Dom\Entity;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,8 +29,6 @@ final class CompanyApiController extends AbstractApiController
 
     public function __construct(
         CompanyRepository $repo_,
-        DemographicRepository $demoRepo_,
-        BiometricRepository $bioRepo_,
         // Dependencies from AbstractApiController
         SerializerInterface $serializer,
         HttpClientInterface $httpClient,
@@ -49,9 +44,7 @@ final class CompanyApiController extends AbstractApiController
 
 
     #[Route('', name: 'api_get_enabled_companies', methods: ['GET'])]
-    public function getCompanies(
-        Request $request
-    ): JsonResponse
+    public function getCompanies(): JsonResponse
     {
         try {
             $companies = $this->repo->findEnabled();
@@ -74,5 +67,82 @@ final class CompanyApiController extends AbstractApiController
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    #[Route('', name: 'api_create_company', methods: ['POST'])]
+    public function createCompany(
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse
+    {
+
+        try {
+            
+            $data = json_decode($request->getContent(), true);
+
+            // Vérification de l existence des données
+            if (!$data) {
+                
+                return new JsonResponse(
+                    [
+                        'code'=> "1",
+                        'message' => 'Données manquantes ou invalides'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // Vérification des champs obligatoires
+            if (!isset($data['name']) || empty(trim($data['name']))) {
+                
+                return new JsonResponse(
+                    [
+                        'code'=> "1",
+                        'message' => 'Le champs name est obligatoire'
+                    ],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+
+            // Vérification unicité du nom
+            $existingCompany = $this->repo->findOneBy(['name' => $data['name']]);
+            if ($existingCompany) {
+                return new JsonResponse(
+                    [
+                        'code'=> "1",
+                        'message' => 'Une entreprise avec ce nom existe déjà'
+                    ],
+                    Response::HTTP_CONFLICT
+                );
+            }
+
+            $company = new Company();
+            $company->setName($data['name']);
+
+            if (isset($data['description'])) {
+                $company->setDescription($data['description']);
+            }
+    
+            $em->persist($company);
+            $em->flush();
+
+            return new JsonResponse(
+                [
+                    'code'=> "0",
+                    'message' => 'Entreprise ' . $data['name'] . ' créée avec succès',
+                ],
+                Response::HTTP_CREATED
+            );
+        } catch (\Exception $e) {
+            
+            return new JsonResponse(
+                [
+                    'code'=> "2",
+                    'message' => 'Une erreur est survenue ' . $e->getMessage()
+                ],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+
     }
 }
