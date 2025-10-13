@@ -20,8 +20,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 
-#[Route('/api/rest/v1/users')]
-final class UserApiController extends AbstractApiController
+#[Route('/api/rest/v1/auth')]
+final class AuthApiController extends AbstractApiController
 {
 
     private UserRepository $repo;
@@ -42,34 +42,7 @@ final class UserApiController extends AbstractApiController
     }
 
 
-    #[Route('', name: 'api_get_enabled_users', methods: ['GET'])]
-    public function getUsers(): JsonResponse
-    {
-        try {
-            $users = $this->repo->findEnabled();
-            $data = $this->serializer->serialize($users, 'json', ['groups' => 'user:read']);
-            $users = json_decode($data, true);
-
-            //dd($users);
-
-            return new JsonResponse(
-                $users,
-                Response::HTTP_OK
-            );
-        } catch (\Exception $e) {
-            
-            return new JsonResponse(
-                [
-                    'code'=> "2",
-                    'message' => 'Une erreur est survenue ' . $e->getMessage()
-                ],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-
-    #[Route('', name: 'api_create_user', methods: ['POST'])]
+    #[Route('', name: 'api_authentica_user', methods: ['POST'])]
     public function createUser(
         Request $request,
         MerchantConfigurationRepository $mcrepo,

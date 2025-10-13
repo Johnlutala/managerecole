@@ -6,10 +6,11 @@ use App\Controller\ApiResource\AbstractApiController;
 use App\Entity\Workshop;
 use App\Entity\WorkshopDay;
 use App\Repository\BiometricRepository;
+use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
+use App\Service\Flexroll;
 use Doctrine\ORM\EntityManagerInterface;
-use phpDocumentor\Reflection\Types\Integer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,7 +48,10 @@ final class WorkshopApiController extends AbstractApiController
 
     
     #[Route('', name: 'api_create_workshop', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    public function create(
+        Request $request,
+        UserRepository  $userRepo
+    ): JsonResponse
     {
         try {
             // Récupérer les données JSON
@@ -62,6 +66,9 @@ final class WorkshopApiController extends AbstractApiController
                     'errors' => $errors
                 ], Response::HTTP_BAD_REQUEST);
             }
+            
+            // PSEUDO UTILISATEUR pour demo
+            $pseudoUser = $userRepo->findOneBy(['username' => 'rubuz.l']); 
 
             // Créer l'atelier
             $workshop = new Workshop();
@@ -69,6 +76,7 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDescription($data['description'] ?? null);
             $workshop->setDailyAmount($data['dailyAmount']);
             $workshop->setCurrency($data['currency']);
+            $workshop->setCreatedBy($pseudoUser);
 
             // Création des jours d'atelier
             foreach ($data['dates'] as $dateString) {
@@ -188,7 +196,8 @@ final class WorkshopApiController extends AbstractApiController
     #[Route("/close", name:"api_close_one_workshop", methods: ['POST'])]
     public function closeOneWorkshop(
         Request $request,
-        WorkshopListGeneration $workshopListGen    
+        WorkshopListGeneration $workshopListGen,
+        Flexroll $flexrollService    
     ): JsonResponse
     {
         try {
@@ -209,10 +218,20 @@ final class WorkshopApiController extends AbstractApiController
 
             //dd($finalList);
 
+            // Envoyer la liste à Flexroll
+            $response = $flexrollService->sendList($finalList);
+
+            if ($response->getStatusCode() !== Response::HTTP_OK) {
+                return new JsonResponse([
+                    'code' => "3",
+                    'message' => 'Erreur lors de l\'envoi de la liste à Flexroll'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
 
         
             // Désactiver les participations et les jours associés
-            /* foreach ($workshop->getWorkshopDays() as $day) {
+            foreach ($workshop->getWorkshopDays() as $day) {
 
                 foreach ($day->getParticipations() as $participation) {
                     $participation->setEnabled(false);
@@ -230,11 +249,11 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setEnabled(false);
 
             $this->entityManager->persist($workshop);
-            $this->entityManager->flush(); */
+            $this->entityManager->flush();
 
 
             return new JsonResponse([
-                'data' => $finalList,
+                'code' => "0",
                 'message' => 'Atelier clôturé avec succès'
             ], Response::HTTP_OK);
 
