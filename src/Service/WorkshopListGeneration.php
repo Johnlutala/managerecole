@@ -86,6 +86,7 @@ class WorkshopListGeneration
 
         return [
             'workshopName' => $workshop->getName(),
+            'shortcode'=> $workshop->getConfiguration()?->getShortcode() ?? null,
             'totalDays' => count($days),
             'participants' => $finalList,
         ];

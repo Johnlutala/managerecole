@@ -12,6 +12,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class Flexroll
 {
     private HttpClientInterface  $httpClient;
+    const FLEXROLL_API_URL = 'https://api.flexroll.com/v1/attendance/batch';
+    const DEV_URL = 'https://api.flexroll.com/v1/attendance/batch';
 
 
     public function __construct(

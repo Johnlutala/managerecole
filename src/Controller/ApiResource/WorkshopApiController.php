@@ -286,9 +286,27 @@ final class WorkshopApiController extends AbstractApiController
             $workshopData = $this->serializer->serialize($workshop, 'json', ['groups' => 'workshop:read']);
             $workshopArray = json_decode($workshopData, true);
 
+
             $workshopArray['startDate'] = $startDate ? $startDate->format('d/m/Y') : null;
             $workshopArray['endDate'] = $endDate ? $endDate->format('d/m/Y') : null;
             $workshopArray['numberOfDays'] = count($days);
+
+            $workshopArray['participants'] = [];
+
+            foreach ($workshop->getWorkshopDays() as $day) {
+                foreach ($day->getParticipations() as $participation) {
+
+                    $participantId = $participation->getParticipant()->getId();
+                    $participant = [
+                        'id' => $participantId,
+                        'fullname' => $participation->getParticipant()->getDemographic()->getFullname(),
+                        'phone' => $participation->getParticipant()->getPhone()
+                    ];
+                    if (!in_array($participantId, array_column($workshopArray['participants'], 'id'))) {
+                        $workshopArray['participants'][] = $participant;
+                    }
+                }
+            }
 
             return new JsonResponse($workshopArray, Response::HTTP_OK);
 
@@ -342,6 +360,77 @@ final class WorkshopApiController extends AbstractApiController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         
+    }
+
+
+    #[Route("/{id}/stats", name:"api_get_one_workshop_stats", methods: ['GET'])]
+    public function getWorkshopStats(int $id): JsonResponse
+    {
+        try {
+            
+            $workshop = $this->repo->findOneBy(['id' => intval($id)]);
+            
+            // Vérification de l'existence de l'atelier
+            if (!$workshop) {
+                
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Atelier non trouvé'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $expectedParticipations = 0;
+            $attendances = [];
+            $totalDays = $workshop->getWorkshopDays()->count();
+
+            foreach ($workshop->getWorkshopDays() as $day) {
+                $expectedParticipations += $day->getParticipations()->count();
+                $trueAttendances = 0;
+                
+                foreach ($day->getParticipations() as $participation) {
+                    if ($participation->isPresent()) {
+                        $trueAttendances++;
+                    }
+                }
+                $attendances[] = [
+                    'date' => $day->getDate()->format('d/m/Y'),
+                    'participants' => $trueAttendances
+                ];
+            }
+
+            $attendanceRate = $expectedParticipations > 0 ? array_sum(array_column($attendances, 'participants')) * 100 / $expectedParticipations : 0;
+
+            // Parcourir les présences et ressortir les participants. Si un participant est présent plusieurs fois, ne compter qu'une seule fois.
+            $uniqueParticipants = [];
+            foreach ($workshop->getWorkshopDays() as $day) {
+                foreach ($day->getParticipations() as $participation) {
+                    if ($participation->isPresent()) {
+                        $participantId = $participation->getParticipant()->getId();
+                        if (!in_array($participantId, $uniqueParticipants)) {
+                            $uniqueParticipants[] = $participantId;
+                        }
+                    }
+                }
+            }
+
+            $stats = [
+                'attendanceRate' => $attendanceRate,
+                'totalParticipants' => count($uniqueParticipants),
+                'days' => [
+                    'total' => $totalDays,
+                    'attendances' => $attendances
+                ]
+            ];
+
+            return new JsonResponse($stats, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération des statistiques de l\'atelier: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     private function validateWorkshopData(?array $data): array

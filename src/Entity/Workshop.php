@@ -52,6 +52,9 @@ class Workshop
     #[ORM\Column(nullable: true)]
     private ?bool $isEnded = null;
 
+    #[ORM\ManyToOne(inversedBy: 'workshops')]
+    private ?MerchantConfiguration $configuration = null;
+
     public function __construct()
     {
         $this->code = uniqid();
@@ -186,6 +189,18 @@ class Workshop
     public function setIsEnded(?bool $isEnded): static
     {
         $this->isEnded = $isEnded;
+
+        return $this;
+    }
+
+    public function getConfiguration(): ?MerchantConfiguration
+    {
+        return $this->configuration;
+    }
+
+    public function setConfiguration(?MerchantConfiguration $configuration): static
+    {
+        $this->configuration = $configuration;
 
         return $this;
     }

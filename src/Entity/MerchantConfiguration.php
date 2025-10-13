@@ -32,6 +32,12 @@ class MerchantConfiguration
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'configuration')]
     private Collection $users;
 
+    /**
+     * @var Collection<int, Workshop>
+     */
+    #[ORM\OneToMany(targetEntity: Workshop::class, mappedBy: 'configuration')]
+    private Collection $workshops;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -39,6 +45,7 @@ class MerchantConfiguration
         $this->enabled = true;
         $this->deleted = false;
         $this->createdAt = new \DateTimeImmutable();
+        $this->workshops = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -94,6 +101,36 @@ class MerchantConfiguration
             // set the owning side to null (unless already changed)
             if ($user->getConfiguration() === $this) {
                 $user->setConfiguration(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Workshop>
+     */
+    public function getWorkshops(): Collection
+    {
+        return $this->workshops;
+    }
+
+    public function addWorkshop(Workshop $workshop): static
+    {
+        if (!$this->workshops->contains($workshop)) {
+            $this->workshops->add($workshop);
+            $workshop->setConfiguration($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWorkshop(Workshop $workshop): static
+    {
+        if ($this->workshops->removeElement($workshop)) {
+            // set the owning side to null (unless already changed)
+            if ($workshop->getConfiguration() === $this) {
+                $workshop->setConfiguration(null);
             }
         }
 
