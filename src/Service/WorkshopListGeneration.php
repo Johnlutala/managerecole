@@ -60,6 +60,7 @@ class WorkshopListGeneration
             $participantObject = [
                 'id' => $participant->getId(),
                 'phone' => $participant->getPhone(),
+                'fullname' => $participant->getDemographic()->getFullname(),
                 'numberOfDays' => 1,
             ];
 
@@ -86,7 +87,7 @@ class WorkshopListGeneration
 
         return [
             'workshopName' => $workshop->getName(),
-            'shortcode'=> $workshop->getConfiguration()?->getShortcode() ?? null,
+            'shortcode'=> $workshop->getConfiguration()?->getShortcode() ?? "zando",
             'encadreur' => $workshop->getCreatedBy()?->getFirstname() . ' ' . $workshop->getCreatedBy()?->getLastname(),
             'totalDays' => strval(count($days)),
             'participants' => $finalList,

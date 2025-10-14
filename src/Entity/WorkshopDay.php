@@ -36,6 +36,9 @@ class WorkshopDay
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'day')]
     private Collection $participations;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isClosed = null;
+
     public function __construct()
     {
         $this->participations = new ArrayCollection();
@@ -112,6 +115,18 @@ class WorkshopDay
                 $participation->setDay(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isClosed(): ?bool
+    {
+        return $this->isClosed;
+    }
+
+    public function setIsClosed(?bool $isClosed): static
+    {
+        $this->isClosed = $isClosed;
 
         return $this;
     }

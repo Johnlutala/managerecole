@@ -17,7 +17,6 @@ class WorkshopDayRepository extends ServiceEntityRepository
     }
 
         /**
-    
          * @return WorkshopDay[] Returns an array of WorkshopDay objects
          */
         public function findActiveByWorkshop($value): array
@@ -29,6 +28,8 @@ class WorkshopDayRepository extends ServiceEntityRepository
                 ->setParameter('enabled', true)
                 ->andWhere('w.deleted = :deleted')
                 ->setParameter('deleted', false)
+                ->andWhere('w.isClosed = :isClosed')
+                ->setParameter('isClosed', false)
                 ->orderBy('w.id', 'ASC')
                 ->setMaxResults(10)
                 ->getQuery()

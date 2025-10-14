@@ -31,10 +31,10 @@ class Workshop
     private ?string $description = null;
     
     
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $dailyAmount = null;
 
-    #[ORM\Column(length: 5)]
+    #[ORM\Column(length: 5, nullable: true)]
     private ?string $currency = null;
 
     /**

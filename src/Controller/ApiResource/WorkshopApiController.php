@@ -76,7 +76,9 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDescription($data['description'] ?? null);
             $workshop->setDailyAmount($data['dailyAmount']);
             $workshop->setCurrency($data['currency']);
+            $workshop->setIsEnded(false);
             $workshop->setCreatedBy($pseudoUser);
+            $workshop->setConfiguration($pseudoUser->getConfiguration());
 
             // Création des jours d'atelier
             foreach ($data['dates'] as $dateString) {
@@ -85,6 +87,8 @@ final class WorkshopApiController extends AbstractApiController
                     $workshopDay = new WorkshopDay();
                     $workshopDay->setDate($date);
                     $workshopDay->setWorkshop($workshop);
+                    $workshopDay->setIsClosed(false);
+                    $workshopDay->setCreatedBy($pseudoUser);
                     $this->entityManager->persist($workshopDay);
                 }
             }
@@ -149,6 +153,7 @@ final class WorkshopApiController extends AbstractApiController
             
             $workshops = $this->repo->findAll([
                 'enabled' => true,
+                'isEnded' => false,
                 'deleted' => false,
                 'createdAt' => 'DESC'
             ], 3);
@@ -219,7 +224,7 @@ final class WorkshopApiController extends AbstractApiController
             //dd($finalList);
 
             // Envoyer la liste à Flexroll
-            $response = $flexrollService->sendList($finalList);
+            /* $response = $flexrollService->sendList($finalList);
 
             if ($response->getStatusCode() !== Response::HTTP_OK) {
                 return new JsonResponse([
@@ -249,11 +254,12 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setEnabled(false);
 
             $this->entityManager->persist($workshop);
-            $this->entityManager->flush();
+            $this->entityManager->flush(); */
 
 
             return new JsonResponse([
                 'code' => "0",
+                'data'=>$finalList,
                 'message' => 'Atelier clôturé avec succès'
             ], Response::HTTP_OK);
 
@@ -470,7 +476,7 @@ final class WorkshopApiController extends AbstractApiController
             $errors[] = ['field' => 'name', 'message' => 'Le nom ne peut pas dépasser 100 caractères'];
         }
 
-        // Validation du montant journalier
+        /* // Validation du montant journalier
         if (!isset($data['dailyAmount'])) {
             $errors[] = ['field' => 'dailyAmount', 'message' => 'Le montant journalier est obligatoire'];
         } elseif (!is_numeric($data['dailyAmount']) || $data['dailyAmount'] <= 0) {
@@ -482,7 +488,7 @@ final class WorkshopApiController extends AbstractApiController
             $errors[] = ['field' => 'currency', 'message' => 'La devise est obligatoire'];
         } elseif (strlen($data['currency']) < 3 || strlen($data['currency']) > 5) {
             $errors[] = ['field' => 'currency', 'message' => 'La devise doit contenir entre 3 et 5 caractères'];
-        }
+        } */
 
         // Validation des dates
         if (!isset($data['dates'])) {
