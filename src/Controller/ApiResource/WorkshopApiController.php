@@ -439,7 +439,7 @@ final class WorkshopApiController extends AbstractApiController
             }
 
             $stats = [
-                'attendanceRate' => $attendanceRate,
+                'attendanceRate' => round($attendanceRate, 2),
                 'totalParticipants' => count($uniqueParticipants),
                 'days' => [
                     'total' => $totalDays,

@@ -317,7 +317,7 @@ final class ParticipantApiController extends AbstractApiController
                     'phone' => $participant->getPhone(),
                     'fullname' => $demographic ? trim($demographic->getFirstname() . ' ' . $demographic->getLastname() . ' ' . $demographic->getMiddlename()) : null,
                     'isPresent' => $attendance->isPresent(),
-                    'participantId' => $participant->getId(),
+                    'attendanceId' => $attendance->getId(),
                 ];
             }
             
