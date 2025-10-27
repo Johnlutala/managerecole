@@ -3,6 +3,7 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
+use App\Entity\User;
 use App\Entity\Workshop;
 use App\Entity\WorkshopDay;
 use App\Repository\BiometricRepository;
@@ -10,6 +11,7 @@ use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\Flexroll;
+use App\Service\TokenEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,6 +31,7 @@ final class WorkshopApiController extends AbstractApiController
 
     private WorkshopRepository  $repo;
     private EntityManagerInterface $entityManager;
+    private TokenEncoder $tokenService;
 
     public function __construct(
         SerializerInterface $serializer,
@@ -37,13 +40,16 @@ final class WorkshopApiController extends AbstractApiController
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
         ValidatorInterface $validator,
+        UserRepository $userRepo,
         WorkshopRepository $repo_,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        TokenEncoder $tokenService
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
         $this->entityManager = $entityManager;
+        $this->tokenService = $tokenService;
     }
 
     
@@ -54,6 +60,16 @@ final class WorkshopApiController extends AbstractApiController
     ): JsonResponse
     {
         try {
+
+            $authUser = $this->authenticateUser(new Request(), $this->tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
             // Récupérer les données JSON
             $data = json_decode($request->getContent(), true);
             
@@ -116,6 +132,7 @@ final class WorkshopApiController extends AbstractApiController
         
         try {
             
+            
             $queries = $request->query->all();
             
     
@@ -151,16 +168,32 @@ final class WorkshopApiController extends AbstractApiController
         
         try {
             
-            $workshops = $this->repo->findAll([
-                'enabled' => true,
-                'isEnded' => false,
-                'deleted' => false,
-                'createdAt' => 'DESC'
-            ], 3);
+            $authUser = $this->authenticateUser($request, $this->tokenService);
+            
+            
+            if ($authUser) {
+                $workshops = $this->repo->findLatestByUser($authUser);
+            } else {
+                $workshops = $this->repo->findAll([
+                    'enabled' => true,
+                    'isEnded' => false,
+                    'deleted' => false,
+                    'createdAt' => 'DESC'
+                ], 3);
+            }
+
 
             
             // Préparer les données des ateliers avec startDate et endDate
             $workshopsData = [];
+
+            if (empty($workshops)) {
+                return new JsonResponse([
+                    'code' => '1',
+                    'message' => 'Aucun atelier trouvé'
+                ], Response::HTTP_NOT_FOUND);
+            }
+
             foreach ($workshops as $workshop) {
                 $startDate = null;
                 $endDate = null;
@@ -177,6 +210,7 @@ final class WorkshopApiController extends AbstractApiController
                     }
                 }
                 
+
                 $workshopsData[] = [
                     'id' => $workshop->getId(),
                     'name' => $workshop->getName(),
@@ -206,6 +240,16 @@ final class WorkshopApiController extends AbstractApiController
     ): JsonResponse
     {
         try {
+
+            $authUser = $this->authenticateUser($request, $this->tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
             $data = json_decode($request->getContent(), true);
             
             $workshop = $this->repo->findOneBy(['id' => $data['workshopId']]);
@@ -216,6 +260,13 @@ final class WorkshopApiController extends AbstractApiController
                     'code' => "1",
                     'message' => 'Atelier non trouvé'
                 ], Response::HTTP_NOT_FOUND);
+            }
+
+            if ($workshop->getCreatedBy() !== $authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Permission refusée'
+                ], Response::HTTP_FORBIDDEN);
             }
 
             // Générer la liste des participants

@@ -50,6 +50,7 @@ trait EntityTrait
     {
         return $this->deleted;
     }
+    
     public function setDeleted(?bool $deleted): self
     {
         $this->deleted = $deleted;

@@ -5,6 +5,7 @@ namespace App\Controller\ApiResource;
 use App\Controller\ApiResource\AbstractApiController;
 use App\Entity\MerchantConfiguration;
 use App\Repository\MerchantConfigurationRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,10 +33,11 @@ final class MerchantConfigurationApiController extends AbstractApiController
         TransportInterface $mailer,
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserRepository $userRepo
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
     }
 

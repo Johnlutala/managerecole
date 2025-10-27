@@ -7,8 +7,8 @@ use App\Entity\Company;
 use App\Repository\BiometricRepository;
 use App\Repository\CompanyRepository;
 use App\Repository\DemographicRepository;
+use App\Repository\UserRepository;
 use App\Service\TokenEncoder;
-use App\Service\TokenGeneration;
 use Doctrine\ORM\EntityManagerInterface;
 use Dom\Entity;
 use Psr\Log\LoggerInterface;
@@ -37,41 +37,24 @@ final class CompanyApiController extends AbstractApiController
         TransportInterface $mailer,
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserRepository  $userRepo
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
+        $this->userRepo = $userRepo;
     }
 
 
     #[Route('', name: 'api_get_enabled_companies', methods: ['GET'])]
-    public function getCompanies(Request $request, TokenEncoder $tokenService): JsonResponse
+    public function getCompanies(
+        Request $request
+    ): JsonResponse
     {
         try {
-
-            $token = $request->headers->get('x-api-token');
-
-            // Vérifier que le token est présent et est une chaîne
-            if (!$token || !is_string($token)) {
-                return new JsonResponse([
-                    'code' => '1',
-                    'message' => 'Token manquant ou invalide'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
-            $validationResult = $tokenService->validateToken($token);
-
-            dd($validationResult);
-
-            // Vérifier que la validation du token a réussi
-            if ($validationResult === null) {
-                return new JsonResponse([
-                    'code' => '1',
-                    'message' => 'Token invalide ou expiré'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
-
+            
+            
 
             $companies = $this->repo->findEnabled();
             $data = $this->serializer->serialize($companies, 'json', ['groups' => 'company:read']);

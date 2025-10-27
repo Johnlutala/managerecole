@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\Flexroll;
+use App\Service\TokenEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,62 +38,40 @@ final class WorkshopDayApiController extends AbstractApiController
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
         ValidatorInterface $validator,
+        UserRepository $userRepo,
         WorkshopDayRepository $repo_,
         EntityManagerInterface $entityManager
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
         $this->entityManager = $entityManager;
     }
 
     
-    #[Route("/", name:"api_get_workshops", methods: ['GET'])]
-    public function getWorkshops(Request $request): JsonResponse
-    {
-        
-        try {
-            
-            $queries = $request->query->all();
-            
-    
-            if (isset($queries['active']) && $queries['active'] === 'true') {
-                
-                $workshops = $this->repo->findActive();
-                $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
-                
-                return new JsonResponse($datas, Response::HTTP_OK, [], true);
-                
-            }
-            
-            $workshops = $this->repo->findAll();
-
-            $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
-            
-            return new JsonResponse($datas, Response::HTTP_OK, [], true);
-    
-            
-        } catch (\Exception $e) {
-            
-            return new JsonResponse([
-                'code' => "2",
-                'message' => 'Erreur lors de la récupération des ateliers: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    
 
     #[Route("/close", name:"api_close_one_day", methods: ['POST'])]
     public function closeOneDay(
-        Request $request    
+        Request $request,
+        TokenEncoder $tokenService    
     ): JsonResponse
     {
         try {
+
+            $authUser = $this->authenticateUser($request, $tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
             $data = json_decode($request->getContent(), true);
             
             $day = $this->repo->findOneBy(['id' => $data['workshopDayId']]);
+
+            // dd($day);
 
             if (!$day) {
 

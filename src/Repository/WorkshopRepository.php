@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\Workshop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -28,6 +29,46 @@ class WorkshopRepository extends ServiceEntityRepository
                 ->setParameter('deleted', false)
                 ->orderBy('w.id', 'ASC')
                 // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+
+        /**
+         * @return Workshop[] Returns an array of Workshop objects
+         */
+        public function findActiveByUser(User $user): array
+        {
+            return $this->createQueryBuilder('w')
+                ->andWhere('w.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('w.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->andWhere('w.createdBy = :user')
+                ->setParameter('user', $user)
+                ->orderBy('w.id', 'ASC')
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+
+        /**
+         * @return Workshop[] Returns an array of Workshop objects
+         */
+        public function findLatestByUser(User $user): array
+        {
+            return $this->createQueryBuilder('w')
+                ->andWhere('w.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('w.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->andWhere('w.isEnded = :isEnded')
+                ->setParameter('isEnded', false)
+                ->andWhere('w.createdBy = :user')
+                ->setParameter('user', $user)
+                ->orderBy('w.createdAt', 'DESC')
+                ->setMaxResults(3)
                 ->getQuery()
                 ->getResult()
             ;

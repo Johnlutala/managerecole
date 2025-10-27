@@ -37,7 +37,7 @@ final class UserApiController extends AbstractApiController
         ValidatorInterface $validator
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $repo_);
         $this->repo = $repo_;
     }
 

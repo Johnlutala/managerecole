@@ -34,7 +34,7 @@ final class AuthApiController extends AbstractApiController
         LoggerInterface $handshakeLogger,
         ValidatorInterface $validator
     ) {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $repo_);
         $this->repo = $repo_;
     }
 
@@ -135,7 +135,7 @@ final class AuthApiController extends AbstractApiController
         }
 
         // Generer le token JWT
-        $token = $tokenGeneration->generateToken("+1 minute", $user->getUsername());
+        $token = $tokenGeneration->generateToken("+6 hours", $user->getUsername());
 
         try {
             

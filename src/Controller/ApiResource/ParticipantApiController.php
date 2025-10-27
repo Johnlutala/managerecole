@@ -12,8 +12,10 @@ use App\Repository\BiometricRepository;
 use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\ParticipationRepository;
+use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
+use App\Service\TokenEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,16 +41,16 @@ final class ParticipantApiController extends AbstractApiController
         ParticipantRepository $repo_,
         DemographicRepository $demoRepo_,
         BiometricRepository $bioRepo_,
-        // Dependencies from AbstractApiController
         SerializerInterface $serializer,
         HttpClientInterface $httpClient,
         TransportInterface $mailer,
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserRepository $userRepo
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
         $this->demoRepo = $demoRepo_;
         $this->bioRepo = $bioRepo_;
@@ -65,9 +67,20 @@ final class ParticipantApiController extends AbstractApiController
     public function createWithBiometrics(
         Request $request,
         EntityManagerInterface $entityManager,
-        WorkshopRepository $workshopRepo
+        WorkshopRepository $workshopRepo,
+        TokenEncoder $tokenService
     ): JsonResponse {
         try {
+
+            $authUser = $this->authenticateUser($request, $tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
             // Récupération et décodage des données JSON
             $data = json_decode($request->getContent(), true);
     
@@ -93,6 +106,7 @@ final class ParticipantApiController extends AbstractApiController
             $demographic->setLastname($data['lastname']);
             $demographic->setGender($data['gender']);
             $demographic->setPhone($data['phoneContact']);
+            $demographic->setCreatedBy($authUser);
     
             // Création de l'entité Biometric (empreintes et visage)
             $biometric = new Biometric();
@@ -126,6 +140,7 @@ final class ParticipantApiController extends AbstractApiController
             $participant = new Participant();
             $participant->setPhone($data['phoneEMoney'] ?? $data['phoneContact']);
             $participant->setDemographic($demographic);
+            $participant->setCreatedBy($authUser);
     
             // Récupération de la société (Company)
             if (isset($data['companyId'])) {
@@ -154,6 +169,7 @@ final class ParticipantApiController extends AbstractApiController
                     $participation->setParticipant($participant);
                     $participation->setWorkshop($workshop);
                     $participation->setDay($day);
+                    $participation->setCreatedBy($authUser);
                     $entityManager->persist($participation);
                 }
             }
@@ -211,11 +227,21 @@ final class ParticipantApiController extends AbstractApiController
         Request $request,
         WorkshopDayRepository $workshopDayRepo,
         ParticipationRepository $participationRepo,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        TokenEncoder $tokenService
     ): JsonResponse
     {
 
         try {
+
+            $authUser = $this->authenticateUser($request, $tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
             
             $data = json_decode($request->getContent(), true);
 
