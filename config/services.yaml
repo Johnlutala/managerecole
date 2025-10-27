@@ -28,3 +28,7 @@ services:
         arguments:
             $secretKey: '%env(JWT_SECRET_KEY)%'
             $issuer: 'flexroll-workshop-api'
+    
+    App\Service\TokenEncoder:
+        arguments:
+            $secretKey: '%env(JWT_SECRET_KEY)%'

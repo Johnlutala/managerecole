@@ -44,8 +44,8 @@
             <tbody>
                 {% for number in numbers %}
                     <tr style="text-align: left;">
-                        <td style="padding-right: 20px;">{{ number }}</td>
-                        <td style="text-align: left;">Numéro de reception invalide ou non autorisé à recevoir ce type de transaction</td>
+                        <td style="padding-right: 20px;">{{ number.key }}</td>
+                        <td style="text-align: left;">{{ number.value }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

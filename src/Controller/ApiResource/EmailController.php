@@ -53,22 +53,31 @@ final class EmailController extends AbstractApiController
         
         try {
             
-            $recipients = [
+            /* $recipients = [
                 'annie.lebughe@enabel.be',
                 'francois-xavier.kabala@enabel.be',
                 'fifi.esalo@enabel.be',
                 'tresor.mutombo@enabel.be',
                 'don.bungiena@enabel.be',
+            ]; */
+
+            $recipients = [
+                "rubuz.l@infosetgroup.com"
             ];
 
             $numbers = [
-                '243824938004',
-                '243815084917',
-                '243816664070',
-                '243824619355',
-                '243824619355',
-                '243824938004',
-                '243816664070',
+                [
+                    'key' => '243839412821',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ],
+                [
+                    'key' => '243839090032',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ],
+                [
+                    'key' => '243824338426',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ]
             ];
             
             $email_notification_create_paylist = (new TemplatedEmail())
@@ -77,11 +86,11 @@ final class EmailController extends AbstractApiController
                 ->subject('FlexRoll - Notification exécution')
                 ->htmlTemplate('pay_list/reasons.html.twig')
                 ->context([
-                    'list_name' => "Liste SH5_2025_002 Tshopo_13102025a",
-                    'execution_date' => "13/10/2025",
-                    'total'=> "51",
-                    'success' => "44",
-                    'failed' => "7",
+                    'list_name' => "Liste SH5_2025_008_a; Remboursement frais de transport pour les participants de la formation des mécanismes de gestion des plaintes MGP, fait du 03 au 07102025",
+                    'execution_date' => "17/10/2025",
+                    'total'=> "30",
+                    'success' => "27",
+                    'failed' => "3",
                     'numbers' => $numbers,
                 ]);
 

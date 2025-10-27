@@ -4,9 +4,12 @@ namespace App\Controller\ApiResource;
 
 //use App\Service\ApiCall;
 //use App\Service\PDF;
+
+use App\Service\TokenGeneration;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -30,7 +33,7 @@ abstract class AbstractApiController extends AbstractController
         TransportInterface  $mailer_,
         LoggerInterface     $logger_,
         LoggerInterface     $handshakeLogger_,
-        ValidatorInterface  $validator_,
+        ValidatorInterface  $validator_
         //PDF                 $pdf_,
         //ApiCall             $apiCall_
     )
@@ -58,4 +61,5 @@ abstract class AbstractApiController extends AbstractController
             'message' => $message
         ], Response::HTTP_BAD_REQUEST);
     }
+
 }
