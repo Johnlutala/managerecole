@@ -36,6 +36,7 @@ final class ParticipantApiController extends AbstractApiController
     private ParticipantRepository $repo;
     private DemographicRepository $demoRepo;
     private BiometricRepository $bioRepo;
+    private TokenEncoder $tokenService;
 
     public function __construct(
         ParticipantRepository $repo_,
@@ -47,20 +48,44 @@ final class ParticipantApiController extends AbstractApiController
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
         ValidatorInterface $validator,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        TokenEncoder $tokenService
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo, $tokenService);
         $this->repo = $repo_;
         $this->demoRepo = $demoRepo_;
         $this->bioRepo = $bioRepo_;
+        $this->tokenService = $tokenService;
     }
 
-    public function getDemographics(
+    #[Route('', name: 'api_get_all_participants', methods: ['GET'])]
+    public function getAll(
         Request $request
-    ): void
+    ): Response
     {
-        # code...
+        try {
+            $keyword = $request->query->get('keyword');
+            $participants = $this->repo->findActive($keyword);
+
+            $data = [];
+            foreach ($participants as $participant) {
+                $data[] = [
+                    'id' => $participant->getId(),
+                    'firstname' => $participant->getDemographic() ? $participant->getDemographic()->getFirstname() : null,
+                    'lastname' => $participant->getDemographic() ? $participant->getDemographic()->getLastname() : null,
+                    'mobileMoney' => $participant->getPhone()
+                ];
+            }
+
+            return new JsonResponse($data, Response::HTTP_OK);
+        } catch (\Throwable $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Une erreur est survenue ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     #[Route('/with-biometrics', name: 'api_create_participant_with_bio', methods: ['POST'])]
@@ -203,21 +228,70 @@ final class ParticipantApiController extends AbstractApiController
     
     
 
-    #[Route('/link-to-demographics', name: 'api_link_participant_to_demographics', methods: ['POST'])]
-    public function linkToDemographics(
+    #[Route('/link-to-workshop', name: 'api_link_participant_to_workshop', methods: ['POST'])]
+    public function linkToWorkshop(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        WorkshopRepository $workshopRepo
     ): JsonResponse
     {
+        $authUser = $this->authenticateUser($request, $this->tokenService);
+        
+        if (!$authUser) {
+            return new JsonResponse([
+                'code' => '3',
+                'message' => 'Authentification échouée: Token manquant ou invalide'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
 
-        // Validation
+        // Validation des données
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+            return new JsonResponse([
+                'code' => "1",
+                'message' => 'Données JSON invalides'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        
+        if (empty($data['participantId']) || empty($data['workshopId'])) {
+            return new JsonResponse([
+                'code' => "1",
+                'message' => 'Les champs participantId et workshopId sont obligatoires'
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
+        // Lier le participant à l'atelier
+        $participant = $this->repo->findOneBy(['id' => $data['participantId']]);
+        $workshop = $workshopRepo->findOneBy(['id' => $data['workshopId']]);
 
+        if (!$participant) {
+            return new JsonResponse([
+                'code' => "1",
+                'message' => "Participant non trouvé"
+            ], Response::HTTP_NOT_FOUND);
+            
+        }
 
-        // Création de l'entité Participant
+        if (!$workshop) {
+            return new JsonResponse([
+                'code' => "1",
+                'message' => "Atelier non trouvé"
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        foreach ($workshop->getWorkshopDays() as $day) {
+            $participation = new Participation();
+            $participation->setParticipant($participant);
+            $participation->setWorkshop($workshop);
+            $participation->setDay($day);
+            $participation->setCreatedBy($authUser);
+            $entityManager->persist($participation);
+        }
+
+        $entityManager->flush();
 
         return new JsonResponse([
-            'message' => 'Participant créé avec succès'
+            'message' => 'Participant ajouté à l\'atelier avec succès'
         ], Response::HTTP_OK);
     }
     

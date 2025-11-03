@@ -19,9 +19,27 @@ class ParticipantRepository extends ServiceEntityRepository
     /**
      * @return Participant[] Returns an array of Participant objects
      */
-    public function findActive(): array
+    public function findActive(?string $keyword): array
     {
+
+        if (!$keyword) {
+            # code...
+            return $this->createQueryBuilder('p')
+                ->andWhere('p.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('p.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->orderBy('p.id', 'ASC')
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+        
         return $this->createQueryBuilder('p')
+            ->leftJoin('p.demographic', 'd')
+            ->andWhere('d.firstname LIKE :keyword OR d.lastname LIKE :keyword')
+            ->setParameter('keyword', '%' . $keyword . '%')
             ->andWhere('p.enabled = :enabled')
             ->setParameter('enabled', true)
             ->andWhere('p.deleted = :deleted')
@@ -31,6 +49,7 @@ class ParticipantRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+
     }
     
     

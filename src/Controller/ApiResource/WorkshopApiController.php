@@ -307,15 +307,15 @@ final class WorkshopApiController extends AbstractApiController
 
         
             // Désactiver les participations et les jours associés
-            /* foreach ($workshop->getWorkshopDays() as $day) {
+            foreach ($workshop->getWorkshopDays() as $day) {
 
                 foreach ($day->getParticipations() as $participation) {
                     $participation->setEnabled(false);
                     $participation->setUpdatedAt(new \DateTime());
                     $this->entityManager->persist($participation);
                 }
-                
-                $day->setEnabled(false);
+
+                $day->setIsClosed(false);
                 $day->setUpdatedAt(new \DateTime());
                 $this->entityManager->persist($day);
             }
@@ -325,7 +325,7 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setEnabled(false);
 
             $this->entityManager->persist($workshop);
-            $this->entityManager->flush(); */
+            $this->entityManager->flush();
 
 
             return new JsonResponse([
