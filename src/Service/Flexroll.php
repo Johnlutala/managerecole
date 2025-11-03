@@ -15,7 +15,7 @@ class Flexroll
     private HttpClientInterface  $httpClient;
     private LoggerInterface $logger;
 
-    const FLEXROLL_API_URL = 'http://beta-flexrollv2.flexpay.cd/api/v1/rest/workshop/list/upload';
+    const FLEXROLL_API_URL = 'http://flexroll.flexpay.cd/api/v1/rest/workshop/list/upload';
     const DEV_URL = "https://grumpy-walls-shout.loca.lt/api/v1/rest/workshop/list/upload";
 
     public function __construct(
@@ -35,7 +35,7 @@ class Flexroll
         
         try {
 
-            dump ($datas);
+            //dump ($datas);
             $response = $this->httpClient->request(
                 'POST',
                 $this::DEV_URL,

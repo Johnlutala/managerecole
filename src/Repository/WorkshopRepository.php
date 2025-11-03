@@ -37,9 +37,28 @@ class WorkshopRepository extends ServiceEntityRepository
         /**
          * @return Workshop[] Returns an array of Workshop objects
          */
-        public function findActiveByUser(User $user): array
+        public function findActiveByUser(User $user, ?string $keyword): array
         {
+            
+            if (!$keyword) {
+                return $this->createQueryBuilder('w')
+                    ->setParameter('enabled', true)
+                    ->andWhere('w.enabled = :enabled')
+                    ->setParameter('enabled', true)
+                    ->andWhere('w.deleted = :deleted')
+                    ->setParameter('deleted', false)
+                    ->andWhere('w.createdBy = :user')
+                    ->setParameter('user', $user)
+                    ->orderBy('w.id', 'ASC')
+                    // ->setMaxResults(10)
+                    ->getQuery()
+                    ->getResult()
+                ;    
+            }
+            
             return $this->createQueryBuilder('w')
+                ->andWhere('w.name LIKE :name')
+                ->setParameter('name', '%' . $keyword . '%')
                 ->andWhere('w.enabled = :enabled')
                 ->setParameter('enabled', true)
                 ->andWhere('w.deleted = :deleted')
@@ -50,7 +69,7 @@ class WorkshopRepository extends ServiceEntityRepository
                 // ->setMaxResults(10)
                 ->getQuery()
                 ->getResult()
-            ;
+            ;    
         }
 
         /**

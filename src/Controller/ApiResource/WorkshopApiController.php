@@ -61,7 +61,7 @@ final class WorkshopApiController extends AbstractApiController
     {
         try {
 
-            $authUser = $this->authenticateUser(new Request(), $this->tokenService);
+            $authUser = $this->authenticateUser($request, $this->tokenService);
 
             if (!$authUser) {
                 return new JsonResponse([
@@ -131,21 +131,31 @@ final class WorkshopApiController extends AbstractApiController
     {
         
         try {
-            
-            
-            $queries = $request->query->all();
-            
-    
-            if (isset($queries['active']) && $queries['active'] === 'true') {
+           
+            $token = $request->headers->get('x-api-token');
+            $keyword = $request->query->get('keyword');
+
+            if ($token) {
+
+                $authUser = $this->authenticateUser($request, $this->tokenService);
+                if (!$authUser) {
+                    return new JsonResponse([
+                        'code' => '3',
+                        'message' => 'Authentification échouée: Token manquant ou invalide'
+                    ], Response::HTTP_UNAUTHORIZED);
+                } else {
+                    $workshops = $this->repo->findActiveByUser($authUser, $keyword);
+                }
+            } else {
                 
-                $workshops = $this->repo->findActive();
-                $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
-                
-                return new JsonResponse($datas, Response::HTTP_OK, [], true);
-                
+                $workshops = $this->repo->findAll([
+                    'enabled' => true,
+                    'isEnded' => false,
+                    'deleted' => false,
+                    'createdAt' => 'DESC'
+                ]);
             }
-            
-            $workshops = $this->repo->findAll();
+               
 
             $datas = $this->serializer->serialize($workshops, 'json', ['groups' => 'workshop:read']);
             
@@ -167,13 +177,21 @@ final class WorkshopApiController extends AbstractApiController
     {
         
         try {
-            
-            $authUser = $this->authenticateUser($request, $this->tokenService);
-            
-            
-            if ($authUser) {
-                $workshops = $this->repo->findLatestByUser($authUser);
+
+            $token = $request->headers->get('x-api-token');
+            if ($token) {
+
+                $authUser = $this->authenticateUser($request, $this->tokenService);
+                if (!$authUser) {
+                    return new JsonResponse([
+                        'code' => '3',
+                        'message' => 'Authentification échouée: Token manquant ou invalide'
+                    ], Response::HTTP_UNAUTHORIZED);
+                } else {
+                    $workshops = $this->repo->findLatestByUser($authUser);
+                }
             } else {
+                
                 $workshops = $this->repo->findAll([
                     'enabled' => true,
                     'isEnded' => false,
@@ -181,6 +199,8 @@ final class WorkshopApiController extends AbstractApiController
                     'createdAt' => 'DESC'
                 ], 3);
             }
+
+
 
 
             
@@ -275,7 +295,7 @@ final class WorkshopApiController extends AbstractApiController
             //dd($finalList);
 
             // Envoyer la liste à Flexroll
-            /* $response = $flexrollService->sendList($finalList);
+            $response = $flexrollService->sendList($finalList);
 
             if ($response->getStatusCode() !== Response::HTTP_OK) {
                 return new JsonResponse([
@@ -287,7 +307,7 @@ final class WorkshopApiController extends AbstractApiController
 
         
             // Désactiver les participations et les jours associés
-            foreach ($workshop->getWorkshopDays() as $day) {
+            /* foreach ($workshop->getWorkshopDays() as $day) {
 
                 foreach ($day->getParticipations() as $participation) {
                     $participation->setEnabled(false);

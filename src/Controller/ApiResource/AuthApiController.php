@@ -135,7 +135,7 @@ final class AuthApiController extends AbstractApiController
         }
 
         // Generer le token JWT
-        $token = $tokenGeneration->generateToken("+6 hours", $user->getUsername());
+        $token = $tokenGeneration->generateToken("+1 day", $user->getUsername());
 
         try {
             
@@ -154,5 +154,26 @@ final class AuthApiController extends AbstractApiController
                 'message' => 'Erreur lors de la connexion: ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    #[Route('/check-token', name: 'api_check_token', methods: ['GET'])]
+    public function checkToken(
+        Request $request,
+        TokenEncoder $tokenService
+    ): Response
+    {
+        $token = $request->headers->get('x-api-token');
+
+        if (!$token || !$tokenService->validateToken($token)) {
+            return new JsonResponse([
+                'code' => '3',
+                'message' => 'Token invalide'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        return new JsonResponse([
+            'code' => '0',
+            'message' => 'Token valide'
+        ], Response::HTTP_OK);
     }
 }
