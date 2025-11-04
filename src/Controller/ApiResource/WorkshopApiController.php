@@ -93,8 +93,8 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDailyAmount($data['dailyAmount']);
             $workshop->setCurrency($data['currency']);
             $workshop->setIsEnded(false);
-            $workshop->setCreatedBy($pseudoUser);
-            $workshop->setConfiguration($pseudoUser->getConfiguration());
+            $workshop->setCreatedBy($authUser);
+            $workshop->setConfiguration($authUser->getConfiguration());
 
             // Création des jours d'atelier
             foreach ($data['dates'] as $dateString) {
@@ -104,7 +104,7 @@ final class WorkshopApiController extends AbstractApiController
                     $workshopDay->setDate($date);
                     $workshopDay->setWorkshop($workshop);
                     $workshopDay->setIsClosed(false);
-                    $workshopDay->setCreatedBy($pseudoUser);
+                    $workshopDay->setCreatedBy($authUser);
                     $this->entityManager->persist($workshopDay);
                 }
             }

@@ -60,8 +60,10 @@ class WorkshopListGeneration
             $participantObject = [
                 'id' => $participant->getId(),
                 'phone' => $participant->getPhone(),
-                'fullname' => $participant->getDemographic()->getFullname(),
+                'name' => $participant->getDemographic()->getFullname(),
                 'numberOfDays' => 1,
+                "amount"=> $workshop->getDailyAmount(),
+                "currency"=> $workshop->getCurrency(),
             ];
 
             if (!in_array($participantObject, $finalList)) {
@@ -83,6 +85,7 @@ class WorkshopListGeneration
         // Retirer l'id du participant pour la version finale
         foreach ($finalList as &$entry) {
             unset($entry['id']);
+            $entry['amount'] = $entry['amount'] * $entry['numberOfDays'];
         }
 
         return [
