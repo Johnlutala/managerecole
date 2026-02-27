@@ -15,7 +15,7 @@ class Flexroll
     private HttpClientInterface  $httpClient;
     private LoggerInterface $logger;
 
-    const FLEXROLL_API_URL = 'http://flexroll.flexpay.cd/api/v1/rest/workshop/list/upload';
+    const FLEXROLL_API_URL = 'https://flexroll.flexpay.cd/api/v1/rest/workshop/list/upload';
     const DEV_URL = "https://grumpy-walls-shout.loca.lt/api/v1/rest/workshop/list/upload";
 
     public function __construct(
@@ -32,13 +32,13 @@ class Flexroll
         array $datas
     ): JsonResponse
     {
-        
+        //$this->logger->info('Envoi de la liste vers Flexroll', ['data' => $datas]);
         try {
 
             //dump ($datas);
             $response = $this->httpClient->request(
                 'POST',
-                $this::DEV_URL,
+                $this::FLEXROLL_API_URL,
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
@@ -46,6 +46,8 @@ class Flexroll
                     'body' => json_encode($datas),
                 ]
             );
+
+            //dump($response);
 
             $statusCode = $response->getStatusCode();
 
@@ -65,7 +67,7 @@ class Flexroll
 
         } catch (\Exception $e) {
 
-            $this->logger->error('Erreur lors de l\'envoi de la liste vers Flexroll: ' . $e->getMessage());
+            //$this->logger->error('Erreur lors de l\'envoi de la liste vers Flexroll: ' . $e->getMessage());
 
             return new JsonResponse([
                 'code' => '2',

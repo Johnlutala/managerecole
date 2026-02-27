@@ -3,11 +3,7 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Entity\User;
-use App\Repository\MerchantConfigurationRepository;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Util\Json;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +13,6 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -36,10 +31,11 @@ final class EmailController extends AbstractApiController
         TransportInterface $mailer,
         LoggerInterface $logger,
         LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserRepository $userRepository
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator);
+        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepository);
     }
 
 
@@ -53,12 +49,20 @@ final class EmailController extends AbstractApiController
         
         try {
             
-            /* $recipients = [
+            /* $recipients = [ // ENABEL_K
                 'annie.lebughe@enabel.be',
                 'francois-xavier.kabala@enabel.be',
                 'fifi.esalo@enabel.be',
                 'tresor.mutombo@enabel.be',
                 'don.bungiena@enabel.be',
+            ]; */
+
+            /* $recipients = [ //E_KORLOM
+                "rose.musau@enabel.be",
+                "pierre.esokowa@enabel.be",
+                "victoire.kabambi@enabel.be",
+                "gado.moussadododan@enabel.be",
+                "pierre.onema@enabel.be",
             ]; */
 
             $recipients = [
@@ -67,17 +71,29 @@ final class EmailController extends AbstractApiController
 
             $numbers = [
                 [
-                    'key' => '243839412821',
-                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                    'key' => '243857610635',
+                    'value' => 'Le bénéficiaire n\'est pas eligible',
+                ],
+                /* [
+                    'key' => '243843395447',
+                    'value' => 'Le bénéficiaire n\'est pas eligible',
                 ],
                 [
-                    'key' => '243839090032',
-                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                    'key' => '243833288642',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
                 ],
                 [
-                    'key' => '243824338426',
-                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
-                ]
+                    'key' => '243822871528',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ],
+                [
+                    'key' => '243831402879',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ],
+                [
+                    'key' => '243815050798',
+                    'value' => 'Receiver invalid or not allowed to receive this type of transaction',
+                ], */
             ];
             
             $email_notification_create_paylist = (new TemplatedEmail())
@@ -86,11 +102,12 @@ final class EmailController extends AbstractApiController
                 ->subject('FlexRoll - Notification exécution')
                 ->htmlTemplate('pay_list/reasons.html.twig')
                 ->context([
-                    'list_name' => "Liste SH5_2025_008_a; Remboursement frais de transport pour les participants de la formation des mécanismes de gestion des plaintes MGP, fait du 03 au 07102025",
-                    'execution_date' => "17/10/2025",
-                    'total'=> "30",
-                    'success' => "27",
-                    'failed' => "3",
+                    'merchant_name' => "E_KORLOM",
+                    'list_name' => "Remboursement frais de transport pour les participants de à l'atelier du Diagnostic Agraire 1630,62$",
+                    'execution_date' => "14/11/2025",
+                    'total'=> "41",
+                    'success' => "40",
+                    'failed' => "1",
                     'numbers' => $numbers,
                 ]);
 

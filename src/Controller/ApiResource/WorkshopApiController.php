@@ -315,7 +315,7 @@ final class WorkshopApiController extends AbstractApiController
                     $this->entityManager->persist($participation);
                 }
 
-                $day->setIsClosed(false);
+                $day->setIsClosed(true);
                 $day->setUpdatedAt(new \DateTime());
                 $this->entityManager->persist($day);
             }
