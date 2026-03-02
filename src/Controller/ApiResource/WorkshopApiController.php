@@ -90,8 +90,8 @@ final class WorkshopApiController extends AbstractApiController
             $workshop = new Workshop();
             $workshop->setName($data['name']);
             $workshop->setDescription($data['description'] ?? null);
-            $workshop->setDailyAmount($data['dailyAmount']);
-            $workshop->setCurrency($data['currency']);
+            $workshop->setDailyAmount(0);
+            $workshop->setCurrency("");
             $workshop->setIsEnded(false);
             $workshop->setCreatedBy($authUser);
             $workshop->setConfiguration($authUser->getConfiguration());
