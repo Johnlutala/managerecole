@@ -59,7 +59,7 @@ class WorkshopListGeneration
             
             $participantObject = [
                 'id' => $participant->getId(),
-                'phone' => $participant->getPhone(),
+                'phone' => $participant->getPhoneMobileMoney(),
                 'name' => $participant->getDemographic()->getFullname(),
                 'numberOfDays' => 1,
                 "amount"=> $workshop->getDailyAmount(),
