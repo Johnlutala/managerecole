@@ -36,6 +36,9 @@ class Participant
     #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'participant')]
     private Collection $participations;
 
+    #[ORM\Column(length: 25, nullable: true)]
+    private ?string $phoneMobileMoney = null;
+
 
     public function __construct()
     {
@@ -114,6 +117,33 @@ class Participant
                 $participation->setParticipant(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFullname(): ?string
+    {
+        $demographic = $this->getDemographic();
+        if (!$demographic) {
+            return null;
+        }
+
+        $firstname = $demographic->getFirstname();
+        $middlename = $demographic->getMiddlename();
+        $lastname = $demographic->getLastname();
+
+        $fullname = trim($firstname . ' ' . $middlename . ' ' . $lastname);
+        return $fullname !== '' ? $fullname : null;
+    }
+
+    public function getPhoneMobileMoney(): ?string
+    {
+        return $this->phoneMobileMoney;
+    }
+
+    public function setPhoneMobileMoney(?string $phoneMobileMoney): static
+    {
+        $this->phoneMobileMoney = $phoneMobileMoney;
 
         return $this;
     }

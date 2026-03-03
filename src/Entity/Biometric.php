@@ -218,4 +218,18 @@ class Biometric
 
         return $this;
     }
+
+    public function getFingers(): array
+    {
+        return [
+            'rightThumb' => [
+                'pos' => 1,
+                'data' => $this->rightThumb,
+            ],
+            'leftThumb' => [
+                'pos' => 6,
+                'data' => $this->leftThumb,
+            ],
+        ];
+    }
 }

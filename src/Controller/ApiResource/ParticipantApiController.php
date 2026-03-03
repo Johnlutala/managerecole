@@ -117,7 +117,7 @@ final class ParticipantApiController extends AbstractApiController
             }
     
             // Vérification des champs requis
-            $required = ['firstname', 'lastname', 'gender', 'phoneContact'];
+            $required = ['firstname', 'lastname', 'gender', 'phoneContact', 'phoneEMoney'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
                     return new JsonResponse(['error' => "Le champ '$field' est obligatoire"], Response::HTTP_BAD_REQUEST);
@@ -431,5 +431,74 @@ final class ParticipantApiController extends AbstractApiController
                 'message' => 'Une erreur est survenue ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    #[Route('/details', name: 'api_get_participant_details', methods: ['GET'])]
+    public function getDetails(
+        Request $request,
+        TokenEncoder $tokenService
+    ): JsonResponse
+    {
+
+        try {
+
+            $authUser = $this->authenticateUser($request, $tokenService);
+
+            if (!$authUser) {
+                return new JsonResponse([
+                    'code' => '3',
+                    'message' => 'Authentification échouée: Token manquant ou invalide'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+            
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => 'Données JSON invalides'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+        
+            // Vérification des champs requis
+            $required = ['participantId'];
+            foreach ($required as $field) {
+                if (empty($data[$field])) {
+                    return new JsonResponse([
+                        'code' => "1",
+                        'message' => "Le champ '$field' est obligatoire"
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+            $participant = $this->repo->findOneBy(['id' => $data['participantId']]);
+
+            
+
+            if (!$participant ) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => "Participant non trouvé"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Création de l'entité Participant
+    
+            return new JsonResponse([
+                'id' => $participant->getId(),
+                'phoneMobileMoney' => $participant->getPhoneMobileMoney(),
+                'fullname' => $participant->getFullname(),
+                'biometric' => $participant->getDemographic() ? $participant->getDemographic()->getBiometrics()->getFingers() : null
+            ], Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            
+            return new JsonResponse([
+                'code' => "2",
+                'message' => 'Erreur lors de la récupération : ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
     }
 }
