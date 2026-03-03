@@ -21,10 +21,11 @@ class Flexroll
     public function __construct(
         HttpClientInterface $httpClient, 
         WorkshopDayRepository $dayRepository,
-        LoggerInterface $logger,
+        LoggerInterface $logger
     )
     {
         $this->httpClient = $httpClient;
+        $this->logger = $logger;
     }
 
 
@@ -58,7 +59,7 @@ class Flexroll
                 ]);
             }
 
-            //$this->logger->error('Erreur lors de l\'envoi de la liste vers Flexroll: ' . $response->getContent(false));
+            $this->logger->error('Erreur lors de l\'envoi de la liste vers Flexroll: ' . $response->getContent(false));
 
             return new JsonResponse([
                 'code' => '1',

@@ -164,6 +164,7 @@ final class ParticipantApiController extends AbstractApiController
             // Création du Participant
             $participant = new Participant();
             $participant->setPhone($data['phoneEMoney'] ?? $data['phoneContact']);
+            $participant->setPhoneMobileMoney($data['phoneEMoney'] ?? null);
             $participant->setDemographic($demographic);
             $participant->setCreatedBy($authUser);
     
@@ -213,7 +214,7 @@ final class ParticipantApiController extends AbstractApiController
             return new JsonResponse([
                 'code' => "0",
                 'message' => 'Participant créé avec succès',
-                // 'participant_id' => $participant->getId(),
+                'participant_id' => $participant->getId(),
                 // 'demographic_id' => $demographic->getId(),
                 // 'biometric_id' => $biometric->getId()
             ], Response::HTTP_CREATED);
@@ -434,7 +435,7 @@ final class ParticipantApiController extends AbstractApiController
     }
 
 
-    #[Route('/details', name: 'api_get_participant_details', methods: ['GET'])]
+    #[Route('/details', name: 'api_get_participant_details', methods: ['POST'])]
     public function getDetails(
         Request $request,
         TokenEncoder $tokenService
