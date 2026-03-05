@@ -336,7 +336,7 @@ final class ParticipantApiController extends AbstractApiController
             }
         
             // Vérification des champs requis
-            $required = ['participantId', 'workshopDayId', 'biometrics'];
+            $required = ['participantId', 'workshopDayId'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
                     return new JsonResponse([
