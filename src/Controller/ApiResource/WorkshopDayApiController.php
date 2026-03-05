@@ -4,7 +4,7 @@ namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
 use App\Entity\Workshop;
-use App\Entity\WorkshopDay;
+use App\Entity\WorkshopDay; 
 use App\Repository\BiometricRepository;
 use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
@@ -100,10 +100,11 @@ final class WorkshopDayApiController extends AbstractApiController
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            
+            $this->logger->error('Error fetching participants: ' . $e->getMessage(), ['exception' => $e]);
+
             return new JsonResponse([
                 'code' => "2",
-                'message' => 'Erreur lors de la récupération de l\'atelier: ' . $e->getMessage()
+                'message' => 'Erreur lors de la clôture du jour d\'atelier: ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         

@@ -59,7 +59,7 @@ class ParticipantRepository extends ServiceEntityRepository
      * @return Participant[] Returns an array of Participant objects that are
      * active and not associated with any participation in the specified workshop
      */
-    public function findActiveWithoutParticipation(?string $keyword, Workshop $workshop): array
+    public function findActiveWithoutParticipation(?string $keyword, ?Workshop $workshop): array
     {
 
         if (!$keyword) {
