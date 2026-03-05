@@ -65,15 +65,20 @@ final class ParticipantApiController extends AbstractApiController
 
             $workshop = $this->workshopRepo->findOneBy(['id' => (int) $workShopId]);
 
+            $data = [];
             if (!$workshop) {
-                return new JsonResponse([
-                    'code' => "1",
-                    'message' => "Atelier non trouvé pour l'ID fourni"
-                ], Response::HTTP_BAD_REQUEST);
+                $participants = $this->repo->findActive($keyword);
+
+                foreach ($participants as $participant) {
+                    $data[] = [
+                        'id' => $participant->getId(),
+                        'firstname' => $participant->getDemographic() ? $participant->getDemographic()->getFirstname() : null,
+                        'lastname' => $participant->getDemographic() ? $participant->getDemographic()->getLastname() : null,
+                        'mobileMoney' => $participant->getPhone()
+                    ];
+                }
             }
 
-
-            $data = [];
             $participants = $this->repo->findActiveWithoutParticipation($keyword, $workshop);
 
             foreach ($participants as $participant) {
