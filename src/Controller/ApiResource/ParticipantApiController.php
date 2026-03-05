@@ -8,8 +8,6 @@ use App\Entity\Company;
 use App\Entity\Demographic;
 use App\Entity\Participant;
 use App\Entity\Participation;
-use App\Repository\BiometricRepository;
-use App\Repository\DemographicRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
@@ -34,14 +32,12 @@ final class ParticipantApiController extends AbstractApiController
 {
 
     private ParticipantRepository $repo;
-    private DemographicRepository $demoRepo;
-    private BiometricRepository $bioRepo;
+    private WorkshopRepository $workshopRepo;
     private TokenEncoder $tokenService;
 
     public function __construct(
         ParticipantRepository $repo_,
-        DemographicRepository $demoRepo_,
-        BiometricRepository $bioRepo_,
+        WorkshopRepository $workshopRepo_,
         SerializerInterface $serializer,
         HttpClientInterface $httpClient,
         TransportInterface $mailer,
@@ -54,8 +50,7 @@ final class ParticipantApiController extends AbstractApiController
     {
         parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo, $tokenService);
         $this->repo = $repo_;
-        $this->demoRepo = $demoRepo_;
-        $this->bioRepo = $bioRepo_;
+        $this->workshopRepo = $workshopRepo_;
         $this->tokenService = $tokenService;
     }
 
@@ -66,9 +61,21 @@ final class ParticipantApiController extends AbstractApiController
     {
         try {
             $keyword = $request->query->get('keyword');
-            $participants = $this->repo->findActive($keyword);
+            $workShopId = $request->query->get('workshopId');
+
+            $workshop = $this->workshopRepo->findOneBy(['id' => (int) $workShopId]);
+
+            if (!$workshop) {
+                return new JsonResponse([
+                    'code' => "1",
+                    'message' => "Atelier non trouvé pour l'ID fourni"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
 
             $data = [];
+            $participants = $this->repo->findActiveWithoutParticipation($keyword, $workshop);
+
             foreach ($participants as $participant) {
                 $data[] = [
                     'id' => $participant->getId(),
@@ -77,6 +84,7 @@ final class ParticipantApiController extends AbstractApiController
                     'mobileMoney' => $participant->getPhone()
                 ];
             }
+
 
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\Throwable $e) {

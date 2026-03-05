@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Participant;
+use App\Entity\Workshop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -35,6 +36,7 @@ class ParticipantRepository extends ServiceEntityRepository
                 ->getResult()
             ;
         }
+
         
         return $this->createQueryBuilder('p')
             ->leftJoin('p.demographic', 'd')
@@ -44,6 +46,52 @@ class ParticipantRepository extends ServiceEntityRepository
             ->setParameter('enabled', true)
             ->andWhere('p.deleted = :deleted')
             ->setParameter('deleted', false)
+            ->orderBy('p.id', 'ASC')
+            // ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+
+    }
+
+
+    /**
+     * @return Participant[] Returns an array of Participant objects that are
+     * active and not associated with any participation in the specified workshop
+     */
+    public function findActiveWithoutParticipation(?string $keyword, Workshop $workshop): array
+    {
+
+        if (!$keyword) {
+            # code...
+            return $this->createQueryBuilder('p')
+                ->andWhere('p.enabled = :enabled')
+                ->setParameter('enabled', true)
+                ->andWhere('p.deleted = :deleted')
+                ->setParameter('deleted', false)
+                ->leftJoin('p.participations', 'part')
+                ->andWhere('part.workshop != :workshop OR part.workshop IS NULL')
+                ->setParameter('workshop', $workshop)
+                ->orderBy('p.id', 'ASC')
+                // ->setMaxResults(10)
+                ->getQuery()
+                ->getResult()
+            ;
+        }
+
+
+        
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.demographic', 'd')
+            ->andWhere('d.firstname LIKE :keyword OR d.lastname LIKE :keyword')
+            ->setParameter('keyword', '%' . $keyword . '%')
+            ->andWhere('p.enabled = :enabled')
+            ->setParameter('enabled', true)
+            ->andWhere('p.deleted = :deleted')
+            ->setParameter('deleted', false)
+            ->leftJoin('p.participations', 'part')
+            ->andWhere('part.workshop != :workshop OR part.workshop IS NULL')
+            ->setParameter('workshop', $workshop)
             ->orderBy('p.id', 'ASC')
             // ->setMaxResults(10)
             ->getQuery()

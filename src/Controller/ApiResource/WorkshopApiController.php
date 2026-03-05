@@ -3,10 +3,8 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Entity\User;
 use App\Entity\Workshop;
 use App\Entity\WorkshopDay;
-use App\Repository\BiometricRepository;
 use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
@@ -90,8 +88,8 @@ final class WorkshopApiController extends AbstractApiController
             $workshop = new Workshop();
             $workshop->setName($data['name']);
             $workshop->setDescription($data['description'] ?? null);
-            $workshop->setDailyAmount(0);
-            $workshop->setCurrency("");
+            $workshop->setDailyAmount($data['dailyAmount'] ?? 0);
+            $workshop->setCurrency($data['currency'] ?? null);
             $workshop->setIsEnded(false);
             $workshop->setCreatedBy($authUser);
             $workshop->setConfiguration($authUser->getConfiguration());
