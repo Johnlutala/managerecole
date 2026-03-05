@@ -93,7 +93,7 @@ final class ParticipantApiController extends AbstractApiController
 
             return new JsonResponse($data, Response::HTTP_OK);
         } catch (\Throwable $e) {
-            
+            $this->logger->error('Error fetching participants: ' . $e->getMessage(), ['exception' => $e]);
             return new JsonResponse([
                 'code' => "2",
                 'message' => 'Une erreur est survenue ' . $e->getMessage()
