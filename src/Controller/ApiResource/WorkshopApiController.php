@@ -290,7 +290,9 @@ final class WorkshopApiController extends AbstractApiController
             // Générer la liste des participants
             $finalList = $workshopListGen->generateList($workshop);
 
+            $this->logger->info('finalList generated: ' . json_encode($finalList, true));
             dd($finalList);
+            
 
             // Envoyer la liste à Flexroll
             $response = $flexrollService->sendList($finalList);
