@@ -435,7 +435,7 @@ final class WorkshopApiController extends AbstractApiController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $days = $workshopDayRepo->findActiveByWorkshop($workshop);
+            $days = $workshopDayRepo->findByWorkshop($workshop);
     
             $data = $this->serializer->serialize($days, 'json', ['groups' => 'workshopday:read']);
             $dataArray = json_decode($data, true);
