@@ -28,7 +28,7 @@ class WorkshopListGeneration
     {
         // récupérer les jours du workshop
         $days = $this->dayRepository->findActiveByWorkshop($workshop);
-        
+
         $participants = [];
         $finalList = [];
 
@@ -53,6 +53,7 @@ class WorkshopListGeneration
             }
 
         }
+        //dd($workshop);
         
         // parcourir la liste des participants et générer la liste
         foreach ($participants as $participant) {

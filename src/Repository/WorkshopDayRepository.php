@@ -25,13 +25,13 @@ class WorkshopDayRepository extends ServiceEntityRepository
                 ->andWhere('w.workshop = :workshop')
                 ->setParameter('workshop', $value)
                 ->andWhere('w.enabled = :enabled')
-                ->setParameter('enabled', true)
+                ->setParameter('enabled', false)
                 ->andWhere('w.deleted = :deleted')
                 ->setParameter('deleted', false)
                 ->andWhere('w.isClosed = :isClosed')
-                ->setParameter('isClosed', false)
+                ->setParameter('isClosed', true)
                 ->orderBy('w.id', 'ASC')
-                ->setMaxResults(10)
+                //->setMaxResults(10)
                 ->getQuery()
                 ->getResult();
     }
