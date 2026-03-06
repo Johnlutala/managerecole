@@ -33,68 +33,49 @@ class WorkshopListGeneration
         $finalList = [];
 
         // parcourir les participations de chacun de ces jours
+        // parcourir les participations
         foreach ($days as $day) {
-            $participations = $day->getParticipations();
-            
+            foreach ($day->getParticipations() as $participation) {
 
-            // pour chaque participation, récuperer le participant
-            foreach ($participations as $participation) {
-
-                if ($participation->isPresent()) {
-                    $participant = $participation->getParticipant();
-                    
-                    if ($participant) {
-                        $participants[] = $participant;
-                    }
-                }
-                else {
+                if (!$participation->isPresent()) {
                     continue;
                 }
-            }
 
-        }
-        //dd($workshop);
-        
-        // parcourir la liste des participants et générer la liste
-        foreach ($participants as $participant) {
-            
-            $participantObject = [
-                'id' => $participant->getId(),
-                'phone' => $participant->getPhoneMobileMoney(),
-                'name' => $participant->getDemographic()->getFullname(),
-                'numberOfDays' => 1,
-                "amount"=> $workshop->getDailyAmount(),
-                "currency"=> $workshop->getCurrency(),
-            ];
+                $participant = $participation->getParticipant();
 
-            if (!in_array($participantObject, $finalList)) {
-                $finalList[] = $participantObject;
+                if (!$participant) {
+                    continue;
+                }
 
-            } else {
-                // Si le participant est déjà dans la liste, on peut mettre à jour d'autres informations si nécessaire
-                foreach ($finalList as &$existingParticipant) {
-                    
-                    if ($existingParticipant['id'] === $participant->getId()) {
-                        // Incrémenter le nombre de jours
-                        $existingParticipant['numberOfDays'] += 1;
-                    }
+                $id = $participant->getId();
+
+                if (!isset($participants[$id])) {
+
+                    $participants[$id] = [
+                        'phone' => $participant->getPhoneMobileMoney(),
+                        'name' => $participant->getDemographic()->getFullname(),
+                        'numberOfDays' => 1,
+                        'amount' => $workshop->getDailyAmount(),
+                        'currency' => $workshop->getCurrency(),
+                    ];
+
+                } else {
+                    $participants[$id]['numberOfDays']++;
                 }
             }
         }
 
-
-        // Retirer l'id du participant pour la version finale
-        foreach ($finalList as &$entry) {
-            unset($entry['id']);
-            $entry['amount'] = $entry['amount'] * $entry['numberOfDays'];
+        // calcul du montant final
+        foreach ($participants as &$participant) {
+            $participant['amount'] = $participant['amount'] * $participant['numberOfDays'];
         }
 
         return [
             'workshopName' => $workshop->getName(),
-            'shortcode'=> $workshop->getConfiguration()->getShortcode() ?? "zando",
-            'encadreur' => $workshop->getCreatedBy()->getFirstname() . ' ' . $workshop->getCreatedBy()->getLastname(),
-            'totalDays' => strval(count($days)),
-            'participants' => $finalList,
+            'shortcode' => $workshop->getConfiguration()->getShortcode() ?? 'zando',
+            'encadreur' => $workshop->getCreatedBy()->getFirstname().' '.$workshop->getCreatedBy()->getLastname(),
+            'totalDays' => (string) count($days),
+            'participants' => array_values($participants),
         ];
     }
 
