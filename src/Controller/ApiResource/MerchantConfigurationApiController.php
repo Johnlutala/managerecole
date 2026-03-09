@@ -3,19 +3,14 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
+use App\Dto\Api\MerchantConfigPayload;
 use App\Entity\MerchantConfiguration;
 use App\Repository\MerchantConfigurationRepository;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 
@@ -27,17 +22,8 @@ final class MerchantConfigurationApiController extends AbstractApiController
 
     public function __construct(
         MerchantConfigurationRepository $repo_,
-        // Dependencies from AbstractApiController
-        SerializerInterface $serializer,
-        HttpClientInterface $httpClient,
-        TransportInterface $mailer,
-        LoggerInterface $logger,
-        LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator,
-        UserRepository $userRepo
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
     }
 
@@ -50,68 +36,56 @@ final class MerchantConfigurationApiController extends AbstractApiController
         EntityManagerInterface $em
     ): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $operation = "Création de configuration marchand";
 
-            if (!$data) {
+        try {
+            $data = $this->getJsonData($request);
+
+            $validationMessages = $this->validateObject(new MerchantConfigPayload(
+                $data['shortcode'] ?? '',
+            ));
+
+            if (count($validationMessages) > 0) {
                 
-                return new JsonResponse(
-                    [
-                        'code'=> "1",
-                        'message' => 'Données manquantes ou incorrectes'
-                    ],
+                return $this->error(
+                    "Données invalides",
+                    $validationMessages,
+                    $operation,
                     Response::HTTP_BAD_REQUEST
                 );
-            }
-
-            // Vérification des champs requis
-            $required = ['shortcode'];
-            foreach ($required as $field) {
-                
-                if (empty($data[$field])) {
-                    
-                    return new JsonResponse([
-                        'code' => "1",
-                        'message' => "Le champ '$field' est obligatoire"
-                    ], Response::HTTP_BAD_REQUEST);
-                }
             }
 
             // Vérification de l'existence
             $existing = $this->repo->findOneBy(['shortcode' => $data['shortcode']]);
             if ($existing) {
                 
-                return new JsonResponse([
-                    'code' => "1",
-                    'message' => "Une configuration avec ce shortcode existe déjà"
-                ], Response::HTTP_CONFLICT);
+                return $this->error(
+                    "Configuration déjà existante pour ce code marchand",
+                    [],
+                    $operation,
+                    Response::HTTP_CONFLICT
+                );
             }
 
 
             $configuration = new MerchantConfiguration();
             $configuration->setShortcode(strtolower($data['shortcode']));
 
-            if (isset($data['token'])) {
-                $configuration->setToken($data['token']);
-            }
 
             $em->persist($configuration);
             $em->flush();
 
-            return new JsonResponse(
-                [
-                    'code'=> "0",
-                    'message' => 'Configuration créée avec succès', 
-                ],
+            return $this->success(
+                null,
+                $operation,
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
             
-            return new JsonResponse(
-                [
-                    'code'=> "2",
-                    'message' => 'Une erreur est survenue ' . $e->getMessage()
-                ],
+            return $this->error(
+                "Une erreur est survenue",
+                [$e->getMessage()],
+                $operation,
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

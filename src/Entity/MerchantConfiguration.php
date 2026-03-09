@@ -23,9 +23,6 @@ class MerchantConfiguration
     #[Groups(['configuration:read'])]
     private ?string $shortcode = null;
 
-    #[ORM\Column(length: 500, nullable: true)]
-    private ?string $token = null;
-
     /**
      * @var Collection<int, User>
      */
@@ -65,17 +62,6 @@ class MerchantConfiguration
         return $this;
     }
 
-    public function getToken(): ?string
-    {
-        return $this->token;
-    }
-
-    public function setToken(?string $token): static
-    {
-        $this->token = $token;
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, User>
