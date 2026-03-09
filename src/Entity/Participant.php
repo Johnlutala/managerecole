@@ -19,16 +19,10 @@ class Participant
     #[Groups(['participant:read'])]
     private ?int $id = null;
     
-    #[ORM\ManyToOne(inversedBy: 'participants')]
-    private ?Demographic $demographic = null;
-    
     #[ORM\Column(length: 25, nullable: true)]
     #[Groups(['participant:read'])]
     private ?string $phone = null;
 
-
-    #[ORM\ManyToOne(inversedBy: 'participants')]
-    private ?Company $company = null;
 
     /**
      * @var Collection<int, Participation>
@@ -38,6 +32,21 @@ class Participant
 
     #[ORM\Column(length: 25, nullable: true)]
     private ?string $phoneMobileMoney = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $firstname = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $middlename = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $lastname = null;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $gender = null;
+
+    #[ORM\OneToOne(inversedBy: 'participant', cascade: ['persist', 'remove'])]
+    private ?Biometric $biometric = null;
 
 
     public function __construct()
@@ -54,17 +63,6 @@ class Participant
         return $this->id;
     }
 
-    public function getDemographic(): ?Demographic
-    {
-        return $this->demographic;
-    }
-
-    public function setDemographic(?Demographic $demographic): static
-    {
-        $this->demographic = $demographic;
-
-        return $this;
-    }
 
     public function getPhone(): ?string
     {
@@ -79,17 +77,6 @@ class Participant
     }
 
 
-    public function getCompany(): ?Company
-    {
-        return $this->company;
-    }
-
-    public function setCompany(?Company $company): static
-    {
-        $this->company = $company;
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Participation>
@@ -123,14 +110,11 @@ class Participant
 
     public function getFullname(): ?string
     {
-        $demographic = $this->getDemographic();
-        if (!$demographic) {
-            return null;
-        }
+        
 
-        $firstname = $demographic->getFirstname();
-        $middlename = $demographic->getMiddlename();
-        $lastname = $demographic->getLastname();
+        $firstname = $this->getFirstname();
+        $middlename = $this->getMiddlename();
+        $lastname = $this->getLastname();
 
         $fullname = trim($firstname . ' ' . $middlename . ' ' . $lastname);
         return $fullname !== '' ? $fullname : null;
@@ -144,6 +128,66 @@ class Participant
     public function setPhoneMobileMoney(?string $phoneMobileMoney): static
     {
         $this->phoneMobileMoney = $phoneMobileMoney;
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getMiddlename(): ?string
+    {
+        return $this->middlename;
+    }
+
+    public function setMiddlename(?string $middlename): static
+    {
+        $this->middlename = $middlename;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?string $gender): static
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+
+    public function getBiometric(): ?Biometric
+    {
+        return $this->biometric;
+    }
+
+    public function setBiometric(?Biometric $biometric): static
+    {
+        $this->biometric = $biometric;
 
         return $this;
     }

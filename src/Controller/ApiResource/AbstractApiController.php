@@ -2,13 +2,9 @@
 
 namespace App\Controller\ApiResource;
 
-//use App\Service\ApiCall;
-//use App\Service\PDF;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use App\Service\TokenEncoder;
-use App\Service\TokenGeneration;
+use App\Service\JwtTokenService;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,72 +18,109 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 abstract class AbstractApiController extends AbstractController
 {
     protected SerializerInterface $serializer;
-    protected HttpClientInterface $httpClient;
+    protected HttpClientInterface $http;
     protected TransportInterface $mailer;
     protected LoggerInterface $logger;
-    protected LoggerInterface $handshakeLogger;
     protected ValidatorInterface $validator;
-    protected UserRepository $userRepo;
-    //protected PDF $pdf;
-    //protected ApiCall $apiCall;
+    protected JwtTokenService $jwt;
+    protected EntityManagerInterface $em;
 
     public function __construct(
-        SerializerInterface $serializer_,
-        HttpClientInterface $httpClient_,
-        TransportInterface  $mailer_,
-        LoggerInterface     $logger_,
-        LoggerInterface     $handshakeLogger_,
-        ValidatorInterface  $validator_,
-        UserRepository $userRepo_
+        EntityManagerInterface $em_,
+        LoggerInterface $logger_,
+        ValidatorInterface $validator_,
+        JwtTokenService $jwt_,
+        HttpClientInterface $http_
     )
     {
-        $this->serializer = $serializer_;
-        $this->mailer = $mailer_;
+        $this->em = $em_;
         $this->logger = $logger_;
-        $this->httpClient = $httpClient_;
-        $this->handshakeLogger = $handshakeLogger_;
+        $this->http = $http_;
         $this->validator = $validator_;
-        $this->userRepo = $userRepo_;
-        //$this->pdf = $pdf_;
-        //$this->apiCall = $apiCall_;
+        $this->jwt = $jwt_;
     }
 
-    protected function notFoundException($message = "Not found"): JsonResponse
-    {
-        return new JsonResponse([
-            'message' => $message
-        ], Response::HTTP_NOT_FOUND);
+    public function checkAuthentication(
+        Request $request
+    ) : array {
+        
+        $token = $this->jwt->extractTokenFromRequest($request);
+
+        if (!$token) {
+            
+            return [
+                "status" => false,
+                "code" => Response::HTTP_UNAUTHORIZED,
+                "message" => "Token manquant ou invalide"
+            ];
+        }
+
+        $payload = $this->jwt->validateAndDecode($token);
+
+        if (count($payload) === 1 || isset($payload['error'])) {
+            
+            return [
+                "status" => false,
+                "code" => Response::HTTP_FORBIDDEN,
+                "message" => $payload['error']
+            ];
+        }
+
+        return [
+            "status" => true,
+            "code" => Response::HTTP_OK
+        ];
     }
 
-    protected function badRequestException($message = "Bad request"): JsonResponse
+    /**
+     * Validate DTO / Entity
+     */
+    protected function validateObject(object $object): array
     {
-        return new JsonResponse([
-            'message' => $message
-        ], Response::HTTP_BAD_REQUEST);
+        $errors = $this->validator->validate($object);
+
+        $messages = [];
+        foreach ($errors as $error) {
+            $messages[] = $error->getMessage();
+        }
+
+        return $messages;
     }
 
-    public function authenticateUser(Request $request, TokenEncoder $tokenService): ?User
+
+    public function success(mixed $data, string $operation, int $status=200): JsonResponse
     {
-        $token = $request->headers->get('x-api-token');
 
-            // Vérifier que le token est présent et est une chaîne
-            if (!$token || !is_string($token)) {
-                return null;
-            }
+        $this->logger->info(
+            "tag : " . $operation,
+            $data
+        );
 
-            // Valider le token
-            $username = $tokenService->validateToken($token);
-            if (!$username) {
-                return null;
-            }
+        return $this->json([
+            'code' => "00",
+            'message' => "Opération effectuée avec succès",
+            'data' => $data
+        ], $status);
+    }
 
-            // Trouver l'utilisateur associé au token (optionnel)
-            $user = $this->userRepo->findOneBy(['username' => $username]);
-            if (!$user) {
-                return null;
-            }
 
-            return $user;
+    public function error(string $message, mixed $data, string $operation, int $status): JsonResponse
+    {
+        $this->logger->error(
+            "tag : " . $operation,
+            $data
+        );
+        
+        return $this->json([
+            'code' => "01",
+            'message' => $message,
+            'errors' => $data
+        ], $status);
+    }
+
+    public function getJsonData(Request $request): array
+    {
+        return json_decode($request->getContent(), true) ?? [];
     }
 
 }

@@ -9,7 +9,6 @@ use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\Flexroll;
-use App\Service\TokenEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,7 +28,6 @@ final class WorkshopApiController extends AbstractApiController
 
     private WorkshopRepository  $repo;
     private EntityManagerInterface $entityManager;
-    private TokenEncoder $tokenService;
 
     public function __construct(
         SerializerInterface $serializer,
@@ -40,14 +38,12 @@ final class WorkshopApiController extends AbstractApiController
         ValidatorInterface $validator,
         UserRepository $userRepo,
         WorkshopRepository $repo_,
-        EntityManagerInterface $entityManager,
-        TokenEncoder $tokenService
+        EntityManagerInterface $entityManager
     )
     {
         parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
         $this->entityManager = $entityManager;
-        $this->tokenService = $tokenService;
     }
 
     

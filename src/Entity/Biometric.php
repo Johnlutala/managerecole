@@ -17,9 +17,6 @@ class Biometric
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $faceData = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $rightThumb = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -49,8 +46,8 @@ class Biometric
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $leftLittle = null;
 
-    #[ORM\OneToOne(mappedBy: 'biometrics', cascade: ['persist', 'remove'])]
-    private ?Demographic $demographic = null;
+    #[ORM\OneToOne(mappedBy: 'biometric', cascade: ['persist', 'remove'])]
+    private ?Participant $participant = null;
 
     public function __construct()
     {
@@ -65,17 +62,6 @@ class Biometric
         return $this->id;
     }
 
-    public function getFaceData(): ?string
-    {
-        return $this->faceData;
-    }
-
-    public function setFaceData(?string $faceData): static
-    {
-        $this->faceData = $faceData;
-
-        return $this;
-    }
 
     public function getRightThumb(): ?string
     {
@@ -197,27 +183,7 @@ class Biometric
         return $this;
     }
 
-    public function getDemographic(): ?Demographic
-    {
-        return $this->demographic;
-    }
-
-    public function setDemographic(?Demographic $demographic): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($demographic === null && $this->demographic !== null) {
-            $this->demographic->setBiometrics(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($demographic !== null && $demographic->getBiometrics() !== $this) {
-            $demographic->setBiometrics($this);
-        }
-
-        $this->demographic = $demographic;
-
-        return $this;
-    }
+   
 
     public function getFingers(): array
     {
@@ -231,5 +197,27 @@ class Biometric
                 'data' => $this->leftThumb,
             ],
         ];
+    }
+
+    public function getParticipant(): ?Participant
+    {
+        return $this->participant;
+    }
+
+    public function setParticipant(?Participant $participant): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($participant === null && $this->participant !== null) {
+            $this->participant->setBiometric(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($participant !== null && $participant->getBiometric() !== $this) {
+            $participant->setBiometric($this);
+        }
+
+        $this->participant = $participant;
+
+        return $this;
     }
 }

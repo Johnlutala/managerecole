@@ -10,7 +10,6 @@ use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\Flexroll;
-use App\Service\TokenEncoder;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -52,8 +51,7 @@ final class WorkshopDayApiController extends AbstractApiController
 
     #[Route("/close", name:"api_close_one_day", methods: ['POST'])]
     public function closeOneDay(
-        Request $request,
-        TokenEncoder $tokenService    
+        Request $request   
     ): JsonResponse
     {
         try {

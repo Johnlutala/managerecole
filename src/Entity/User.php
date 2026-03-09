@@ -168,4 +168,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
+    /**
+     * Hash un mot de passe avec bcrypt
+     */
+    public function hashPassword($plainPassword)
+    {
+        return password_hash($plainPassword, PASSWORD_BCRYPT, [
+            'cost' => 15
+        ]);
+    }
+
+    /**
+     * Vérifie si un mot de passe correspond au hash
+     */
+    public function verifyPassword(string $plainPassword): bool
+    {
+        return password_verify($plainPassword, $this->password);
+    }
+
 }

@@ -13,7 +13,7 @@ use App\Repository\ParticipationRepository;
 use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
-use App\Service\TokenEncoder;
+use App\Service\JwtTokenService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,7 +33,7 @@ final class ParticipantApiController extends AbstractApiController
 
     private ParticipantRepository $repo;
     private WorkshopRepository $workshopRepo;
-    private TokenEncoder $tokenService;
+    private JwtTokenService $tokenService;
 
     public function __construct(
         ParticipantRepository $repo_,
@@ -45,7 +45,7 @@ final class ParticipantApiController extends AbstractApiController
         LoggerInterface $handshakeLogger,
         ValidatorInterface $validator,
         UserRepository $userRepo,
-        TokenEncoder $tokenService
+        JwtTokenService $tokenService
     )
     {
         parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo, $tokenService);
@@ -105,8 +105,7 @@ final class ParticipantApiController extends AbstractApiController
     public function createWithBiometrics(
         Request $request,
         EntityManagerInterface $entityManager,
-        WorkshopRepository $workshopRepo,
-        TokenEncoder $tokenService
+        WorkshopRepository $workshopRepo
     ): JsonResponse {
         try {
 
@@ -316,7 +315,6 @@ final class ParticipantApiController extends AbstractApiController
         WorkshopDayRepository $workshopDayRepo,
         ParticipationRepository $participationRepo,
         EntityManagerInterface $entityManager,
-        TokenEncoder $tokenService
     ): JsonResponse
     {
 
@@ -451,7 +449,6 @@ final class ParticipantApiController extends AbstractApiController
     #[Route('/details', name: 'api_get_participant_details', methods: ['POST'])]
     public function getDetails(
         Request $request,
-        TokenEncoder $tokenService
     ): JsonResponse
     {
 
