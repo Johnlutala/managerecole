@@ -3,20 +3,17 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
+use App\Dto\Api\UserCreationPayload;
 use App\Entity\User;
 use App\Repository\MerchantConfigurationRepository;
 use App\Repository\UserRepository;
+use App\Service\UsernameGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 
@@ -28,16 +25,8 @@ final class UserApiController extends AbstractApiController
 
     public function __construct(
         UserRepository $repo_,
-        // Dependencies from AbstractApiController
-        SerializerInterface $serializer,
-        HttpClientInterface $httpClient,
-        TransportInterface $mailer,
-        LoggerInterface $logger,
-        LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $repo_);
         $this->repo = $repo_;
     }
 
@@ -45,24 +34,30 @@ final class UserApiController extends AbstractApiController
     #[Route('', name: 'api_get_enabled_users', methods: ['GET'])]
     public function getUsers(): JsonResponse
     {
+        $operation = "Récupération des utilisateurs";
+
+
         try {
-            $users = $this->repo->findEnabled();
+            $users = $this->repo->findBy([
+                'enabled' => true,
+                'deleted' => false,
+            ]);
             $data = $this->serializer->serialize($users, 'json', ['groups' => 'user:read']);
             $users = json_decode($data, true);
 
             //dd($users);
 
-            return new JsonResponse(
+            return $this->success(
                 $users,
+                $operation,
                 Response::HTTP_OK
             );
         } catch (\Exception $e) {
             
-            return new JsonResponse(
-                [
-                    'code'=> "2",
-                    'message' => 'Une erreur est survenue ' . $e->getMessage()
-                ],
+            return $this->error(
+                "Une erreur est survenue",
+                [$e->getMessage()],
+                $operation,
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
@@ -73,49 +68,48 @@ final class UserApiController extends AbstractApiController
     public function createUser(
         Request $request,
         MerchantConfigurationRepository $mcrepo,
+        UsernameGenerator $usernameGenerator,
         EntityManagerInterface $em
     ): JsonResponse
     {
+        $operation = "Création d'utilisateur";
+
         try {
-            $data = json_decode($request->getContent(), true);
+            $data = $this->getJsonData($request);
 
             $factory = new PasswordHasherFactory([
                 'common' => ['algorithm' => 'bcrypt'],
             ]);
             $hasher = $factory->getPasswordHasher('common');
 
-            if (!$data) {
+            $validationMessages = $this->validateObject(new UserCreationPayload(
+                $data['firstname'] ?? '',
+                $data['lastname'] ?? '',
+                $data['email'] ?? '',
+                $data['password'] ?? '',
+                $data['merchant'] ?? ''
+            ));
+
+            if (count($validationMessages) > 0) {
                 
-                return new JsonResponse(
-                    [
-                        'code'=> "1",
-                        'message' => 'Données manquantes ou incorrectes'
-                    ],
+                return $this->error(
+                    "Données invalides",
+                    $validationMessages,
+                    $operation,
                     Response::HTTP_BAD_REQUEST
                 );
-            }
-
-            // Vérification des champs requis
-            $required = ['firstname', 'lastname', 'email', 'username', 'password', 'merchant'];
-            foreach ($required as $field) {
-                
-                if (empty($data[$field])) {
-                    
-                    return new JsonResponse([
-                        'code' => "1",
-                        'message' => "Le champ '$field' est obligatoire"
-                    ], Response::HTTP_BAD_REQUEST);
-                }
             }
 
             // Vérification de l'existence
             $existing = $this->repo->findOneBy(['email' => $data['email']]);
             if ($existing) {
                 
-                return new JsonResponse([
-                    'code' => "1",
-                    'message' => "Un utilisateur avec cet e-mail existe déjà"
-                ], Response::HTTP_CONFLICT);
+                return $this->error(
+                    "Utilisateur déjà existant avec cette adresse mail",
+                    [],
+                    $operation,
+                    Response::HTTP_CONFLICT
+                );
             }
 
 
@@ -123,37 +117,43 @@ final class UserApiController extends AbstractApiController
             $merchantConfig = $mcrepo->findOneBy(['shortcode' => strtolower($data['merchant'])]);
             if (!$merchantConfig) {
                 
-                return new JsonResponse([
-                    'code' => "1",
-                    'message' => "Configuration du marchand introuvable"
-                ], Response::HTTP_BAD_REQUEST);
+                return $this->error(
+                    "Configuration de marchand non trouvée",
+                    [],
+                    $operation,
+                    Response::HTTP_BAD_REQUEST
+                );
             }
 
             $user = new User();
             $user->setFirstname($data['firstname']);
             $user->setLastname($data['lastname']);
             $user->setEmail($data['email']);
-            $user->setUsername($data['username']);
+            $user->setUsername(
+                $usernameGenerator->generate(
+                    $data['firstname'],
+                    $data['lastname']
+                )
+            );
             $user->setPassword($hasher->hash($data['password']));
             $user->setConfiguration($merchantConfig);
 
             $em->persist($user);
             $em->flush();
 
-            return new JsonResponse(
+            return $this->success(
                 [
-                    'code'=> "0",
-                    'message' => 'Utilisateur ' . $data['username'] . ' créé avec succès',
+                    'username' => $user->getUsername()
                 ],
+                $operation,
                 Response::HTTP_CREATED
             );
         } catch (\Exception $e) {
             
-            return new JsonResponse(
-                [
-                    'code'=> "2",
-                    'message' => 'Une erreur est survenue ' . $e->getMessage()
-                ],
+            return $this->error(
+                'Une erreur est survenue',
+                [$e->getTrace()],
+                $operation,
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

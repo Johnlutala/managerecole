@@ -14,6 +14,7 @@ use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -25,19 +26,24 @@ abstract class AbstractApiController extends AbstractController
     protected JwtTokenService $jwt;
     protected EntityManagerInterface $em;
 
-    public function __construct(
+    #[Required]
+    public function setUpDependencies(
         EntityManagerInterface $em_,
         LoggerInterface $logger_,
         ValidatorInterface $validator_,
         JwtTokenService $jwt_,
-        HttpClientInterface $http_
-    )
+        HttpClientInterface $http_,
+        TransportInterface $mailer_,
+        SerializerInterface $serializer_
+    ): void
     {
         $this->em = $em_;
         $this->logger = $logger_;
         $this->http = $http_;
         $this->validator = $validator_;
         $this->jwt = $jwt_;
+        $this->mailer = $mailer_;
+        $this->serializer = $serializer_;
     }
 
     public function checkAuthentication(
@@ -75,7 +81,7 @@ abstract class AbstractApiController extends AbstractController
     /**
      * Validate DTO / Entity
      */
-    protected function validateObject(object $object): array
+    public function validateObject(object $object): array
     {
         $errors = $this->validator->validate($object);
 

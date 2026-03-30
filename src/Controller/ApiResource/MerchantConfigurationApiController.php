@@ -76,7 +76,7 @@ final class MerchantConfigurationApiController extends AbstractApiController
             $em->flush();
 
             return $this->success(
-                null,
+                [],
                 $operation,
                 Response::HTTP_CREATED
             );
@@ -102,28 +102,29 @@ final class MerchantConfigurationApiController extends AbstractApiController
             $configuration = $this->repo->findOneBy(['shortcode' => strtolower($shortcode)]);
             if (!$configuration) {
                 
-                return new JsonResponse([
-                    'status' => false
-                ], Response::HTTP_OK);
+                return $this->error(
+                    "Configuration non trouvée",
+                    [],
+                    "Récupération de configuration",
+                    Response::HTTP_NOT_FOUND
+                );
             }
 
             $data = $this->serializer->serialize($configuration, 'json', ['groups' => 'configuration:read']);
             $configuration = json_decode($data, true);
 
-            return new JsonResponse(
-                [
-                    'status'=> true 
-                ],
+            return $this->success(
+                $configuration,
+                "Récupération de configuration",
                 Response::HTTP_OK
             );
 
         } catch (\Exception $e) {
             
-            return new JsonResponse(
-                [
-                    'code'=> "2",
-                    'message' => 'Une erreur est survenue ' . $e->getMessage()
-                ],
+            return $this->error(
+                "Une erreur est survenue",
+                [$e->getMessage()],
+                "Récupération de configuration",
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
