@@ -23,9 +23,9 @@ class JwtTokenService
     {
         $payload = [
             'iat'  => time(),
-            'exp'  => time() + 1200, // 30 minutes
-            'sub'  => $claims['shortcode'],
-            'code' => $claims['username'],
+            'exp'  => time() + 1800, // 30 minutes
+            'shortcode'  => $claims['shortcode'],
+            'username' => $claims['username'],
         ];
 
         return JWT::encode($payload, $this->secretKey, $this->algo);
@@ -36,13 +36,14 @@ class JwtTokenService
      */
     public function extractTokenFromRequest(Request $request): ?string
     {
-        $authHeader = $request->headers->get('Authorization');
+        $authHeader = $request->headers->get('x-api-token');
 
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+
+        if (!$authHeader || str_starts_with($authHeader, 'Bearer ')) {
             return null;
         }
 
-        return str_replace('Bearer ', '', $authHeader);
+        return $authHeader;
     }
 
     /**

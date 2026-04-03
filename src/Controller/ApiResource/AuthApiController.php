@@ -16,6 +16,14 @@ final class AuthApiController extends AbstractApiController
 {
     private UserRepository $repo;
 
+    public function __construct(
+        UserRepository $repo_
+    )
+    {
+        $this->repo = $repo_;
+        
+    }
+
     
 
     #[Route('/login', name: 'api_login', methods: ['POST'])]

@@ -74,7 +74,8 @@ abstract class AbstractApiController extends AbstractController
 
         return [
             "status" => true,
-            "code" => Response::HTTP_OK
+            "code" => Response::HTTP_OK,
+            "payload" => $payload
         ];
     }
 
@@ -103,8 +104,8 @@ abstract class AbstractApiController extends AbstractController
         );
 
         return $this->json([
-            'code' => "00",
-            'message' => "Opération effectuée avec succès",
+            'code' => "0",
+            'message' => "Succès",
             'data' => $data
         ], $status);
     }
@@ -118,7 +119,7 @@ abstract class AbstractApiController extends AbstractController
         );
         
         return $this->json([
-            'code' => "01",
+            'code' => "1",
             'message' => $message,
             'errors' => $data
         ], $status);
