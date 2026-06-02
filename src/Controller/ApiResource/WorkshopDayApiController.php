@@ -3,25 +3,18 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Entity\Workshop;
-use App\Entity\WorkshopDay; 
-use App\Repository\BiometricRepository;
 use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
-use App\Repository\WorkshopRepository;
-use App\Service\Flexroll;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Transport\TransportInterface;
-use Symfony\Component\Messenger\Transport\Serialization\Serializer;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use App\Service\WorkshopListGeneration;
 
 #[Route('/api/rest/v1/workshopdays')]
 final class WorkshopDayApiController extends AbstractApiController
@@ -54,22 +47,29 @@ final class WorkshopDayApiController extends AbstractApiController
         Request $request   
     ): JsonResponse
     {
+        $operation = "Clôture d'un jour d'atelier";
         try {
 
-            $authUser = $this->authenticateUser($request, $tokenService);
-
-            if (!$authUser) {
-                return new JsonResponse([
-                    'code' => '3',
-                    'message' => 'Authentification échouée: Token manquant ou invalide'
-                ], Response::HTTP_UNAUTHORIZED);
+            $checkTokenResult = $this->checkAuthentication($request);
+        
+            if (isset($checkTokenResult['status']) && $checkTokenResult['status'] === false) {
+                
+                return $this->error(
+                    "Echec de la création d'atelier",
+                    [
+                        "message" => $checkTokenResult["message"]
+                    ],
+                    $operation,
+                    $checkTokenResult['code']
+                );
             }
 
-            $data = json_decode($request->getContent(), true);
+
+            // Récupérer les données JSON
+            $data = $this->getJsonData($request);
             
             $day = $this->repo->findOneBy(['id' => $data['workshopDayId']]);
 
-            // dd($day);
 
             if (!$day) {
 
