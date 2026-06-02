@@ -75,6 +75,18 @@ class Participant
 
         return $this;
     }
+    
+    public function getPhoneMomo(): ?string
+    {
+        return $this->phoneMobileMoney;
+    }
+
+    public function setPhoneMomo(?string $phoneMobileMoney): static
+    {
+        $this->phoneMobileMoney = $phoneMobileMoney;
+
+        return $this;
+    }
 
 
 

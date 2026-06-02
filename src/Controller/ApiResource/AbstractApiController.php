@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Service\Attribute\Required;
+use App\Entity\User;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -47,37 +48,72 @@ abstract class AbstractApiController extends AbstractController
     }
 
     public function checkAuthentication(
-        Request $request
+        Request $request,
+        bool $requireAuth = true
     ) : array {
         
         $token = $this->jwt->extractTokenFromRequest($request);
+        $userRepo = $this->em->getRepository(User::class);
 
-        if (!$token) {
-            
+        if (!$token && $requireAuth === false) {
+            // AUTHENTIFICATION OPTIONNELLE
             return [
-                "status" => false,
-                "code" => Response::HTTP_UNAUTHORIZED,
-                "message" => "Token manquant ou invalide"
+                "status" => true,
+                "code" => Response::HTTP_OK,
+                "user" => null,
+                "message" => "Utilisateur non trouvé"
             ];
+
+        } else {
+            
+            //  AUTHENTIFICATION OBLIGATOIRE
+
+            if (!$token) {
+                
+                return [
+                    "status" => false,
+                    "code" => Response::HTTP_UNAUTHORIZED,
+                    "message" => "Token manquant ou invalide"
+                ];
+            }
+    
+            $payload = $this->jwt->validateAndDecode($token);
+    
+            if (count($payload) === 1 || isset($payload['error'])) {
+                
+                return [
+                    "status" => false,
+                    "code" => Response::HTTP_FORBIDDEN,
+                    "message" => $payload['error']
+                ];
+            }
+    
+            // Check user existence
+            $user = $userRepo->findOneBy([
+                'username' => $payload['username'],
+                'enabled' => true,
+                'deleted' => false
+            ]);
+            if (!$user) {
+                return [
+                    "status" => false,
+                    "code" => Response::HTTP_FORBIDDEN,
+                    "message" => "Utilisateur non autorisé"
+                ];
+            }
+    
+            return [
+                "status" => true,
+                "code" => Response::HTTP_OK,
+                "user" => $user,
+                "shortcode" => $payload['shortcode']
+            ];
+
+
         }
 
-        $payload = $this->jwt->validateAndDecode($token);
-
-        if (count($payload) === 1 || isset($payload['error'])) {
-            
-            return [
-                "status" => false,
-                "code" => Response::HTTP_FORBIDDEN,
-                "message" => $payload['error']
-            ];
-        }
-
-        return [
-            "status" => true,
-            "code" => Response::HTTP_OK,
-            "payload" => $payload
-        ];
     }
+
 
     /**
      * Validate DTO / Entity

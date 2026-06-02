@@ -5,22 +5,16 @@ namespace App\Controller\ApiResource;
 use App\Controller\ApiResource\AbstractApiController;
 use App\Entity\Workshop;
 use App\Entity\WorkshopDay;
-use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
 use App\Repository\WorkshopRepository;
 use App\Service\Flexroll;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Transport\TransportInterface;
-use Symfony\Component\Messenger\Transport\Serialization\Serializer;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use App\Service\WorkshopListGeneration;
+use App\Dto\Api\WorkshopPayload;
 
 #[Route('/api/rest/v1/workshops')]
 final class WorkshopApiController extends AbstractApiController
@@ -30,55 +24,63 @@ final class WorkshopApiController extends AbstractApiController
     private EntityManagerInterface $entityManager;
 
     public function __construct(
-        SerializerInterface $serializer,
-        HttpClientInterface $httpClient,
-        TransportInterface $mailer,
-        LoggerInterface $logger,
-        LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator,
-        UserRepository $userRepo,
-        WorkshopRepository $repo_,
-        EntityManagerInterface $entityManager
+        WorkshopRepository $repo_
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
-        $this->entityManager = $entityManager;
     }
 
     
     #[Route('', name: 'api_create_workshop', methods: ['POST'])]
     public function create(
-        Request $request,
-        UserRepository  $userRepo
+        Request $request
     ): JsonResponse
     {
+        $operation = "Création d'atelier";
         try {
 
-            $authUser = $this->authenticateUser($request, $this->tokenService);
-
-            if (!$authUser) {
-                return new JsonResponse([
-                    'code' => '3',
-                    'message' => 'Authentification échouée: Token manquant ou invalide'
-                ], Response::HTTP_UNAUTHORIZED);
+            // Authentification
+            $checkTokenResult = $this->checkAuthentication($request);
+        
+            if (isset($checkTokenResult['status']) && $checkTokenResult['status'] === false) {
+                
+                return $this->error(
+                    "Echec de la création d'atelier",
+                    [
+                        "message" => $checkTokenResult["message"]
+                    ],
+                    $operation,
+                    $checkTokenResult['code']
+                );
             }
+
 
             // Récupérer les données JSON
-            $data = json_decode($request->getContent(), true);
+            $data = $this->getJsonData($request);
             
             // Validation simple
-            $errors = $this->validateWorkshopData($data);
-            if (!empty($errors)) {
-                return new JsonResponse([
-                    'code' => "1",
-                    'message' => 'Validation échouée',
-                    'errors' => $errors
-                ], Response::HTTP_BAD_REQUEST);
+            $requestObject = new  WorkshopPayload(
+                $data['name'],
+                $data['description'],
+                $data['dailyAmount'],
+                $data['currency'],
+                $data['dates']
+            );
+
+            $validationMessages = $this->validateObject($requestObject);
+
+            //dd($requestObject->getPayload());
+
+            if (count($validationMessages) > 0) {
+                
+                return $this->error(
+                    "Données invalides",
+                    $validationMessages,
+                    $operation,
+                    400
+                );
             }
             
-            // PSEUDO UTILISATEUR pour demo
-            $pseudoUser = $userRepo->findOneBy(['username' => 'rubuz.l']); 
 
             // Créer l'atelier
             $workshop = new Workshop();
@@ -87,8 +89,8 @@ final class WorkshopApiController extends AbstractApiController
             $workshop->setDailyAmount($data['dailyAmount'] ?? 0);
             $workshop->setCurrency($data['currency'] ?? null);
             $workshop->setIsEnded(false);
-            $workshop->setCreatedBy($authUser);
-            $workshop->setConfiguration($authUser->getConfiguration());
+            $workshop->setCreatedBy($checkTokenResult['user']);
+            $workshop->setConfiguration($checkTokenResult['user']->getConfiguration());
 
             // Création des jours d'atelier
             foreach ($data['dates'] as $dateString) {
@@ -98,24 +100,31 @@ final class WorkshopApiController extends AbstractApiController
                     $workshopDay->setDate($date);
                     $workshopDay->setWorkshop($workshop);
                     $workshopDay->setIsClosed(false);
-                    $workshopDay->setCreatedBy($authUser);
-                    $this->entityManager->persist($workshopDay);
+                    $workshopDay->setCreatedBy($checkTokenResult['user']);
+                    $this->em->persist($workshopDay);
                 }
             }
 
-            $this->entityManager->persist($workshop);
-            $this->entityManager->flush();
+            $this->em->persist($workshop);
+            $this->em->flush();
 
-            return new JsonResponse([
-                'code' => "0",
-                'message' => 'Atelier créé avec succès'
-            ], Response::HTTP_CREATED);
+            return $this->success(
+                [
+                    'id' => $workshop->getId(),
+                    'name' => $workshop->getName(),
+                    'description' => $workshop->getDescription(),
+                ],
+                $operation,
+                Response::HTTP_CREATED
+            );
 
         } catch (\Throwable $e) {
-            return new JsonResponse([
-                'code' => "1",
-                'message' => 'Erreur lors de la création de l\'atelier: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->error(
+                'Erreur lors de la création de l\'atelier',
+                ['message' => $e->getMessage()],
+                $operation,
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -123,31 +132,37 @@ final class WorkshopApiController extends AbstractApiController
     #[Route("/", name:"api_get_workshops", methods: ['GET'])]
     public function getWorkshops(Request $request): JsonResponse
     {
-        
+        $operation = "Récupération de la liste des ateliers";
+        $keyword = $request->query->get('keyword');
         try {
            
-            $token = $request->headers->get('x-api-token');
-            $keyword = $request->query->get('keyword');
+            $checkTokenResult = $this->checkAuthentication($request, false);
+            //dd($checkTokenResult);
+            if ($checkTokenResult['status'] === false) {
 
-            if ($token) {
-
-                $authUser = $this->authenticateUser($request, $this->tokenService);
-                if (!$authUser) {
-                    return new JsonResponse([
-                        'code' => '3',
-                        'message' => 'Authentification échouée: Token manquant ou invalide'
-                    ], Response::HTTP_UNAUTHORIZED);
-                } else {
-                    $workshops = $this->repo->findActiveByUser($authUser, $keyword);
-                }
+                return $this->error(
+                    "Echec de la récupération des ateliers",
+                    [
+                        "message" => $checkTokenResult["message"]
+                    ],
+                    $operation,
+                    $checkTokenResult['code']
+                );
             } else {
-                
-                $workshops = $this->repo->findAll([
-                    'enabled' => true,
-                    'isEnded' => false,
-                    'deleted' => false,
-                    'createdAt' => 'DESC'
-                ]);
+
+                switch ($checkTokenResult['user']) {
+                    case null:
+                        $workshops = $this->repo->findBy([
+                            'enabled' => true,
+                            'isEnded' => false,
+                            'deleted' => false
+                        ], ['createdAt' => 'DESC']);
+                        break;
+                    
+                    default:
+                        $workshops = $this->repo->findActiveByUser($checkTokenResult['user'], $keyword);
+                        break;
+                } 
             }
                
 
@@ -169,29 +184,36 @@ final class WorkshopApiController extends AbstractApiController
     #[Route("/latest", name:"api_get_latest_workshops", methods: ['GET'])]
     public function getLatestWorkshops(Request $request): JsonResponse
     {
-        
+        $operation = "Récupération de la liste des ateliers";
         try {
 
-            $token = $request->headers->get('x-api-token');
-            if ($token) {
+            $checkTokenResult = $this->checkAuthentication($request, false);
+            //dd($checkTokenResult);
+            if ($checkTokenResult['status'] === false) {
 
-                $authUser = $this->authenticateUser($request, $this->tokenService);
-                if (!$authUser) {
-                    return new JsonResponse([
-                        'code' => '3',
-                        'message' => 'Authentification échouée: Token manquant ou invalide'
-                    ], Response::HTTP_UNAUTHORIZED);
-                } else {
-                    $workshops = $this->repo->findLatestByUser($authUser);
-                }
+                return $this->error(
+                    "Echec de la récupération des ateliers",
+                    [
+                        "message" => $checkTokenResult["message"]
+                    ],
+                    $operation,
+                    $checkTokenResult['code']
+                );
             } else {
-                
-                $workshops = $this->repo->findAll([
-                    'enabled' => true,
-                    'isEnded' => false,
-                    'deleted' => false,
-                    'createdAt' => 'DESC'
-                ], 3);
+
+                switch ($checkTokenResult['user']) {
+                    case null:
+                        $workshops = $this->repo->findBy([
+                            'enabled' => true,
+                            'isEnded' => false,
+                            'deleted' => false
+                        ], ['createdAt' => 'DESC'], 3);
+                        break;
+                    
+                    default:
+                        $workshops = $this->repo->findLatestByUser($checkTokenResult['user']);
+                        break;
+                } 
             }
 
 
@@ -253,18 +275,26 @@ final class WorkshopApiController extends AbstractApiController
         Flexroll $flexrollService    
     ): JsonResponse
     {
+        $operation = "Clôture d'atelier";
         try {
 
-            $authUser = $this->authenticateUser($request, $this->tokenService);
-
-            if (!$authUser) {
-                return new JsonResponse([
-                    'code' => '3',
-                    'message' => 'Authentification échouée: Token manquant ou invalide'
-                ], Response::HTTP_UNAUTHORIZED);
+            $checkTokenResult = $this->checkAuthentication($request);
+        
+            if (isset($checkTokenResult['status']) && $checkTokenResult['status'] === false) {
+                
+                return $this->error(
+                    "Echec de la création d'atelier",
+                    [
+                        "message" => $checkTokenResult["message"]
+                    ],
+                    $operation,
+                    $checkTokenResult['code']
+                );
             }
 
-            $data = json_decode($request->getContent(), true);
+
+            // Récupérer les données JSON
+            $data = $this->getJsonData($request);
             
             $workshop = $this->repo->findOneBy(['id' => $data['workshopId']]);
 
@@ -276,7 +306,7 @@ final class WorkshopApiController extends AbstractApiController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            if ($workshop->getCreatedBy() !== $authUser) {
+            if ($workshop->getCreatedBy() !== $checkTokenResult['user']) {
                 return new JsonResponse([
                     'code' => '3',
                     'message' => 'Permission refusée'
@@ -308,20 +338,20 @@ final class WorkshopApiController extends AbstractApiController
                 foreach ($day->getParticipations() as $participation) {
                     $participation->setEnabled(false);
                     $participation->setUpdatedAt(new \DateTime());
-                    $this->entityManager->persist($participation);
+                    $this->em->persist($participation);
                 }
 
                 $day->setIsClosed(true);
                 $day->setUpdatedAt(new \DateTime());
-                $this->entityManager->persist($day);
+                $this->em->persist($day);
             }
 
             $workshop->setUpdatedAt(new \DateTime());
             $workshop->setIsEnded(true);
             $workshop->setEnabled(false);
 
-            $this->entityManager->persist($workshop);
-            $this->entityManager->flush();
+            $this->em->persist($workshop);
+            $this->em->flush();
 
 
             return new JsonResponse([
@@ -391,7 +421,7 @@ final class WorkshopApiController extends AbstractApiController
                     $participantId = $participation->getParticipant()->getId();
                     $participant = [
                         'id' => $participantId,
-                        'fullname' => $participation->getParticipant()->getDemographic()->getFullname(),
+                        'fullname' => $participation->getParticipant()->getFullname(),
                         'phone' => $participation->getParticipant()->getPhone()
                     ];
                     if (!in_array($participantId, array_column($workshopArray['participants'], 'id'))) {
@@ -525,52 +555,5 @@ final class WorkshopApiController extends AbstractApiController
         }
     }
 
-    private function validateWorkshopData(?array $data): array
-    {
-        $errors = [];
-
-        if (empty($data)) {
-            $errors[] = ['field' => 'payload', 'message' => 'Données JSON invalides ou manquantes'];
-            return $errors;
-        }
-
-        // Validation du nom
-        if (empty($data['name'])) {
-            $errors[] = ['field' => 'name', 'message' => 'Le nom est obligatoire'];
-        } elseif (strlen($data['name']) < 3) {
-            $errors[] = ['field' => 'name', 'message' => 'Le nom doit contenir au moins 3 caractères'];
-        } elseif (strlen($data['name']) > 100) {
-            $errors[] = ['field' => 'name', 'message' => 'Le nom ne peut pas dépasser 100 caractères'];
-        }
-
-        /* // Validation du montant journalier
-        if (!isset($data['dailyAmount'])) {
-            $errors[] = ['field' => 'dailyAmount', 'message' => 'Le montant journalier est obligatoire'];
-        } elseif (!is_numeric($data['dailyAmount']) || $data['dailyAmount'] <= 0) {
-            $errors[] = ['field' => 'dailyAmount', 'message' => 'Le montant journalier doit être un nombre positif'];
-        }
-
-        // Validation de la devise
-        if (empty($data['currency'])) {
-            $errors[] = ['field' => 'currency', 'message' => 'La devise est obligatoire'];
-        } elseif (strlen($data['currency']) < 3 || strlen($data['currency']) > 5) {
-            $errors[] = ['field' => 'currency', 'message' => 'La devise doit contenir entre 3 et 5 caractères'];
-        } */
-
-        // Validation des dates
-        if (!isset($data['dates'])) {
-            $errors[] = ['field' => 'dates', 'message' => 'Les dates sont obligatoires'];
-        } elseif (!is_array($data['dates'])) {
-            $errors[] = ['field' => 'dates', 'message' => 'Les dates doivent être un tableau'];
-        } elseif (empty($data['dates'])) {
-            $errors[] = ['field' => 'dates', 'message' => 'Au moins une date est requise'];
-        }
-
-        // Validation de la description (optionnelle)
-        if (isset($data['description']) && strlen($data['description']) > 500) {
-            $errors[] = ['field' => 'description', 'message' => 'La description ne peut pas dépasser 500 caractères'];
-        }
-
-        return $errors;
-    }
+    
 }
