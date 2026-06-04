@@ -381,7 +381,10 @@ final class WorkshopApiController extends AbstractApiController
         try {
             $workshop = $this->repo->findOneBy(['id' => intval($id)]);
             
-            $days = $workshopDayRepo->findActiveByWorkshop($id);
+            $days = $workshopDayRepo->findByWorkshop($workshop);
+
+            //dd($workshop, $days);
+
             $startDate = null;
             $endDate = null;
 

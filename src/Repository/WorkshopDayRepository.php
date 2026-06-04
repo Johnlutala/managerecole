@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\WorkshopDay;
+use App\Entity\Workshop;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,7 +20,7 @@ class WorkshopDayRepository extends ServiceEntityRepository
         /**
          * @return WorkshopDay[] Returns an array of WorkshopDay objects
          */
-        public function findActiveByWorkshop($value): array
+        public function findActiveByWorkshop(Workshop $value): array
         {
             return $this->createQueryBuilder('w')
                 ->andWhere('w.workshop = :workshop')
@@ -40,7 +41,7 @@ class WorkshopDayRepository extends ServiceEntityRepository
     /**
      * @return WorkshopDay[] Returns an array of WorkshopDay objects
      */
-    public function findByWorkshop($value): array
+    public function findByWorkshop(Workshop $value): array
     {
         return $this->createQueryBuilder('w')
             ->andWhere('w.workshop = :workshop')
