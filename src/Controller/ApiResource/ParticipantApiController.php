@@ -115,7 +115,7 @@ final class ParticipantApiController extends AbstractApiController
 
             }
 
-            $authUsername = $authResult['payload']['username'];
+            $authUsername = $authResult['user']->getUsername();
             
             // Récupération et décodage des données JSON
             $data = $this->getJsonData($request);
