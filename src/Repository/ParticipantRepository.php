@@ -31,7 +31,6 @@ class ParticipantRepository extends ServiceEntityRepository
                 ->andWhere('p.deleted = :deleted')
                 ->setParameter('deleted', false)
                 ->orderBy('p.id', 'ASC')
-                // ->setMaxResults(10)
                 ->getQuery()
                 ->getResult()
             ;
@@ -39,8 +38,7 @@ class ParticipantRepository extends ServiceEntityRepository
 
         
         return $this->createQueryBuilder('p')
-            ->leftJoin('p.demographic', 'd')
-            ->andWhere('d.firstname LIKE :keyword OR d.lastname LIKE :keyword')
+            ->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
             ->setParameter('keyword', '%' . $keyword . '%')
             ->andWhere('p.enabled = :enabled')
             ->setParameter('enabled', true)
@@ -82,8 +80,7 @@ class ParticipantRepository extends ServiceEntityRepository
 
         
         return $this->createQueryBuilder('p')
-            ->leftJoin('p.demographic', 'd')
-            ->andWhere('d.firstname LIKE :keyword OR d.lastname LIKE :keyword')
+            ->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
             ->setParameter('keyword', '%' . $keyword . '%')
             ->andWhere('p.enabled = :enabled')
             ->setParameter('enabled', true)

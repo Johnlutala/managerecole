@@ -48,9 +48,12 @@ final class ParticipantApiController extends AbstractApiController
             $keyword = $request->query->get('keyword');
             $workShopId = $request->query->get('workshopId');
 
+            
             $workshop = $this->workshopRepo->findOneBy(['id' => (int) $workShopId]);
+            //dd($workshop);
 
             $data = [];
+
             if (!$workshop) {
                 $participants = $this->repo->findActive($keyword);
 
@@ -62,19 +65,23 @@ final class ParticipantApiController extends AbstractApiController
                         'mobileMoney' => $participant->getPhoneMobileMoney()
                     ];
                 }
+            } else {
+
+                $participants = $this->repo->findActiveWithoutParticipation($keyword, $workshop);
+                
+    
+                foreach ($participants as $participant) {
+                    $data[] = [
+                            'id' => $participant->getId(),
+                            'firstname' => $participant->getFirstname(),
+                            'lastname' => $participant->getLastname(),
+                            'mobileMoney' => $participant->getPhoneMobileMoney()
+                        ];
+                }
             }
 
-            $participants = $this->repo->findActiveWithoutParticipation($keyword, $workshop);
 
-            foreach ($participants as $participant) {
-                $data[] = [
-                        'id' => $participant->getId(),
-                        'firstname' => $participant->getFirstname(),
-                        'lastname' => $participant->getLastname(),
-                        'mobileMoney' => $participant->getPhoneMobileMoney()
-                    ];
-            }
-
+            //dd($data);
 
             return $this->success(
                 $data,
@@ -264,7 +271,7 @@ final class ParticipantApiController extends AbstractApiController
 
             }
 
-            $authUsername = $authResult['payload']['username'];
+            $authUsername = $authResult['user']->getUsername();
             $user = $this->userRepo->findOneBy(['username' => $authUsername]);
 
             if (!$user) {
