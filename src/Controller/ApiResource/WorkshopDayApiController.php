@@ -3,41 +3,23 @@
 namespace App\Controller\ApiResource;
 
 use App\Controller\ApiResource\AbstractApiController;
-use App\Repository\UserRepository;
 use App\Repository\WorkshopDayRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/api/rest/v1/workshopdays')]
 final class WorkshopDayApiController extends AbstractApiController
 {
 
     private WorkshopDayRepository  $repo;
-    private EntityManagerInterface $entityManager;
 
     public function __construct(
-        SerializerInterface $serializer,
-        HttpClientInterface $httpClient,
-        TransportInterface $mailer,
-        LoggerInterface $logger,
-        LoggerInterface $handshakeLogger,
-        ValidatorInterface $validator,
-        UserRepository $userRepo,
         WorkshopDayRepository $repo_,
-        EntityManagerInterface $entityManager
     )
     {
-        parent::__construct($serializer, $httpClient, $mailer, $logger, $handshakeLogger, $validator, $userRepo);
         $this->repo = $repo_;
-        $this->entityManager = $entityManager;
     }
 
     
@@ -86,8 +68,8 @@ final class WorkshopDayApiController extends AbstractApiController
             $day->setEnabled(false);
             
 
-            $this->entityManager->persist($day);
-            $this->entityManager->flush();
+            $this->em->persist($day);
+            $this->em->flush();
 
             
 

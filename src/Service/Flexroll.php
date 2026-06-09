@@ -39,7 +39,7 @@ class Flexroll
             //dump ($datas);
             $response = $this->httpClient->request(
                 'POST',
-                $this::FLEXROLL_API_URL,
+                $this::DEV_URL,
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
