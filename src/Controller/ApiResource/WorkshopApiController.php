@@ -382,13 +382,17 @@ final class WorkshopApiController extends AbstractApiController
             $workshop = $this->repo->findOneBy(['id' => intval($id)]);
             
             $days = $workshopDayRepo->findByWorkshop($workshop);
+            $allDays = $workshopDayRepo->findBy([
+                'workshop' => $workshop,
+                'deleted' => false
+            ]);
 
-            //dd($workshop, $days);
+            //dd($workshop, $days, $allDays);
 
             $startDate = null;
             $endDate = null;
 
-            foreach ($days as $day) {
+            foreach ($allDays as $day) {
                 $date = $day->getDate();
                 if ($date) {
                     if ($startDate === null || $date < $startDate) {
@@ -414,7 +418,9 @@ final class WorkshopApiController extends AbstractApiController
 
             $workshopArray['startDate'] = $startDate ? $startDate->format('d/m/Y') : null;
             $workshopArray['endDate'] = $endDate ? $endDate->format('d/m/Y') : null;
-            $workshopArray['numberOfDays'] = count($days);
+            $workshopArray['availableDays'] = count($days);
+            $workshopArray['totalDays'] = count($allDays);
+
 
             $workshopArray['participants'] = [];
 

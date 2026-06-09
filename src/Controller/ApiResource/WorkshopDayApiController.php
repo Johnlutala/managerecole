@@ -37,7 +37,7 @@ final class WorkshopDayApiController extends AbstractApiController
             if (isset($checkTokenResult['status']) && $checkTokenResult['status'] === false) {
                 
                 return $this->error(
-                    "Echec de la création d'atelier",
+                    "Echec de cloture d'atelier",
                     [
                         "message" => $checkTokenResult["message"]
                     ],
