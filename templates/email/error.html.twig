@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Email</title>
+</head>
+<body>
+<div>
+    <h3>Erreur système - [FLEXCARD]</h3>
+    <div>
+        <p>
+            Date: {{ _date|date('d-m-Y H:i:s') }}
+        </p>
+        <p>
+            Raison : {{ message }}<br>
+        </p>
+        <hr>
+        <p style="font-family: monospace; font-size: 9pt">
+            {{ trace }}
+        </p>
+    </div>
+    <p>
+        Veuillez prendre connaissance des informations ci-haut.
+        Ceci est un email système à ne pas répondre.
+    </p>
+</div>
+</body>
+</html>
+
