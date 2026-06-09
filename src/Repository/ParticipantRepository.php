@@ -59,42 +59,34 @@ class ParticipantRepository extends ServiceEntityRepository
      */
     public function findActiveWithoutParticipation(?string $keyword, ?Workshop $workshop): array
     {
-
-        if (!$keyword) {
-            # code...
-            return $this->createQueryBuilder('p')
-                ->andWhere('p.enabled = :enabled')
-                ->setParameter('enabled', true)
-                ->andWhere('p.deleted = :deleted')
-                ->setParameter('deleted', false)
-                ->leftJoin('p.participations', 'part')
-                ->andWhere('part.workshop != :workshop OR part.workshop IS NULL')
-                ->setParameter('workshop', $workshop)
-                ->orderBy('p.id', 'ASC')
-                // ->setMaxResults(10)
-                ->getQuery()
-                ->getResult()
-            ;
-        }
-
-
+        // On récupère proprement l'EntityManager
+        $entityManager = $this->getEntityManager();
         
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
-            ->setParameter('keyword', '%' . $keyword . '%')
-            ->andWhere('p.enabled = :enabled')
+        // Requête principale sur l'entité courante (Participant)
+        $qb = $this->createQueryBuilder('p');
+
+        // 1. Sous-requête pour récupérer les IDs des participants liés à l'atelier
+        $subQb = $entityManager->createQueryBuilder()
+            ->select('IDENTITY(part.participant)')
+            ->from(\App\Entity\Participation::class, 'part')
+            ->where('part.workshop = :workshop');
+
+        // 2. Application des filtres globaux
+        $qb->andWhere('p.enabled = :enabled')
             ->setParameter('enabled', true)
             ->andWhere('p.deleted = :deleted')
             ->setParameter('deleted', false)
-            ->leftJoin('p.participations', 'part')
-            ->andWhere('part.workshop != :workshop OR part.workshop IS NULL')
+            ->andWhere($qb->expr()->notIn('p.id', $subQb->getDQL())) // Exclusion
             ->setParameter('workshop', $workshop)
-            ->orderBy('p.id', 'ASC')
-            // ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+            ->orderBy('p.id', 'ASC');
 
+        // 3. Filtre de recherche par mot-clé (optionnel)
+        if ($keyword) {
+            $qb->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
+            ->setParameter('keyword', '%' . $keyword . '%');
+        }
+
+        return $qb->getQuery()->getResult();
     }
     
     
