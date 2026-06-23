@@ -84,6 +84,10 @@ class ParticipantCreationPayload
     private array $biometrics;
 
 
+    private ?string $organization;
+    private ?string $grade;
+
+
     public function __construct(
         string $firstname_,
         string $lastname_,
@@ -91,7 +95,9 @@ class ParticipantCreationPayload
         string $middlename,
         string $phone_,
         string $phoneEMoney_,
-        array $biometrics_
+        array $biometrics_,
+        string $organization_,
+        string $grade_,
     ) {
         $this->firstname = $firstname_;
         $this->lastname = $lastname_;
@@ -100,7 +106,8 @@ class ParticipantCreationPayload
         $this->phone = $phone_;
         $this->phoneEMoney = $phoneEMoney_;
         $this->biometrics = $biometrics_;
-    
+        $this->organization = $organization_;
+        $this->grade = $grade_;
     }
 
 }

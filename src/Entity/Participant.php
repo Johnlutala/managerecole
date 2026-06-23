@@ -48,6 +48,12 @@ class Participant
     #[ORM\OneToOne(inversedBy: 'participant', cascade: ['persist', 'remove'])]
     private ?Biometric $biometric = null;
 
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $organization = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $grade = null;
+
 
     public function __construct()
     {
@@ -200,6 +206,30 @@ class Participant
     public function setBiometric(?Biometric $biometric): static
     {
         $this->biometric = $biometric;
+
+        return $this;
+    }
+
+    public function getOrganization(): ?string
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(?string $organization): static
+    {
+        $this->organization = $organization;
+
+        return $this;
+    }
+
+    public function getGrade(): ?string
+    {
+        return $this->grade;
+    }
+
+    public function setGrade(?string $grade): static
+    {
+        $this->grade = $grade;
 
         return $this;
     }

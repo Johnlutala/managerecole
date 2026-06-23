@@ -62,7 +62,9 @@ final class ParticipantApiController extends AbstractApiController
                         'id' => $participant->getId(),
                         'firstname' => $participant->getFirstname(),
                         'lastname' => $participant->getLastname(),
-                        'mobileMoney' => $participant->getPhoneMobileMoney()
+                        'mobileMoney' => $participant->getPhoneMobileMoney(),
+                        'organization' => $participant->getOrganization(),
+                        'grade' => $participant->getGrade()
                     ];
                 }
             } else {
@@ -75,7 +77,9 @@ final class ParticipantApiController extends AbstractApiController
                             'id' => $participant->getId(),
                             'firstname' => $participant->getFirstname(),
                             'lastname' => $participant->getLastname(),
-                            'mobileMoney' => $participant->getPhoneMobileMoney()
+                            'mobileMoney' => $participant->getPhoneMobileMoney(),
+                            'organization' => $participant->getOrganization(),
+                            'grade' => $participant->getGrade()
                         ];
                 }
             }
