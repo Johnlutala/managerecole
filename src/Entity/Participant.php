@@ -138,6 +138,18 @@ class Participant
         return $fullname !== '' ? $fullname : null;
     }
 
+    public function getNameAndFunction(): ?string
+    {
+        $value = '';
+        if (!$this->getOrganization()) {
+            $value = $this->getFullname();
+        } else {
+            $value = $this->getFullname() . '/' . $this->getOrganization();
+        }
+
+        return $value;
+    }
+
     public function getPhoneMobileMoney(): ?string
     {
         return $this->phoneMobileMoney;

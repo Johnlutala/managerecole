@@ -140,7 +140,9 @@ final class ParticipantApiController extends AbstractApiController
                 $data['middlename'] ?? '',
                 $data['phone'] ?? '',
                 $data['phoneEMoney'] ?? '',
-                $data['biometrics'] ?? ''
+                $data['biometrics'] ?? '',
+                $data['organization'] ?? null,
+                $data['grade'] ?? null,
             ));
 
             if (count($validationMessages) > 0) {
@@ -560,8 +562,10 @@ final class ParticipantApiController extends AbstractApiController
     
             return new JsonResponse([
                 'id' => $participant->getId(),
-                'phoneMobileMoney' => $participant->getPhoneMobileMoney(),
                 'fullname' => $participant->getFullname(),
+                'organization' => $participant->getOrganization(),
+                'grade' => $participant->getGrade(),
+                'phoneMobileMoney' => $participant->getPhoneMobileMoney(),
                 'biometric' => $participant->getBiometric() ? $participant->getBiometric()->getFingers() : null
             ], Response::HTTP_OK);
 
