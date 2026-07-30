@@ -1,0 +1,96 @@
+/* Fix pour les formulaires - écrase les styles problématiques de core.css */
+
+/* FIX CRITIQUE: Neutralise le flex-direction: column de .card pour le contenu des formulaires */
+/* .card a flex-direction: column (ligne 3793 de core.css) */
+/* .card-body a flex: 1 1 auto qui propage le comportement flex */
+
+/* Force le card-body à ne pas propager le flex aux enfants */
+.card-body {
+    display: block !important;
+    flex: 1 1 auto; /* Garde le flex pour le card-body lui-même */
+}
+
+/* Empêche tous les éléments du formulaire d'hériter du flex */
+.card-body form,
+.card-body form > *,
+.card-body .mb-4,
+.card-body .mb-3,
+.card-body .row {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Force tous les éléments à s'afficher horizontalement */
+.card *,
+.card-body *,
+form *,
+label,
+.form-label,
+input,
+select {
+    writing-mode: horizontal-tb !important;
+    -webkit-writing-mode: horizontal-tb !important;
+    -ms-writing-mode: lr-tb !important;
+    text-orientation: mixed !important;
+}
+
+/* Désactive le flex sur les éléments de formulaire */
+.card-body label,
+.card-body .form-label,
+.card-body input,
+.card-body select,
+.card-body .form-control,
+.card-body .form-select {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Labels doivent être en block avec contenu inline */
+.form-label {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+    white-space: normal !important;
+    word-wrap: normal !important;
+    letter-spacing: normal !important;
+}
+
+.form-label span,
+.form-label i,
+label span,
+label i {
+    display: inline !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Inputs et selects en block */
+.form-control,
+.form-select,
+input[type="email"],
+input[type="text"],
+select {
+    display: block !important;
+    width: 100% !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Fix pour les divs de formulaire */
+.mb-4,
+.mb-3 {
+    display: block !important;
+    width: 100% !important;
+    clear: both !important;
+}
+
+/* Fix pour le texte d'aide */
+.form-text {
+    display: block !important;
+    margin-top: 0.25rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* Fix pour les boutons */
+.btn {
+    display: inline-block !important;
+    writing-mode: horizontal-tb !important;
+}
