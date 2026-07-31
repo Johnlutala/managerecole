@@ -1,0 +1,7 @@
+.btn-remove {
+    transition: background 0.2s;
+}
+.btn-remove:hover {
+    background: #ffeaea !important;
+    border-color: #ffb3b3 !important;
+}

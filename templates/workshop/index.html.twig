@@ -1,20 +1,374 @@
-{% extends 'base.html.twig' %}
+        {% extends 'base.html.twig' %}
 
-{% block title %}Hello WorkshopController!{% endblock %}
+        {% block title %}Workshops
+        {% endblock %}
 
-{% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+        {% block body %}
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+            <body>
+                <!-- Begin page -->
+                <div class="wrapper">
+                    <div class="content-page">
+                        <div class="container-fluid">
+                            <div class="page-title-head d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h4 class="fs-xl fw-bold m-0">Workshop</h4>
+                                </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/src/Controller/WorkshopController.php</code></li>
-        <li>Your template at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/templates/workshop/index.html.twig</code></li>
-    </ul>
-</div>
+                                <div class="text-end">
+                                    <ol class="breadcrumb m-0 py-0">
+                                        <li class="breadcrumb-item">
+                                            <a href="javascript: void(0);">ENABEL</a>
+                                        </li>
+                                        <li class="breadcrumb-item active">Workshop</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            {# Menu Index, Filtrer #}
+                            <div class="row">
+                                <div class="col-12">
+                                    <div data-table data-table-rows-per-page="8" class="card">
+                                        <div class="card-header border-light justify-content-between">
+                                            <div class="d-flex gap-2">
+                                                <div class="app-search">
+                                                    <input data-table-search type="text" class="form-control" placeholder="Search clients...">
+                                                    <i data-lucide="search" class="app-search-icon text-muted"></i>
+                                                </div>
+
+                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addWorkshopModal">
+                                                    <i class="ti ti-plus me-1"></i>
+                                                    Nouveau Atelier
+                                                </button>
+                                                <button class="btn btn-danger d-none" id="deleteSelectedBtn">Delete</button>
+                                            </div>
+
+                                            {# Filtrage #}
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i data-lucide="filter" class="app-search-icon text-muted"></i>
+
+                                                <!-- Statut Filter -->
+                                                <div class="app-search">
+                                                    <select class="form-select" onchange="window.location.href='{{ path('app_workshop_index') }}?status=' + this.value">
+
+                                                        <option value="" {{ status is empty ? 'selected' : '' }}>
+                                                            Tous les statuts
+                                                        </option>
+
+                                                        <option value="0" {{ status == '0' ? 'selected' : '' }}>
+                                                            En cours
+                                                        </option>
+
+                                                        <option value="1" {{ status == '1' ? 'selected' : '' }}>
+                                                            Terminé
+                                                        </option>
+
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {# Table #}
+                                        <div class="table-responsive">
+                                            <table class="table table-custom table-centered table-select table-hover w-100 mb-0">
+                                                <thead class="bg-light bg-opacity-25 thead-sm">
+                                                    <tr class="text-uppercase fs-xxs">
+                                                        <th scope="col" style="width: 1%;">
+                                                            <input data-table-select-all class="form-check-input form-check-input-light fs-14 mt-0" type="checkbox" id="checkAll">
+                                                        </th>
+                                                        <th style="width:1%;"></th>
+                                                        <th data-table-sort="name">Atélier</th>
+                                                        <th data-table-sort>Description</th>
+                                                        <th data-table-sort data-column="country">Montant</th>
+                                                        <th data-table-sort>Participants</th>
+                                                        <th data-table-sort>Durée/Jour</th>
+                                                        <th data-table-sort>Statut</th>
+                                                        <th class="text-center">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for workshop in workshops %}
+                                                        <tr>
+
+                                                            <td class="ps-3">
+                                                                <input class="form-check-input form-check-input-light fs-14 product-item-check workshop-check mt-0" type="checkbox" value="{{ workshop.id }}">
+                                                            </td>
+                                                            <td></td>
+
+                                                            {# Atelier #}
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <div class="avatar-md me-3">
+                                                                        <div class="avatar-title bg-primary-subtle text-primary rounded">
+                                                                            <i data-lucide="graduation-cap" class="fs-2"></i>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div>
+                                                                        <h5 class="mb-0">
+                                                                            <a href="{{ path('app_workshop_show', {'id': workshop.id}) }}" class="link-reset">
+                                                                                {{ workshop.name }}
+                                                                            </a>
+                                                                        </h5>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            {# Description #}
+                                                            <td>
+                                                                {{ workshop.description|length > 60? workshop.description|slice(0,60) ~ '...': workshop.description }}
+                                                            </td>
+
+                                                            <td>
+                                                                <h5 class="fs-base mb-0 fw-medium">
+                                                                    {{ workshop.dailyAmount|number_format(2, '.', ' ') }}
+                                                                </h5>
+
+                                                                <small class="text-muted">
+                                                                    {{ workshop.currency }}
+                                                                </small>
+                                                            </td>
+
+                                                            {# Participants #}
+                                                            <td>
+                                                                {{ workshop.participations|length }}
+                                                            </td>
+
+                                                            {# Jours #}
+                                                            <td>
+                                                                {{ workshop.workshopDays|length }}
+                                                            </td>
+
+                                                            {# Statut #}
+                                                            <td>
+                                                                {% if workshop.isEnded %}
+                                                                    <span class="badge badge-soft-danger">
+                                                                        Terminé
+                                                                    </span>
+                                                                {% else %}
+                                                                    <span class="badge badge-soft-success">
+                                                                        En cours
+                                                                    </span>
+                                                                {% endif %}
+                                                            </td>
+                                                            {# Actions #}
+                                                            <td>
+                                                                <div class="d-flex justify-content-center gap-1">
+
+                                                                    <a href="{{ path('app_workshop_show', {'id': workshop.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                                        <i class="ti ti-eye fs-lg"></i>
+                                                                    </a>
+
+                                                                    <a href="{{ path('app_workshop_edit', {'id': workshop.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                                        <i class="ti ti-edit fs-lg"></i>
+                                                                    </a>
+
+                                                                    {{ include('workshop/_delete_form.html.twig') }}
+
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+
+                                                    {% else %}
+
+                                                        <tr>
+                                                            <td colspan="11" class="text-center py-5 text-muted">
+                                                                Aucun atelier trouvé.
+                                                            </td>
+                                                        </tr>
+
+                                                    {% endfor %}
+
+                                                </tbody>
+
+                                            </table>
+                                        </div>
+
+                                        <div class="card-footer border-0">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div data-table-pagination-info="clients"></div>
+
+                                                <div data-table-pagination></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end row -->
+
+                            <!-- Modal Ajout Atelier -->
+                            <div class="modal fade" id="addWorkshopModal" tabindex="-1" aria-labelledby="addWorkshopModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addWorkshopModalLabel">
+                                                Nouvel atelier
+                                            </h5>
+
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+
+                                        {{ form_start(form) }}
+
+                                        <div class="modal-body">
+
+                                            <div class="row g-3">
+
+                                                <div class="col-md-6">
+                                                    {{ form_row(form.name) }}
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    {{ form_row(form.configuration) }}
+                                                </div>
+
+                                                <div class="row mt-2">
+                                                    <div class="col-md-4">
+                                                        {{ form_row(form.dailyAmount) }}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        {{ form_row(form.currency) }}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        {{ form_row(form.isEnded) }}
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-12">
+                                                    {{ form_row(form.description) }}
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                                                Annuler
+                                            </button>
+
+                                            <button type="submit" class="btn btn-primary">
+
+                                                <i class="ti ti-device-floppy me-1"></i>
+
+                                                Enregistrer
+
+                                            </button>
+
+                                        </div>
+
+                                        {{ form_end(form) }}
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- container -->
+                    </div>
+
+
+                </div>
+            
+                <form id="deleteSelectedForm" method="post" action="{{ path('app_workshop_delete_selected') }}">
+
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_selected') }}">
+
+                    <input type="hidden" id="selectedIds" name="ids">
+
+                </form>
+
+                <script src="assets/js/pages/custom-table.js"></script>
+
+            </body>
+
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+        const deleteBtn = document.getElementById("deleteSelectedBtn");
+        const checkAll = document.getElementById("checkAll");
+
+        function updateButton() {
+
+            const checked = document.querySelectorAll(".workshop-check:checked");
+
+            if (checked.length > 0) {
+                deleteBtn.classList.remove("d-none");
+            } else {
+                deleteBtn.classList.add("d-none");
+            }
+
+        }
+
+        checkAll.addEventListener("change", function () {
+
+            document.querySelectorAll(".workshop-check").forEach(function (checkbox) {
+
+                checkbox.checked = checkAll.checked;
+
+            });
+
+            updateButton();
+
+        });
+
+        document.querySelectorAll(".workshop-check").forEach(function (checkbox) {
+
+            checkbox.addEventListener("change", updateButton);
+
+        });
+
+        deleteBtn.addEventListener("click", function (e) {
+
+        e.preventDefault();
+
+        const ids = [];
+
+        document.querySelectorAll(".workshop-check:checked").forEach(function (checkbox) {
+
+            ids.push(checkbox.value);
+
+        });
+
+        if (ids.length === 0) {
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Aucune sélection',
+            text: 'Veuillez sélectionner au moins un atelier.',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#f59e0b'
+        });
+
+        return;
+        }
+
+        Swal.fire({
+            title: 'Confirmer la suppression',
+            text: "Les ateliers sélectionnés seront supprimés.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                document.getElementById("selectedIds").value = ids.join(",");
+                document.getElementById("deleteSelectedForm").submit();
+            }
+
+        });
+
+        });
+
+      });
+
+    </script>
 {% endblock %}

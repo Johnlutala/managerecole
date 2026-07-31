@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Workshop
+{% endblock %}
+
+{% block body %}
+
+
+	<!-- Begin page -->
+	<div class="wrapper">
+
+
+		<div class="content-page">
+
+			<div class="container-fluid">
+
+				<div class="page-title-head d-flex align-items-center">
+					<div class="flex-grow-1">
+						<h4 class="fs-xl fw-bold m-0">Détail de l'Atélier</h4>
+					</div>
+
+					<div class="text-end">
+						<ol class="breadcrumb m-0 py-0">
+							<li class="breadcrumb-item">
+								<a href="javascript: void(0);">ENABEL</a>
+							</li>
+
+							<li class="breadcrumb-item">
+								<a href="javascript: void(0);">Workshop</a>
+							</li>
+
+							<li class="breadcrumb-item active">Détail</li>
+						</ol>
+					</div>
+				</div>
+
+
+				<div class="container-fluid">
+
+					<div
+						class="row">
+
+						<!-- Informations rapides -->
+						<div class="col-xl-3">
+
+							<div class="card">
+
+								<div class="card-header">
+									<h4 class="card-title">
+										Atelier N° :
+										{{ workshop.id }}
+									</h4>
+								</div>
+
+								<div class="card-body text-center">
+									<h4>{{ workshop.name }}</h4>
+									<p class="text-muted">
+										Code :
+										<strong>{{ workshop.code }}</strong>
+									</p>
+									{% if workshop.isEnded %}
+										<span class="badge bg-danger">
+											Terminé
+										</span>
+									{% else %}
+										<span class="badge bg-success">
+											En cours
+										</span>
+									{% endif %}
+
+									<hr>
+
+									<div class="d-grid gap-2">
+										<a href="{{ path('app_workshop_edit', {'id': workshop.id}) }}" class="btn btn-warning">
+											<i class="ti ti-edit"></i>
+											Modifier
+										</a>
+
+										<form method="post" action="{{ path('app_workshop_delete', {'id': workshop.id}) }}" onsubmit="return confirm('Voulez-vous supprimer cet atelier ?');">
+
+											<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ workshop.id) }}">
+
+											<button type="submit" class="btn btn-danger w-100">
+												<i class="ti ti-trash"></i>
+												Supprimer
+											</button>
+
+										</form>
+
+										<a href="{{ path('app_workshop_index') }}" class="btn btn-secondary">
+											<i class="ti ti-arrow-left"></i>
+											Retour
+										</a>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+
+						<!-- Détails -->
+						<div class="col-xl-9">
+
+							<div class="card">
+
+								<div class="card-header">
+
+									<h4 class="card-title">
+										Détails de l'atelier
+									</h4>
+
+								</div>
+
+								<div class="card-body">
+
+									<div class="table-responsive">
+
+										<table class="table table-bordered align-middle">
+
+											<tbody>
+
+												<tr>
+													<th>Description</th>
+													<td>{{ workshop.description }}</td>
+												</tr>
+
+												<tr>
+													<th>Montant à Payer
+													</th>
+													<td>{{ workshop.dailyAmount|number_format(2,'.',' ') }}</td>
+												</tr>
+
+												<tr>
+													<th>Devise</th>
+													<td>
+														<span class="badge bg-info">
+															{{ workshop.currency }}
+														</span>
+													</td>
+												</tr>
+
+												<tr>
+													<th>Code</th>
+													<td>{{ workshop.code }}</td>
+												</tr>
+
+												<tr>
+													<th>Status</th>
+													<td>
+														{% if workshop.enabled %}
+															<span class="badge bg-success">Encours</span>
+														{% else %}
+															<span class="badge bg-danger">Terminé</span>
+														{% endif %}
+													</td>
+												</tr>
+
+												<tr>
+													<th>Date de création</th>
+													<td>
+														{{ workshop.createdAt ? workshop.createdAt|date('d/m/Y H:i') : 'Non renseignée' }}
+													</td>
+												</tr>
+
+												<tr>
+													<th>Dernière modification</th>
+													<td>
+														{{ workshop.updatedAt ? workshop.updatedAt|date('d/m/Y H:i') : 'Non renseignée' }}
+													</td>
+												</tr>
+
+											</tbody>
+
+										</table>
+
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+			<!-- container -->
+
+		</div>
+
+	</div>
+
+{% endblock %}

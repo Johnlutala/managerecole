@@ -1,0 +1,34 @@
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<form id="deleteForm"  method="post" action="{{ path('app_workshop_delete', {'id': workshop.id}) }}" >
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ workshop.id) }}">
+    <button class="btn"  id="btnDelete">Delete</button>
+</form>
+
+<script>
+
+ document.getElementById('btnDelete').addEventListener('click', function (e) {
+
+    e.preventDefault(); // Empêche l'envoi immédiat du formulaire
+
+    Swal.fire({
+        title: 'Supprimer cet atelier ?',
+        text: 'Cette action est irréversible.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        reverseButtons: true
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            document.getElementById('deleteForm').submit();
+        }
+
+    });
+
+});
+</script>

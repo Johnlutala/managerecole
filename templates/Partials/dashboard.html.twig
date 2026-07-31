@@ -1,0 +1,826 @@
+<div
+	class="wrapper">
+	<!-- Begin page --
+	            
+	  <!-- Sidenav Menu Start -->
+	<div class="sidenav-menu">
+		<!-- Brand Logo -->
+		<a href="index-2.html" class="logo">
+			<span class="logo logo-light">
+				<span class="logo-lg"><img src="assets/images/logo0.png" ></span>
+				{# <span class="logo-sm"><img src="assets/images/logo-sm.png" alt="small logo"></span> #}
+			</span>
+
+			<span class="logo logo-dark">
+				{# <span class="logo-lg"><img src="assets/images/logo-black.png" alt="dark logo"></span> #}
+				{# <span class="logo-sm"><img src="assets/images/logo-sm.png" alt="small logo"></span> #}
+			</span>
+		</a>
+
+		<!-- Sidebar Hover Menu Toggle Button -->
+		<button class="button-on-hover">
+			<i class="ti ti-menu-4 fs-22 align-middle"></i>
+		</button>
+
+		<!-- Full Sidebar Menu Close Button -->
+		<button class="button-close-offcanvas">
+			<i class="ti ti-x align-middle"></i>
+		</button>
+
+		<div
+			class="scrollbar" data-simplebar>
+			<!-- Navbar User -->
+			<div class="sidenav-user">
+
+				<div class="d-flex justify-content-between align-items-center">
+					<div>
+						<a href="users-profile.html" class="link-reset">
+							<img src="assets/images/users/user-3.jpg" alt="user-image" class="rounded-circle mb-2 avatar-md">
+							<span class="sidenav-user-name fw-bold">Geneva K.</span>
+							<span class="fs-12 fw-semibold" data-lang="user-role">Art Director</span>
+						</a>
+					</div>
+					<div>
+						<a class="dropdown-toggle drop-arrow-none link-reset sidenav-user-set-icon" data-bs-toggle="dropdown" data-bs-offset="0,12" href="#!" aria-haspopup="false" aria-expanded="false">
+							<i class="ti ti-settings fs-24 align-middle ms-1"></i>
+						</a>
+
+						<div
+							class="dropdown-menu">
+							<!-- Header -->
+							<div class="dropdown-header noti-title">
+								<h6 class="text-overflow m-0">Welcome back!</h6>
+							</div>
+
+							<!-- My Profile -->
+							<a href="profile.html" class="dropdown-item">
+								<i class="ti ti-user-circle me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Profile</span>
+							</a>
+
+							<!-- Notifications -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-bell-ringing me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Notifications</span>
+							</a>
+
+							<!-- Settings -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-settings-2 me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Account Settings</span>
+							</a>
+
+							<!-- Support -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-headset me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Support Center</span>
+							</a>
+
+							<!-- Divider -->
+							<div class="dropdown-divider"></div>
+
+							<!-- Lock -->
+							<a href="auth-lock-screen.html" class="dropdown-item">
+								<i class="ti ti-lock me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Lock Screen</span>
+							</a>
+
+							<!-- Logout -->
+							<a href="javascript:void(0);" class="dropdown-item fw-semibold">
+								<i class="ti ti-logout-2 me-2 fs-17 align-middle"></i>
+								<span class="align-middle">Log Out</span>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!--- Sidenav Menu -->
+			<ul class="side-nav">
+				<li class="side-nav-title mt-2" data-lang="menu-title">Navigation</li>
+
+				<li class="side-nav-item">
+					<a href="{{ path('app_default') }}" class="side-nav-link">
+						<span class="menu-icon">
+							<i data-lucide="circle-gauge"></i>
+						</span>
+						<span class="menu-text" data-lang="Dashboard">
+							Dashboards
+						</span>
+					</a>
+				</li>
+
+				{# Menu de Siedbar  #}
+				<li class="side-nav-title" data-lang="apps-title">Apps</li>
+
+				<li class="side-nav-item">
+					<a href="{{ path('app_workshop_index') }}" class="side-nav-link">
+						<span class="menu-icon">
+							<i data-lucide="graduation-cap"></i>
+						</span>
+						<span class="menu-text" data-lang="etelier">
+							Atélier
+						</span>
+					</a>
+				</li>
+				<li class="side-nav-item">
+					<a href="#" class="side-nav-link">
+						<span class="menu-icon">
+							<i data-lucide="users"></i>
+						</span>
+						<span class="menu-text" data-lang="participant">
+							Participant
+						</span>
+					</a>
+				</li>
+
+				<li class="side-nav-item">
+					<a data-bs-toggle="collapse" href="#sidebarUsers" aria-expanded="false" aria-controls="sidebarUsers" class="side-nav-link">
+						<span class="menu-icon">
+							<i data-lucide="user"></i>
+						</span>
+						<span class="menu-text" data-lang="users">
+							Users
+						</span>
+						<span class="menu-arrow"></span>
+					</a>
+					<div class="collapse" id="sidebarUsers">
+						<ul class="sub-menu">
+							<li class="side-nav-item">
+								<a href="users-contacts.html" class="side-nav-link">
+									<span class="menu-text" data-lang="contacts">Contacts</span>
+								</a>
+							</li>
+							<li class="side-nav-item">
+								<a href="users-profile.html" class="side-nav-link">
+									<span class="menu-text" data-lang="profile">Profile</span>
+								</a>
+							</li>
+							<li class="side-nav-item">
+								<a href="users-roles.html" class="side-nav-link">
+									<span class="menu-text" data-lang="roles">Roles</span>
+								</a>
+							</li>
+							<li class="side-nav-item">
+								<a href="users-role-details.html" class="side-nav-link">
+									<span class="menu-text" data-lang="role-details">Role Details</span>
+								</a>
+							</li>
+							<li class="side-nav-item">
+								<a href="users-permissions.html" class="side-nav-link">
+									<span class="menu-text" data-lang="permissions">Permissions</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
+
+			</ul>
+		</div>
+	</div>
+	<!-- Sidenav Menu End -->
+
+	<!-- Topbar Start -->
+	<header class="app-topbar">
+		<div class="container-fluid topbar-menu">
+			<div class="d-flex align-items-center gap-2">
+				<!-- Topbar Brand Logo -->
+				<div class="logo-topbar">
+					<!-- Logo light -->
+					{# <a href="index-2.html" class="logo-light">
+						<span class="logo-lg">
+							<img src="assets/images/logo.png" alt="logo">
+						</span>
+						<span class="logo-sm">
+							<img src="assets/images/logo-sm.png" alt="small logo">
+						</span>
+					</a> #}
+
+					<!-- Logo Dark -->
+					{# <a href="index-2.html" class="logo-dark">
+						<span class="logo-lg">
+							<img src="assets/images/logo-black.png" alt="dark logo">
+						</span>
+						<span class="logo-sm">
+							<img src="assets/images/logo-sm.png" alt="small logo">
+						</span>
+					</a> #}
+				</div>
+
+				<!-- Sidebar Menu Toggle Button -->
+				<button class="sidenav-toggle-button btn btn-default btn-icon">
+					<i class="ti ti-menu-4 fs-22"></i>
+				</button>
+
+				<!-- Horizontal Menu Toggle Button -->
+				<button class="topnav-toggle-button px-2" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+					<i class="ti ti-menu-4 fs-22"></i>
+				</button>
+
+				<!-- Mega Menu Dropdown Navbar -->
+				<div class="topbar-item d-none d-md-flex">
+					<div class="dropdown">
+						<button class="topbar-link btn fw-medium btn-link dropdown-toggle drop-arrow-none" data-lang="mega-menu" data-bs-toggle="dropdown" data-bs-offset="0,17" type="button" aria-haspopup="false" aria-expanded="false">
+							Mega Menu
+							<i class="ti ti-chevron-down ms-1 fs-16"></i>
+						</button>
+						<div class="dropdown-menu dropdown-menu-xxl p-0">
+							<div class="h-100" style="max-height: 380px;" data-simplebar>
+								<div
+									class="row g-0">
+
+									<!-- Dashboard & Analytics -->
+									<div class="col-md-4">
+										<div class="p-2">
+											<h5 class="mb-1 fw-semibold fs-sm dropdown-header">Dashboard & Analytics</h5>
+											<ul class="list-unstyled megamenu-list">
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-chart-line align-middle me-2 fs-16"></i>
+														Sales Dashboard</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-bulb align-middle me-2 fs-16"></i>
+														Marketing Dashboard</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-currency-dollar align-middle me-2 fs-16"></i>
+														Finance Overview</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-users align-middle me-2 fs-16"></i>
+														User Analytics</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-activity align-middle me-2 fs-16"></i>
+														Traffic Insights</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-gauge align-middle me-2 fs-16"></i>
+														Performance Metrics</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-zoom-check align-middle me-2 fs-16"></i>
+														Conversion Tracking</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<!-- Project Management -->
+									<div class="col-md-4">
+										<div class="p-2">
+											<h5 class="mb-1 fw-semibold fs-sm dropdown-header">Project Management</h5>
+											<ul class="list-unstyled megamenu-list">
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-layout-kanban align-middle me-2 fs-16"></i>
+														Kanban Workflow</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-calendar-stats align-middle me-2 fs-16"></i>
+														Project Timeline</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-list-check align-middle me-2 fs-16"></i>
+														Task Management</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-users-group align-middle me-2 fs-16"></i>
+														Team Members</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-clipboard-list align-middle me-2 fs-16"></i>
+														Assignments</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-chart-pie align-middle me-2 fs-16"></i>
+														Resource Allocation</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-file-invoice align-middle me-2 fs-16"></i>
+														Project Reports</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<!-- User Management -->
+									<div class="col-md-4">
+										<div class="p-2">
+											<h5 class="mb-1 fw-semibold fs-sm dropdown-header">User Management</h5>
+											<ul class="list-unstyled megamenu-list">
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-user-circle align-middle me-2 fs-16"></i>
+														User Profiles</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-lock me-2 align-middle fs-16"></i>
+														Access Control</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-shield-lock align-middle me-2 fs-16"></i>
+														Role Permissions</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-notes align-middle me-2 fs-16"></i>
+														Activity Logs</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-settings align-middle me-2 fs-16"></i>
+														Security Settings</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-users align-middle me-2 fs-16"></i>
+														User Groups</a>
+												</li>
+												<li>
+													<a href="javascript:void(0);" class="dropdown-item">
+														<i class="ti ti-key align-middle me-2 fs-16"></i>
+														Authentication
+													</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<!-- .d-flex-->
+
+
+			{# Navbar détail #}
+			<div
+				class="d-flex align-items-center gap-2">
+				<!-- Search -->
+				<div class="app-search d-none d-xl-flex me-2">
+					<input type="search" class="form-control topbar-search rounded-pill" name="search" placeholder="Quick Search...">
+					<i data-lucide="search" class="app-search-icon text-muted"></i>
+				</div>
+				<!-- Theme Mode Dropdown -->
+				<div class="topbar-item">
+					<div class="dropdown">
+						<button class="topbar-link" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
+							<i data-lucide="sun" class="fs-xxl"></i>
+						</button>
+						<ul class="dropdown-menu dropdown-menu-end thememode-dropdown">
+
+							<li>
+								<label class="dropdown-item">
+									<i data-lucide="sun" class="align-middle me-1 fs-16"></i>
+									<span class="align-middle">Light</span>
+									<input class="form-check-input" type="radio" name="data-bs-theme" value="light">
+								</label>
+							</li>
+
+							<li>
+								<label class="dropdown-item">
+									<i data-lucide="moon" class="align-middle me-1 fs-16"></i>
+									<span class="align-middle">Dark</span>
+									<input class="form-check-input" type="radio" name="data-bs-theme" value="dark">
+								</label>
+							</li>
+
+							<li>
+								<label class="dropdown-item">
+									<i data-lucide="monitor-cog" class="align-middle me-1 fs-16"></i>
+									<span class="align-middle">System</span>
+									<input class="form-check-input" type="radio" name="data-bs-theme" value="system">
+								</label>
+							</li>
+
+						</ul>
+						<!-- end dropdown-menu-->
+					</div>
+					<!-- end dropdown-->
+				</div>
+				<!-- end topbar item-->
+
+
+				<!-- Light/Dark Mode Button -->
+				<div class="topbar-item d-none">
+					<button class="topbar-link" id="light-dark-mode" type="button">
+						<i data-lucide="moon" class="fs-xxl mode-light-moon"></i>
+					</button>
+				</div>
+
+
+				<!-- User Dropdown -->
+				<div class="topbar-item nav-user">
+					<div class="dropdown">
+						<a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown" data-bs-offset="0,19" href="#!" aria-haspopup="false" aria-expanded="false">
+							<img src="assets/images/users/user-3.jpg" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
+							<div class="d-lg-flex align-items-center gap-1 d-none">
+								<h5 class="my-0">Geneva</h5>
+								<i class="ti ti-chevron-down align-middle"></i>
+							</div>
+						</a>
+						<div
+							class="dropdown-menu dropdown-menu-end">
+							<!-- Header -->
+							<div class="dropdown-header noti-title">
+								<h6 class="text-overflow m-0">Welcome back 👋!</h6>
+							</div>
+
+							<!-- My Profile -->
+							<a href="users-profile.html" class="dropdown-item">
+								<i class="ti ti-user-circle me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Profile</span>
+							</a>
+
+							<!-- Notifications -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-bell-ringing me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Notifications</span>
+							</a>
+
+							<!-- Settings -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-settings-2 me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Account Settings</span>
+							</a>
+
+							<!-- Support -->
+							<a href="javascript:void(0);" class="dropdown-item">
+								<i class="ti ti-headset me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Support Center</span>
+							</a>
+
+							<!-- Divider -->
+							<div class="dropdown-divider"></div>
+
+							<!-- Lock -->
+							<a href="auth-lock-screen.html" class="dropdown-item">
+								<i class="ti ti-lock me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Lock Screen</span>
+							</a>
+
+							<!-- Logout -->
+							<a href="javascript:void(0);" class="dropdown-item fw-semibold">
+								<i class="ti ti-logout-2 me-1 fs-17 align-middle"></i>
+								<span class="align-middle">Log Out</span>
+							</a>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- Button Trigger Customizer Offcanvas -->
+				<div class="topbar-item d-none d-sm-flex">
+					<button class="topbar-link" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" type="button">
+						<i class="ti ti-settings icon-spin fs-24"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+</div>
+
+
+<!-- END wrapper -->
+
+<!-- Theme Settings -->
+<div class="offcanvas offcanvas-end overflow-hidden" tabindex="-1" id="theme-settings-offcanvas">
+	<div class="d-flex justify-content-between text-bg-primary gap-2 p-3" style="background-image: url(assets/images/user-bg-pattern.png);">
+		<div>
+			<h5 class="mb-1 fw-bold text-white text-uppercase">Admin Customizer</h5>
+			<p class="text-white text-opacity-75 fst-italic fw-medium mb-0">Easily configure layout, styles, and preferences for your admin interface.</p>
+		</div>
+
+		<div class="flex-grow-0">
+			<button type="button" class="d-block btn btn-sm bg-white bg-opacity-25 text-white rounded-circle btn-icon" data-bs-dismiss="offcanvas">
+				<i class="ti ti-x fs-lg"></i>
+			</button>
+		</div>
+	</div>
+
+	<div class="offcanvas-body p-0 h-100" data-simplebar>
+		<div class="p-3 border-bottom border-dashed">
+			<h5 class="mb-3 fw-bold">Select Theme</h5>
+			<div class="row g-3">
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-default" value="default">
+						<label class="form-check-label p-0 w-100" for="demo-skin-default">
+							<img src="assets/images/layouts/themes/theme-default.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Default</h5>
+				</div>
+
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-material" value="material">
+						<label class="form-check-label p-0 w-100" for="demo-skin-material">
+							<img src="assets/images/layouts/themes/theme-material.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Material</h5>
+				</div>
+
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-modern" value="modern">
+						<label class="form-check-label p-0 w-100" for="demo-skin-modern">
+							<img src="assets/images/layouts/themes/theme-modern.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Modern</h5>
+				</div>
+
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-saas" value="saas">
+						<label class="form-check-label p-0 w-100" for="demo-skin-saas">
+							<img src="assets/images/layouts/themes/theme-saas.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">SaaS</h5>
+				</div>
+
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-flat" value="flat">
+						<label class="form-check-label p-0 w-100" for="demo-skin-flat">
+							<img src="assets/images/layouts/themes/theme-flat.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Flat</h5>
+				</div>
+
+				<div class="col-6">
+					<div class="form-check card-radio shadow">
+						<input class="form-check-input" type="radio" name="data-skin" id="demo-skin-minimal" value="minimal">
+						<label class="form-check-label p-0 w-100" for="demo-skin-minimal">
+							<img src="assets/images/layouts/themes/theme-minimal.png" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Minimal</h5>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 border-bottom border-dashed">
+			<h5 class="mb-3 fw-bold">Color Scheme</h5>
+			<div class="row">
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-light" value="light">
+						<label class="form-check-label p-0 w-100" for="layout-color-light">
+							<img src="assets/images/layouts/light.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Light</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-dark" value="dark">
+						<label class="form-check-label p-0 w-100" for="layout-color-dark">
+							<img src="assets/images/layouts/dark.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Dark</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-system" value="system">
+						<label class="form-check-label p-0 w-100" for="layout-color-system">
+							<img src="assets/images/layouts/system.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">System</h5>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 border-bottom border-dashed">
+			<h5 class="mb-3 fw-bold">Topbar Color</h5>
+
+			<div class="row g-3">
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-light" value="light">
+						<label class="form-check-label p-0 w-100" for="topbar-color-light">
+							<img src="assets/images/layouts/topbar-light.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="text-center text-muted mt-2 mb-0">Light</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-dark" value="dark">
+						<label class="form-check-label p-0 w-100" for="topbar-color-dark">
+							<img src="assets/images/layouts/topbar-dark.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Dark</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-gray" value="gray">
+						<label class="form-check-label p-0 w-100" for="topbar-color-gray">
+							<img src="assets/images/layouts/topbar-gray.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Gray</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check card-radio">
+						<input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-gradient" value="gradient">
+						<label class="form-check-label p-0 w-100" for="topbar-color-gradient">
+							<img src="assets/images/layouts/topbar-gradient.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Gradient</h5>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 border-bottom border-dashed">
+			<h5 class="mb-3 fw-bold">Sidenav Color</h5>
+
+			<div class="row g-3">
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-menu-color" id="sidenav-color-light" value="light">
+						<label class="form-check-label p-0 w-100" for="sidenav-color-light">
+							<img src="assets/images/layouts/light.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Light</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-menu-color" id="sidenav-color-dark" value="dark">
+						<label class="form-check-label p-0 w-100" for="sidenav-color-dark">
+							<img src="assets/images/layouts/side-dark.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Dark</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-menu-color" id="sidenav-color-gray" value="gray">
+						<label class="form-check-label p-0 w-100" for="sidenav-color-gray">
+							<img src="assets/images/layouts/side-gray.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Gray</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-menu-color" id="sidenav-color-gradient" value="gradient">
+						<label class="form-check-label p-0 w-100" for="sidenav-color-gradient">
+							<img src="assets/images/layouts/side-gradient.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Gradient</h5>
+				</div>
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-menu-color" id="sidenav-color-image" value="image">
+						<label class="form-check-label p-0 w-100" for="sidenav-color-image">
+							<img src="assets/images/layouts/side-image.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="fs-sm text-center text-muted mt-2 mb-0">Image</h5>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 border-bottom border-dashed">
+			<h5 class="mb-3 fw-bold">Sidebar Size</h5>
+
+			<div class="row g-3">
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-default" value="default">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-default">
+							<img src="assets/images/layouts/light.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 text-center text-muted mt-2">Default</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-compact" value="compact">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-compact">
+							<img src="assets/images/layouts/sidebar-compact.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 text-center text-muted mt-2">Compact</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-small" value="condensed">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-small">
+							<img src="assets/images/layouts/sidebar-sm.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 text-center text-muted mt-2">Condensed</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-small-hover" value="on-hover">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-small-hover">
+							<img src="assets/images/layouts/sidebar-sm.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 text-center text-muted mt-2">On Hover</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-small-hover-active" value="on-hover-active">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-small-hover-active">
+							<img src="assets/images/layouts/light.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 fs-base text-center text-muted mt-2">On Hover - Show</h5>
+				</div>
+
+				<div class="col-4">
+					<div class="form-check sidebar-setting card-radio">
+						<input class="form-check-input" type="radio" name="data-sidenav-size" id="sidenav-size-offcanvas" value="offcanvas">
+						<label class="form-check-label p-0 w-100" for="sidenav-size-offcanvas">
+							<img src="assets/images/layouts/sidebar-full.svg" alt="layout-img" class="img-fluid">
+						</label>
+					</div>
+					<h5 class="mb-0 text-center text-muted mt-2">Offcanvas</h5>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 border-bottom border-dashed">
+			<div class="d-flex justify-content-between align-items-center">
+				<h5 class="fw-bold mb-0">Layout Position</h5>
+
+				<div class="btn-group radio" role="group">
+					<input type="radio" class="btn-check" name="data-layout-position" id="layout-position-fixed" value="fixed">
+					<label class="btn btn-sm btn-soft-warning w-sm" for="layout-position-fixed">Fixed</label>
+
+					<input type="radio" class="btn-check" name="data-layout-position" id="layout-position-scrollable" value="scrollable">
+					<label class="btn btn-sm btn-soft-warning w-sm ms-0" for="layout-position-scrollable">Scrollable</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3">
+			<div class="d-flex justify-content-between align-items-center">
+				<h5 class="mb-0">
+					<label class="fw-bold m-0" for="sidebaruser-check">Sidebar User Info</label>
+				</h5>
+
+				<div class="form-check form-switch fs-lg">
+					<input type="checkbox" class="form-check-input" name="sidebar-user" id="sidebaruser-check">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="offcanvas-footer border-top p-3 text-center">
+		<div class="row">
+			<div class="col-6">
+				<button type="button" class="btn btn-light fw-semibold py-2 w-100" id="reset-layout">Reset</button>
+			</div>
+			<div class="col-6">
+				<a href="#!" target="_blank" class="btn btn-danger bg-gradient py-2 fw-semibold w-100">Buy Now</a>
+			</div>
+		</div>
+	</div>
+</div>
