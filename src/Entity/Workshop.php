@@ -12,7 +12,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
 #[ORM\Entity(repositoryClass: WorkshopRepository::class)]
 class Workshop
 {
+     
     use EntityTrait;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -23,12 +25,9 @@ class Workshop
     #[ORM\Column(length: 255, unique:true)]
     private ?string $name = null;
     
-    
-    
     #[Groups(['workshop:read'])]
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $description = null;
-    
     
     #[ORM\Column(nullable: true)]
     private ?float $dailyAmount = null;

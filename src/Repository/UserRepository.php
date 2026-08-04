@@ -16,6 +16,41 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * @return User[] Returns an array of User objects matching search and filters.
+     */
+    public function findBySearchAndFilters(?string $search, ?string $role, ?string $status): array
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->andWhere('u.deleted = :deleted')
+            ->setParameter('deleted', false)
+            ->orderBy('u.firstname', 'ASC');
+
+        if ($status !== null && $status !== '') {
+            $qb->andWhere('u.enabled = :enabled')
+                ->setParameter('enabled', $status === '1');
+        }
+
+        if ($role !== null && $role !== '') {
+            $qb->andWhere('u.roles LIKE :role')
+                ->setParameter('role', '%"' . $role . '"%');
+        }
+
+        if ($search !== null && $search !== '') {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.firstname LIKE :search',
+                    'u.lastname LIKE :search',
+                    'u.username LIKE :search',
+                    'u.email LIKE :search'
+                )
+            )
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */
@@ -30,6 +65,15 @@ class UserRepository extends ServiceEntityRepository
     //            ->getResult()
     //        ;
     //    }
+
+    public function countNotDeleted(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->andWhere('u.deleted = false')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
     //    public function findOneBySomeField($value): ?User
     //    {

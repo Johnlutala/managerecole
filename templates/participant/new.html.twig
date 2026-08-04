@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Participant
+{% endblock %}
+
+{% block body %}
+	<body>
+		<div class="wrapper">
+			<div class="content-page">
+				<div class="container-fluid">
+					<div class="page-title-head d-flex align-items-center">
+						<div class="flex-grow-1">
+							<h4 class="fs-xl fw-bold m-0">Nouveau participant</h4>
+						</div>
+
+						<div class="text-end">
+							<ol class="breadcrumb m-0 py-0">
+								<li class="breadcrumb-item">
+									<a href="javascript: void(0);">ENABEL</a>
+								</li>
+								<li class="breadcrumb-item">
+									<a href="{{ path('app_participant_index') }}">Participants</a>
+								</li>
+								<li class="breadcrumb-item active">Création</li>
+							</ol>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-header">
+									<h4 class="card-title">Créer un participant</h4>
+								</div>
+								<div class="card-body">
+									{{ include('participant/_form.html.twig') }}
+									<div class="mt-3">
+										<a href="{{ path('app_participant_index') }}" class="btn btn-secondary">Retour</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+{% endblock %}

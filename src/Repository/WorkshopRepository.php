@@ -42,7 +42,6 @@ class WorkshopRepository extends ServiceEntityRepository
 
         if (!$keyword) {
             return $this->createQueryBuilder('w')
-                ->setParameter('enabled', true)
                 ->andWhere('w.enabled = :enabled')
                 ->setParameter('enabled', true)
                 ->andWhere('w.deleted = :deleted')
@@ -50,10 +49,8 @@ class WorkshopRepository extends ServiceEntityRepository
                 ->andWhere('w.createdBy = :user')
                 ->setParameter('user', $user)
                 ->orderBy('w.id', 'ASC')
-                // ->setMaxResults(10)
                 ->getQuery()
-                ->getResult()
-            ;
+                ->getResult();
         }
 
         return $this->createQueryBuilder('w')
@@ -92,23 +89,52 @@ class WorkshopRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+    /**
+     * Retourne tous les ateliers non supprimés créés par un utilisateur.
+     */
+    public function findAllNotDeletedByUser(User $user): array
+    {
+        return $this->createQueryBuilder('w')
+            ->andWhere('w.deleted = false')
+            ->andWhere('w.createdBy = :user')
+            ->setParameter('user', $user)
+            ->orderBy('w.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-   public function findAllNotDeleted(): array
-{
-    return $this->createQueryBuilder('w')
-        ->andWhere('w.deleted = false')
-        ->orderBy('w.createdAt', 'DESC')
-        ->getQuery()
-        ->getResult();
-}
+    /**
+     * Retourne les ateliers par statut créés par un utilisateur.
+     */
+    public function findByStatusAndUser(bool $isEnded, User $user): array
+    {
+        return $this->createQueryBuilder('w')
+            ->andWhere('w.deleted = false')
+            ->andWhere('w.isEnded = :status')
+            ->andWhere('w.createdBy = :user')
+            ->setParameter('status', $isEnded)
+            ->setParameter('user', $user)
+            ->orderBy('w.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllNotDeleted(): array
+    {
+        return $this->createQueryBuilder('w')
+            ->andWhere('w.deleted = false')
+            ->orderBy('w.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findByStatus(?bool $isEnded): array
     {
-        $qb = $this->createQueryBuilder('w');
+        $qb = $this->createQueryBuilder('w')
+            ->andWhere('w.deleted = false');
 
         if ($isEnded !== null) {
             $qb->andWhere('w.isEnded = :status')
-              ->andWhere('w.deleted = false')
                 ->setParameter('status', $isEnded);
         }
 
@@ -117,6 +143,19 @@ class WorkshopRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function countNotDeleted(): int
+    {
+        return (int) $this->createQueryBuilder('w')
+            ->select('COUNT(w.id)')
+            ->andWhere('w.deleted = false')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+
+
+
 
     //    /**
     //     * @return Workshop[] Returns an array of Workshop objects

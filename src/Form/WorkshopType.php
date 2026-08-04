@@ -23,7 +23,7 @@ class WorkshopType extends AbstractType
                 'label' => 'Nom de l’atelier',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex : Symfony Avancé'
+                    'placeholder' => '---'
                 ]
             ])
 
@@ -60,7 +60,7 @@ class WorkshopType extends AbstractType
             ->add('configuration', EntityType::class, [
                 'class' => MerchantConfiguration::class,
                 'choice_label' => 'shortcode',
-                'label' => 'Configuration par :',
+                'label' => 'Nom de Marchand',
                 'placeholder' => '-- Sélectionner --',
                 'attr' => [
                     'class' => 'form-select'

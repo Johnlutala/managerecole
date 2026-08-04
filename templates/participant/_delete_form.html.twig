@@ -1,23 +1,26 @@
+
    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<form class="deleteForm"
-      method="post"
-      action="{{ path('app_workshop_delete', {'id': workshop.id}) }}">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ workshop.id) }}">
-    <button type="submit" class="btn btn-danger btnDelete w-100" >
+<form class="deleteForm" method="post" action="{{ path('app_participant_delete', {'id': participant.id}) }}" >
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ participant.id) }}">
+    <button type="submit" class="btn btn-danger btnDelete w-100">
          <i class="ti ti-trash"> </i>
-         Desactiver
+        Desactiver
     </button>
-   
 </form>
+
 <script>
-    document.querySelectorAll('.btnDelete').forEach(function (button) {
+
+document.querySelectorAll('.btnDelete').forEach(function (button) {
+
     button.addEventListener('click', function (e) {
+
         e.preventDefault();
+
         const form = button.closest('form');
 
         Swal.fire({
-            title: 'Supprimer cet atelier ?',
+            title: 'Supprimer ce participant ?',
             text: 'Cette action est irréversible.',
             icon: 'warning',
             showCancelButton: true,

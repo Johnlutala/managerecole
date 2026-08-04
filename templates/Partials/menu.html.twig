@@ -1,21 +1,23 @@
-
 <div class="content-page">
-<div class="container-fluid">
-	<div class="page-title-head d-flex align-items-center">
+	<div class="container-fluid">
+		<div class="page-title-head d-flex align-items-center">
 
-		<div class="text">
-			<ol class="breadcrumb m-0 py-0">
-				<li class="breadcrumb-item">
-					<h4 class="fs-xl fw-bold m-0"> <a href="javascript: void(0);">Dashboard</a></h4>
-				</li>
+			<div class="text">
+				<ol class="breadcrumb m-0 py-0">
+					<li class="breadcrumb-item">
+						<h4 class="fs-xl fw-bold m-0">
+							<a href="javascript: void(0);">Dashboard</a>
+						</h4>
+					</li>
 
-				<li class="breadcrumb-item active">Enabel</li>
-			</ol>
+					<li class="breadcrumb-item active">Enabel</li>
+				</ol>
+			</div>
 		</div>
 	</div>
-</div>
 
-	<div class="row row-cols-xxl-4 row-cols-md-2 row-cols-1">
+	<div
+		class="row row-cols-xxl-4 row-cols-md-2 row-cols-1">
 		<!-- Total Sales Widget -->
 		<div class="col">
 			<div class="card">
@@ -28,7 +30,7 @@
 						</div>
 						<div class="text-end">
 							<h3 class="mb-2 fw-normal">
-								<span data-target="50">0</span>
+								<span>{{ totalWorkshops|default(0) }}</span>
 							</h3>
 							<p class="mb-0 text-muted">
 								<span>Total Atéliers</span>
@@ -52,7 +54,7 @@
 						</div>
 						<div class="text-end">
 							<h3 class="mb-2 fw-normal">
-								<span data-target="2358">0</span>
+								<span>{{ totalParticipants|default(0) }}</span>
 							</h3>
 							<p class="mb-0 text-muted">
 								<span>Total Participants</span>
@@ -76,7 +78,7 @@
 						</div>
 						<div class="text-end">
 							<h3 class="mb-2 fw-normal">
-								<span data-target="500">0</span>
+								<span>{{ totalUsers|default(0) }}</span>
 							</h3>
 							<p class="mb-0 text-muted">
 								<span>Total Utilisateurs</span>

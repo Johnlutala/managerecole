@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Participant;
 use App\Entity\Workshop;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -36,7 +37,6 @@ class ParticipantRepository extends ServiceEntityRepository
             ;
         }
 
-        
         return $this->createQueryBuilder('p')
             ->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
             ->setParameter('keyword', '%' . $keyword . '%')
@@ -49,8 +49,21 @@ class ParticipantRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
-
     }
+
+public function findActiveByUser(User $user): array
+{
+    return $this->createQueryBuilder('p')
+        ->andWhere('p.enabled = :enabled')
+        ->setParameter('enabled', true)
+        ->andWhere('p.deleted = :deleted')
+        ->setParameter('deleted', false)
+        ->andWhere('p.createdBy = :user')
+        ->setParameter('user', $user)
+        ->orderBy('p.id', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
 
 
     /**
@@ -61,7 +74,7 @@ class ParticipantRepository extends ServiceEntityRepository
     {
         // On récupère proprement l'EntityManager
         $entityManager = $this->getEntityManager();
-        
+
         // Requête principale sur l'entité courante (Participant)
         $qb = $this->createQueryBuilder('p');
 
@@ -83,13 +96,33 @@ class ParticipantRepository extends ServiceEntityRepository
         // 3. Filtre de recherche par mot-clé (optionnel)
         if ($keyword) {
             $qb->andWhere('p.firstname LIKE :keyword OR p.lastname LIKE :keyword')
-            ->setParameter('keyword', '%' . $keyword . '%');
+                ->setParameter('keyword', '%' . $keyword . '%');
         }
 
         return $qb->getQuery()->getResult();
     }
-    
-    
+
+    public function countNotDeleted(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->andWhere('p.deleted = false')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+public function findAllNotDeletedByUser(User $user): array
+{
+    return $this->createQueryBuilder('p')
+        ->andWhere('p.deleted = :deleted')
+        ->setParameter('deleted', false)
+        ->andWhere('p.createdBy = :user')
+        ->setParameter('user', $user)
+        ->orderBy('p.id', 'ASC')
+        ->getQuery()
+        ->getResult();
+}
+
 
     //    public function findOneBySomeField($value): ?Participant
     //    {

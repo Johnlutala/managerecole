@@ -1,20 +1,336 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello UserController!{% endblock %}
+{% block title %}Utilisateurs
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+	<div class="wrapper">
+		<div class="content-page">
+			<div class="container-fluid">
+				<div class="page-title-head d-flex align-items-center">
+					<div class="flex-grow-1">
+						<h4 class="fs-xl fw-bold m-0">Utilisateurs</h4>
+					</div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+					<div class="text-end">
+						<ol class="breadcrumb m-0 py-0">
+							<li class="breadcrumb-item">
+								<a href="javascript: void(0);">ENABEL</a>
+							</li>
+							<li class="breadcrumb-item active">Utilisateurs</li>
+						</ol>
+					</div>
+				</div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/src/Controller/UserController.php</code></li>
-        <li>Your template at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/templates/user/index.html.twig</code></li>
-    </ul>
-</div>
-{% endblock %}
+				<div class="row">
+					<div class="col-12">
+						<div data-table data-table-rows-per-page="8" class="card">
+							<div class="card-header border-light justify-content-between">
+								<div class="d-flex gap-2 align-items-center flex-wrap">
+									<form method="get" action="{{ path('app_user_index') }}" class="d-flex gap-2 align-items-center flex-wrap">
+										<div class="app-search">
+											<input data-table-search type="search" name="search" value="{{ search|default('') }}" class="form-control" placeholder="Rechercher prénom/nom/pseudo/email">
+											<i data-lucide="search" class="app-search-icon text-muted"></i>
+										</div>
+
+										<div class="app-search">
+											<select class="form-select" name="role" onchange="this.form.submit()">
+												<option value="" {{ role is empty ? 'selected' : '' }}>Tous les rôles</option>
+												<option value="ROLE_USER" {{ role == 'ROLE_USER' ? 'selected' : '' }}>Utilisateur</option>
+												<option value="ROLE_ADMIN" {{ role == 'ROLE_ADMIN' ? 'selected' : '' }}>Administrateur</option>
+												<option value="ROLE_SUPER_ADMIN" {{ role == 'ROLE_SUPER_ADMIN' ? 'selected' : '' }}>Super admin</option>
+											</select>
+										</div>
+
+										<div class="app-search">
+											<select class="form-select" name="status" onchange="this.form.submit()">
+												<option value="" {{ status is empty ? 'selected' : '' }}>Tous les statuts</option>
+												<option value="1" {{ status == '1' ? 'selected' : '' }}>Actif</option>
+												<option value="0" {{ status == '0' ? 'selected' : '' }}>Inactif</option>
+											</select>
+										</div>
+
+
+									</form>
+
+									<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+										<i class="ti ti-plus me-1"></i>
+										Nouvel utilisateur
+									</button>
+								</div>
+							</div>
+
+							<div class="table-responsive">
+								<table class="table table-custom table-centered table-hover w-100 mb-0">
+									<thead class="bg-light bg-opacity-25 thead-sm">
+										<tr class="text-uppercase fs-xxs">
+											<th>Noms</th>
+											<th>Nom Utilisateur</th>
+											<th>Rôles</th>
+											<th>Statut</th>
+											<th class="text-center">Actions</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for user in users %}
+											<tr>
+												<td>
+													<div class="d-flex align-items-center">
+														<div class="avatar-md me-3">
+															<div class="avatar-title bg-primary-subtle text-primary rounded">
+																<i data-lucide="user" class="fs-2"></i>
+															</div>
+														</div>
+														<div>
+															<h5 class="mb-0">
+																<a href="{{ path('app_user_show', {'id': user.id}) }}" class="link-reset">
+																	{{ user.firstname }}
+																	{{ user.lastname }}
+																</a>
+															</h5>
+														</div>
+													</div>
+												</td>
+												<td>{{ user.username }}</td>
+												<td>{{ user.roles|join(', ') }}</td>
+												<td>
+													{% if user.enabled %}
+														<span class="badge badge-soft-success">Actif</span>
+													{% else %}
+														<span class="badge badge-soft-danger">Inactif</span>
+													{% endif %}
+												</td>
+												<td>
+													<div class="d-flex justify-content-center gap-1">
+														<a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+															<i class="ti ti-eye fs-lg"></i>
+														</a>
+														<a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+															<i class="ti ti-edit fs-lg"></i>
+														</a>
+														{{ include('user/_delete_form.html.twig') }}
+													</div>
+												</td>
+											</tr>
+										{% else %}
+											<tr>
+												<td colspan="5" class="text-center py-5 text-muted">Aucun utilisateur trouvé.</td>
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<div class="card-footer border-0">
+								<div class="d-flex justify-content-between align-items-center">
+									<div data-table-pagination-info="users"></div>
+									<div data-table-pagination></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+
+					{{ form_start(form) }}
+
+					<div class="modal-header">
+						<h5 class="modal-title" id="addUserModalLabel">Ajouter un utilisateur</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+
+					<div class="modal-body">
+						<div class="row g-3">
+							<div class="col-md-6">{{ form_row(form.lastname) }}</div>
+							<div class="col-md-6">{{ form_row(form.firstname) }}</div>
+							<div class="col-md-6">{{ form_row(form.username) }}</div>
+							<div class="col-md-6">{{ form_row(form.email) }}</div>
+
+							<div class="col-md-6">
+								<div class="mb-3 form-password-toggle">
+									<label class="form-label" for="user_password_first">Mot de passe</label>
+									<div class="input-group input-group-merge">
+										{{ form_widget(form.password.first, {
+											'attr': {
+												'id': 'user_password_first',
+												'class': 'form-control',
+												'placeholder': '********'
+											}
+										}) }}
+										<span class="input-group-text cursor-pointer toggle-password" data-target="user_password_first">
+											<i class="ti ti-eye-off"></i>
+										</span>
+									</div>
+									{{ form_errors(form.password.first) }}
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<div class="mb-3 form-password-toggle">
+									<label class="form-label" for="user_password_second">Confirmer le mot de passe</label>
+									<div class="input-group input-group-merge">
+										{{ form_widget(form.password.second, {
+											'attr': {
+												'id': 'user_password_second',
+												'class': 'form-control',
+												'placeholder': '********'
+											}
+										}) }}
+										<span class="input-group-text cursor-pointer toggle-password" data-target="user_password_second">
+											<i class="ti ti-eye-off"></i>
+										</span>
+									</div>
+									{{ form_errors(form.password.second) }}
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								{{ form_label(form.roles) }}
+								<div class="form-check-group">
+									{% for child in form.roles %}
+										<div class="form-check">
+											{{ form_widget(child) }}
+											{{ form_label(child) }}
+										</div>
+									{% endfor %}
+								</div>
+								{{ form_errors(form.roles) }}
+							</div>
+
+							<div class="col-md-6">
+								{{ form_row(form.configuration) }}
+							</div>
+
+							<div class="col-md-6">
+								{{ form_row(form.enabled) }}
+							</div>
+						</div>
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-light" data-bs-dismiss="modal">
+							Annuler
+						</button>
+						<button type="submit" class="btn btn-primary">
+							<i class="ti ti-device-floppy me-1"></i>
+							Enregistrer
+						</button>
+					</div>
+
+					{{ form_end(form) }}
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div></div><script>
+document.addEventListener('DOMContentLoaded', function () {
+document.querySelectorAll('.toggle-password').forEach(function (toggle) {
+toggle.addEventListener('click', function () {
+const targetId = this.getAttribute('data-target');
+const input = document.getElementById(targetId);
+const icon = this.querySelector('i');
+
+if (! input) {
+return;
+}
+
+if (input.type === 'password') {
+input.type = 'text';
+icon.classList.remove('ti-eye-off');
+icon.classList.add('ti-eye');
+} else {
+input.type = 'password';
+icon.classList.remove('ti-eye');
+icon.classList.add('ti-eye-off');
+}
+});
+});
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+const deleteBtn = document.getElementById("deleteSelectedBtn");
+const checkAll = document.getElementById("checkAll");
+
+function updateButton() {
+
+const checked = document.querySelectorAll(".workshop-check:checked");
+
+if (checked.length > 0) {
+deleteBtn.classList.remove("d-none");
+} else {
+deleteBtn.classList.add("d-none");
+}
+
+}
+
+checkAll.addEventListener("change", function () {
+
+document.querySelectorAll(".workshop-check").forEach(function (checkbox) {
+
+checkbox.checked = checkAll.checked;
+
+});
+
+updateButton();
+
+});
+
+document.querySelectorAll(".workshop-check").forEach(function (checkbox) {
+
+checkbox.addEventListener("change", updateButton);
+
+});
+
+deleteBtn.addEventListener("click", function (e) {
+
+e.preventDefault();
+
+const ids = [];
+
+document.querySelectorAll(".workshop-check:checked").forEach(function (checkbox) {
+
+ids.push(checkbox.value);
+
+});
+
+if (ids.length === 0) {
+
+Swal.fire({
+icon: 'warning',
+title: 'Aucune sélection',
+text: 'Veuillez sélectionner au moins un atelier.',
+confirmButtonText: 'OK',
+confirmButtonColor: '#f59e0b'
+});
+
+return;
+}
+
+Swal.fire({
+title: 'Confirmer la suppression',
+text: "Les ateliers sélectionnés seront supprimés.",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#dc3545',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Oui, supprimer',
+cancelButtonText: 'Annuler'
+}).then((result) => {
+
+if (result.isConfirmed) {
+
+document.getElementById("selectedIds").value = ids.join(",");
+document.getElementById("deleteSelectedForm").submit();
+}
+
+});
+
+});
+
+});</script>{% endblock %}

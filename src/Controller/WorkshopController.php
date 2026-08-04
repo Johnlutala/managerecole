@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Workshop;
+use App\Entity\User;
 use App\Form\WorkshopType;
 use App\Repository\WorkshopRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,15 +23,36 @@ final class WorkshopController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
 
-        $status = $request->query->get('status');
+       $status = $request->query->get('status');
 
-        if ($status === '0') {
-            $workshops = $workshopRepository->findByStatus(false);
-        } elseif ($status === '1') {
-            $workshops = $workshopRepository->findByStatus(true);
-        } else {
-            $workshops = $workshopRepository->findAllNotDeleted();
-        }
+if ($this->isGranted('ROLE_ADMIN')) {
+
+    // L'administrateur voit tous les ateliers
+    if ($status === '0') {
+        $workshops = $workshopRepository->findByStatus(false);
+    } elseif ($status === '1') {
+        $workshops = $workshopRepository->findByStatus(true);
+    } else {
+        $workshops = $workshopRepository->findAllNotDeleted();
+    }
+
+} else {
+
+    // L'utilisateur ne voit que ses ateliers
+    $user = $this->getUser();
+
+    if (!$user instanceof User) {
+        throw $this->createAccessDeniedException();
+    }
+
+    if ($status === '0') {
+        $workshops = $workshopRepository->findByStatusAndUser(false, $user);
+    } elseif ($status === '1') {
+        $workshops = $workshopRepository->findByStatusAndUser(true, $user);
+    } else {
+        $workshops = $workshopRepository->findAllNotDeletedByUser($user);
+    }
+}
 
         $workshop = new Workshop();
 
@@ -39,6 +61,8 @@ final class WorkshopController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+             $workshop->setCreatedBy($this->getUser());
+
             $entityManager->persist($workshop);
             $entityManager->flush();
 
@@ -46,7 +70,7 @@ final class WorkshopController extends AbstractController
 
             return $this->redirectToRoute('app_workshop_index');
         }
-
+       
 
         return $this->render('workshop/index.html.twig', [
             'workshops' => $workshops,
@@ -63,6 +87,8 @@ final class WorkshopController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+           $workshop->setCreatedBy($this->getUser());
             $entityManager->persist($workshop);
             $entityManager->flush();
 

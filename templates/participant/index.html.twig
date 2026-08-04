@@ -1,20 +1,274 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ParticipantController!{% endblock %}
+{% block title %}Participants
+{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+	<body>
+		<div class="wrapper">
+			<div class="content-page">
+				<div class="container-fluid">
+					<div class="page-title-head d-flex align-items-center">
+						<div class="flex-grow-1">
+							<h4 class="fs-xl fw-bold m-0">Participants</h4>
+						</div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/src/Controller/ParticipantController.php</code></li>
-        <li>Your template at <code>C:/Users/rubuz.l/Documents/Infoset/Projets/workshop-flexroll/templates/participant/index.html.twig</code></li>
-    </ul>
-</div>
+						<div class="text-end">
+							<ol class="breadcrumb m-0 py-0">
+								<li class="breadcrumb-item">
+									<a href="javascript: void(0);">ENABEL</a>
+								</li>
+								<li class="breadcrumb-item active">Participants</li>
+							</ol>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12">
+							<div data-table data-table-rows-per-page="8" class="card">
+								<div class="card-header border-light justify-content-between">
+									<div class="d-flex gap-2">
+										<div class="app-search">
+											<input data-table-search type="text" class="form-control" placeholder="Search participants...">
+											<i data-lucide="search" class="app-search-icon text-muted"></i>
+										</div>
+
+										<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+											<i class="ti ti-plus me-1"></i>
+											Nouveau Participant
+										</button>
+										<button class="btn btn-danger d-none" id="deleteSelectedBtn">Delete</button>
+									</div>
+
+									<div class="d-flex align-items-center gap-2">
+										<i data-lucide="filter" class="app-search-icon text-muted"></i>
+
+										<div class="app-search">
+											<select class="form-select" onchange="window.location.href='{{ path('app_participant_index') }}?status=' + this.value">
+												<option value="" {{ status is empty ? 'selected' : '' }}>
+													Tous les statuts
+												</option>
+												<option value="0" {{ status == '0' ? 'selected' : '' }}>
+													Actifs
+												</option>
+												<option value="1" {{ status == '1' ? 'selected' : '' }}>
+													Inactifs
+												</option>
+											</select>
+										</div>
+									</div>
+								</div>
+
+								<div class="table-responsive">
+									<table class="table table-custom table-centered table-select table-hover w-100 mb-0">
+										<thead class="bg-light bg-opacity-25 thead-sm">
+											<tr class="text-uppercase fs-xxs">
+												<th scope="col" style="width: 1%;">
+													<input data-table-select-all class="form-check-input form-check-input-light fs-14 mt-0" type="checkbox" id="checkAll">
+												</th>
+												<th style="width:1%;"></th>
+												<th data-table-sort>Participant</th>
+												<th data-table-sort>Tel Mobile Money</th>
+												<th data-table-sort>Organisation</th>
+												<th data-table-sort>Grade</th>
+												<th data-table-sort>Statut</th>
+												<th class="text-center">Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for participant in participants %}
+												<tr>
+													<td class="ps-3">
+														<input class="form-check-input form-check-input-light fs-14 participant-check mt-0" type="checkbox" value="{{ participant.id }}">
+													</td>
+													<td></td>
+													<td>
+														<div class="d-flex">
+															
+															<div>
+																<h5 class="mb-0">
+																	<a href="{{ path('app_participant_show', {'id': participant.id}) }}" class="link-reset">
+																		{{ participant.fullname ?: participant.code }}
+																	</a>
+																</h5>
+																<small class="text-muted">
+																	{{ participant.phone ?: 'Sans téléphone' }}
+																</small>
+															</div>
+														</div>
+													</td>
+													<td>
+														{{ participant.phoneMobileMoney ?: '---' }}
+													</td><td>
+														{{ participant.organization ?: '---' }}
+													</td>
+													<td>
+														{{ participant.grade ?: '---' }}
+													</td>
+													<td>
+														{% if participant.enabled %}
+															<span class="badge badge-soft-success">Actif</span>
+														{% else %}
+															<span class="badge badge-soft-danger">Inactif</span>
+														{% endif %}
+													</td>
+													<td>
+														<div class="d-flex justify-content-center gap-1">
+															<a href="{{ path('app_participant_show', {'id': participant.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+																<i class="ti ti-eye fs-lg"></i>
+															</a>
+															<a href="{{ path('app_participant_edit', {'id': participant.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+																<i class="ti ti-edit fs-lg"></i>
+															</a>
+														</div>
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="7" class="text-center py-5 text-muted">
+														Aucun participant trouvé.
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+
+								<div class="card-footer border-0">
+									<div class="d-flex justify-content-between align-items-center">
+										<div data-table-pagination-info="participants"></div>
+										<div data-table-pagination></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+                    
+
+					<div class="modal fade" id="addParticipantModal" tabindex="-1" aria-labelledby="addParticipantModalLabel" aria-hidden="true">
+						<div class="modal-dialog modal-lg">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="addParticipantModalLabel">Nouveau participant</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+								{{ form_start(form) }}
+								<div class="modal-body">
+									<div class="row g-3">
+										<div class="col-md-4">
+											{{ form_row(form.lastname) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.middlename) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.firstname) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.gender) }}
+										</div>
+                                        <div class="col-md-4">
+											{{ form_row(form.phone) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.phoneMobileMoney) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.organization) }}
+										</div>
+										<div class="col-md-4">
+											{{ form_row(form.grade) }}
+										</div>
+										
+										<div class="col-md-4">
+											{{ form_row(form.enabled) }}
+										</div>
+										
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+									<button type="submit" class="btn btn-primary">
+										<i class="ti ti-device-floppy me-1"></i>
+										Enregistrer
+									</button>
+								</div>
+								{{ form_end(form) }}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<form id="deleteSelectedForm" method="post" action="{{ path('app_participant_delete_selected') }}">
+			<input type="hidden" name="_token" value="{{ csrf_token('delete_selected') }}">
+			<input type="hidden" id="selectedIds" name="ids">
+		</form>
+
+		<script src="assets/js/pages/custom-table.js"></script>
+	</body>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+const deleteBtn = document.getElementById("deleteSelectedBtn");
+const checkAll = document.getElementById("checkAll");
+
+function updateButton() {
+const checked = document.querySelectorAll(".participant-check:checked");
+if (checked.length > 0) {
+deleteBtn.classList.remove("d-none");
+} else {
+deleteBtn.classList.add("d-none");
+}
+}
+
+checkAll.addEventListener("change", function () {
+document.querySelectorAll(".participant-check").forEach(function (checkbox) {
+checkbox.checked = checkAll.checked;
+});
+updateButton();
+});
+
+document.querySelectorAll(".participant-check").forEach(function (checkbox) {
+checkbox.addEventListener("change", updateButton);
+});
+
+deleteBtn.addEventListener("click", function (e) {
+e.preventDefault();
+const ids = [];
+document.querySelectorAll(".participant-check:checked").forEach(function (checkbox) {
+ids.push(checkbox.value);
+});
+
+if (ids.length === 0) {
+Swal.fire({
+icon: 'warning',
+title: 'Aucune sélection',
+text: 'Veuillez sélectionner au moins un participant.',
+confirmButtonText: 'OK',
+confirmButtonColor: '#f59e0b'
+});
+return;
+}
+
+Swal.fire({
+title: 'Confirmer la suppression',
+text: "Les participants sélectionnés seront supprimés.",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#dc3545',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Oui, supprimer',
+cancelButtonText: 'Annuler'
+}).then((result) => {
+if (result.isConfirmed) {
+document.getElementById('selectedIds').value = ids.join(',');
+document.getElementById('deleteSelectedForm').submit();
+}
+});
+});
+});
+	</script>
 {% endblock %}
