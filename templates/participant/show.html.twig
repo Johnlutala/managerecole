@@ -76,17 +76,18 @@
 										<table class="table table-bordered align-middle">
 											<tbody>
 												<tr>
-													<th>Prénom</th>
-													<td>{{ participant.firstname }}</td>
-												</tr>
-												<tr>
-													<th>Second prénom</th>
-													<td>{{ participant.middlename ?: '---' }}</td>
-												</tr>
-												<tr>
 													<th>Nom</th>
 													<td>{{ participant.lastname }}</td>
 												</tr>
+												<tr>
+													<th>Postnom</th>
+													<td>{{ participant.middlename ?: '---' }}</td>
+												</tr>
+												<tr>
+													<th>Prénom</th>
+													<td>{{ participant.firstname }}</td>
+												</tr>
+												
 												<tr>
 													<th>Téléphone</th>
 													<td>{{ participant.phone ?: '---' }}</td>
