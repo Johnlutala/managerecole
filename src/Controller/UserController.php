@@ -29,6 +29,7 @@ final class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+             $user->setCreatedBy($this->getUser());
 
             $entityManager->persist($user);
             $entityManager->flush();

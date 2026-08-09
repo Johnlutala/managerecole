@@ -12,6 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
+use Psr\Log\LoggerInterface;
 
 #[Route('/api/rest/v1/users')]
 final class UserApiGeneratePasswordController extends AbstractApiController
@@ -24,14 +25,15 @@ final class UserApiGeneratePasswordController extends AbstractApiController
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         Security $security,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        LoggerInterface $logger
     ): JsonResponse {
 
-        $operation = "GÃ©nÃ©ration des identifiants";
+        $operation = "Génération des identifiants";
 
         try {
 
-            // GÃ©nÃ©ration d'un username unique
+            // Génération d'un username unique
             $username = $this->generateUsername($user, $userRepository);
             $user->setUsername($username);
 
@@ -46,8 +48,7 @@ final class UserApiGeneratePasswordController extends AbstractApiController
             if ($currentUser instanceof User) {
                 $user->setCreatedBy($currentUser);
             }
-
-            // GÃ©nÃ©ration du mot de passe
+            //Génération d'un mot de passe aléatoire
             $plainPassword = $this->generatePlainPassword($user);
 
             // Hash
@@ -59,23 +60,39 @@ final class UserApiGeneratePasswordController extends AbstractApiController
 
             $em->flush();
 
-            $email = (new TemplatedEmail())
-                ->from($_ENV['SENDER_EMAIL'])
-                ->to($user->getEmail())
-                ->subject('Vos nouveaux identifiants de connexion')
-                ->htmlTemplate('email/user_create.html.twig')
-                ->context([
-                    'user' => $user,
-                    'username' => $username,
-                    'password' => $plainPassword,
-                    'operation' => 'GÃ©nÃ©ration des identifiants',
-                ]);
-          
-            $mailer->send($email);
+            $mailSent = true;
+            $start = microtime(true);
+            try {
+                $email = (new TemplatedEmail())
+                    ->from($_ENV['SENDER_EMAIL'])
+                    ->to($user->getEmail())
+                    ->subject('Vos nouveaux identifiants de connexion')
+                    ->htmlTemplate('email/user_create.html.twig')
+                    ->context([
+                        'user' => $user,
+                        'username' => $username,
+                        'password' => $plainPassword,
+                        'operation' => 'Génération des identifiants',
+                    ]);
+
+                $mailer->send($email);
+            } catch (\Exception $e) {
+                $mailSent = false;
+                  $this->logger->error(
+                    'Échec de l’envoi du mail',
+                    [
+                        'user_id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'error' => $e->getMessage(),
+                        'duration' => microtime(true) - $start,
+                    ]
+                );
+            }
             return $this->success(
                 [
                     'username' => $username,
-                    'password' => $plainPassword
+                    'password' => $plainPassword,
+                    'mailSent' => $mailSent
                 ],
                 $operation,
                 Response::HTTP_OK
@@ -97,10 +114,11 @@ final class UserApiGeneratePasswordController extends AbstractApiController
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         Security $security,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        LoggerInterface $logger
     ): JsonResponse {
 
-        $operation = "RÃ©initialisation du mot de passe";
+        $operation = "Réinitialisation du mot de passe";
 
         try {
 
@@ -120,27 +138,40 @@ final class UserApiGeneratePasswordController extends AbstractApiController
             if ($currentUser instanceof User) {
                 $user->setCreatedBy($currentUser);
             }
-
             $em->flush();
 
-            $email = (new TemplatedEmail())
-                ->from($_ENV['SENDER_EMAIL'])
-                ->to($user->getEmail())
-                ->subject('Vos nouveaux identifiants de connexion')
-                ->htmlTemplate('email/user_update.html.twig')
-                ->context([
-                    'user' => $user,
-                    'username' => $user->getUsername(),
-                    'password' => $plainPassword,
-                    'operation' => 'RÃ©initialisation du mot de passe',
-                ]);
+            $mailSent = true;
+            try {
+                $email = (new TemplatedEmail())
+                    ->from($_ENV['SENDER_EMAIL'])
+                    ->to($user->getEmail())
+                    ->subject('Vos nouveaux identifiants de connexion')
+                    ->htmlTemplate('email/user_update.html.twig')
+                    ->context([
+                        'user' => $user,
+                        'username' => $user->getUsername(),
+                        'password' => $plainPassword,
+                        'operation' => 'Réinitialisation du mot de passe',
+                    ]);
 
-            $mailer->send($email);
+                $mailer->send($email);
+            } catch (\Exception $e) {
+                $mailSent = false;
+                  $this->logger->error(
+                    'Échec de l’envoi du mail',
+                    [
+                        'user_id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
 
             return $this->success(
                 [
                     'username' => $user->getUsername(),
-                    'password' => $plainPassword
+                    'password' => $plainPassword,
+                    'mailSent' => $mailSent
                 ],
                 $operation,
                 Response::HTTP_OK
