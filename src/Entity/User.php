@@ -21,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
     
     #[Groups(['user:read'])]
-    #[ORM\Column(length: 255, unique:true)]
+    #[ORM\Column(length: 255, unique:true, nullable: true)]
     private ?string $username = null;
     
     #[ORM\Column(length: 255, nullable: true)]

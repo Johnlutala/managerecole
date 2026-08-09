@@ -36,14 +36,6 @@ class UserType extends AbstractType
                 ]
             ])
 
-            ->add('username', TextType::class, [
-                'label' => "Nom d'utilisateur",
-                'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => "Nom d'utilisateur"
-                ]
-            ])
-
             ->add('email', EmailType::class, [
                 'label' => 'Adresse e-mail',
                 'attr' => [
@@ -51,26 +43,7 @@ class UserType extends AbstractType
                     'placeholder' => 'exemple@email.com'
                 ]
             ])
-
-            ->add('password', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'invalid_message' => 'Les mots de passe doivent correspondre.',
-                'required' => false,
-                'first_options'  => [
-                    'label' => 'Mot de passe',
-                    'attr' => [
-                        'class' => 'form-control',
-                        'placeholder' => '********'
-                    ],
-                ],
-                'second_options' => [
-                    'label' => 'Confirmer le mot de passe',
-                    'attr' => [
-                        'class' => 'form-control',
-                        'placeholder' => '********'
-                    ],
-                ],
-            ])
+           
 
             ->add('roles', ChoiceType::class, [
                 'label' => 'Rôle(s)',
@@ -86,7 +59,7 @@ class UserType extends AbstractType
 
             ->add('configuration', EntityType::class, [
                 'class' => MerchantConfiguration::class,
-                'choice_label' => 'id', // Remplace par 'name' si disponible
+                'choice_label' => 'shortcode', // Remplace par 'name' si disponible
                 'label' => 'Configuration',
                 'placeholder' => '-- Sélectionner --',
                 'attr' => [

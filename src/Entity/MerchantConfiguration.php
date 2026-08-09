@@ -122,4 +122,9 @@ class MerchantConfiguration
 
         return $this;
     }
+
+    public function __toString(): string
+{
+    return $this->shortcode ?? '';
+}
 }

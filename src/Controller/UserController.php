@@ -29,13 +29,6 @@ final class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('password')->getData();
-
-            if (empty($plainPassword)) {
-                $user->setPassword(null);
-            } else {
-                $this->hashPasswordIfNeeded($user, $passwordHasher, $plainPassword);
-            }
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -95,18 +88,11 @@ final class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $originalPassword = $user->getPassword();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('password')->get('first')->getData();
-
-            if (empty($plainPassword)) {
-                $user->setPassword($originalPassword);
-            } else {
-                $this->hashPasswordIfNeeded($user, $passwordHasher, $plainPassword);
-            }
+           
 
             $entityManager->flush();
 

@@ -15,13 +15,12 @@ trait EntityTrait
     
     #[ORM\Column(type: 'boolean', nullable: true)]
     private ?bool $deleted=false;
+  
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
-    private ?\DateTimeInterface $createdAt = null;
+    private ?\DateTimeInterface $createdAt= null ;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]

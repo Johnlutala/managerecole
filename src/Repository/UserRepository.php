@@ -24,7 +24,7 @@ class UserRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('u')
             ->andWhere('u.deleted = :deleted')
             ->setParameter('deleted', false)
-            ->orderBy('u.firstname', 'ASC');
+            ->orderBy('u.createdAt', 'DESC');
 
         if ($status !== null && $status !== '') {
             $qb->andWhere('u.enabled = :enabled')

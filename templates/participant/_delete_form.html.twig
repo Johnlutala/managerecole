@@ -20,13 +20,13 @@ document.querySelectorAll('.btnDelete').forEach(function (button) {
         const form = button.closest('form');
 
         Swal.fire({
-            title: 'Supprimer ce participant ?',
+            title: 'Voulez-vous désactiver ce participant ?',
             text: 'Cette action est irréversible.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Oui, supprimer',
+            confirmButtonText: 'Oui, désactiver',
             cancelButtonText: 'Annuler',
             reverseButtons: true
 

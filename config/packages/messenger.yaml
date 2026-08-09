@@ -21,7 +21,9 @@ framework:
             messenger.bus.default: []
 
         routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            # Send credential emails during the API request.
+            # Without this route, Mailer sends them immediately instead of queueing.
+            # A Messenger worker is therefore not required for these emails.
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
 
