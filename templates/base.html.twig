@@ -9,11 +9,8 @@
    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
-    
-
     <link href="{{ asset('assets/css/vendors.min.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css">
-
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     
     
@@ -21,15 +18,16 @@
 
 <body>
   {% include 'Partials/dashboard.html.twig' %}
+  {# {% include 'Partials/index.html.twig' %} #}
 
     {% block body %}{% endblock %}
-
- <!-- Vendor js -->
-	<script src={{ asset("assets/js/vendors.min.js") }}></script>
-	<script src={{ asset("assets/js/app.js") }}></script>
-	<script src={{ asset("assets/plugins/chartjs/chart.umd.js") }}></script>
-	<script src={{ asset("assets/js/pages/custom-table.js") }}></script>
-	<script src={{ asset("assets/js/pages/dashboard.js") }}></script>
+ 
+    <!-- Vendor js -->
+    <script src={{asset("assets/js/vendors.min.js")}}></script>
+    <script src={{asset("assets/js/app.js")}}></script>
+    <script src={{asset("assets/plugins/chartjs/chart.umd.js")}}></script>
+    <script src={{asset("assets/js/pages/custom-table.js")}}></script>
+    <script src={{asset("assets/js/pages/dashboard.js")}}></script>
 
 </body>
 </html>
