@@ -53,7 +53,7 @@
 								<div class="d-grid gap-2">
 									<a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal">
 										<i class="ti ti-key fs-lg"></i>
-										Accès utilisateur
+										Mot de passe
 									</a>
 									<a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning">
 										<i class="ti ti-edit"></i>
@@ -62,10 +62,10 @@
 
 									{% include 'user/_delete_form.html.twig' %}
 
-									<a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+									{# <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
 										<i class="ti ti-arrow-left"></i>
 										Retour
-									</a>
+									</a> #}
 								</div>
 							</div>
 
@@ -166,22 +166,9 @@
 					<h4 class="mb-0">Gestion des identifiants</h4>
 				</div>
 
-				<p class="text-muted mt-2">
-					Utilisez le bouton
-					<strong>« Générer  »</strong>
-					pour créer des nouveaux identifiants(Nom d'utilisateur et Mot de passe). <br>
-										Utilisez le bouton
-					<strong>« Réinitialiser »</strong>
-					pour remplacer ou mettre à jour uniquement le Mot de passe actuel.
-				</p>
+				<p class="text-muted mt-2">Utilisez le bouton <strong>&laquo; R&eacute;initialiser &raquo;</strong> pour remplacer le mot de passe actuel.</p>
 
 				<div class="d-flex justify-content-center gap-3 mt-4">
-
-
-					<button class="btn btn-primary" id="btnGeneratePassword">
-						<i class="ti ti-key me-2"></i>
-						Générer
-					</button>
 
 					<button class="btn btn-warning" id="btnResetPassword">
 						<i class="ti ti-refresh me-2"></i>
@@ -205,84 +192,6 @@
 <script>
 
 	const userId = {{ user.id }};
-
-// ===============================
-// Génération des identifiants
-// ===============================
-document.getElementById('btnGeneratePassword').addEventListener('click', async function () {
-
-Swal.fire({
-title: 'Génération des identifiants...',
-text: 'Veuillez patienter quelques instants.',
-allowOutsideClick: false,
-allowEscapeKey: false,
-didOpen: () => {
-Swal.showLoading();
-}
-});
-
-try {
-
-const response = await fetch('/api/rest/v1/users/' + userId + '/generate-password', {method: 'POST'});
-
-const data = await response.json();
-
-Swal.close();
-
-if (response.ok && data.code === "0") {
-
-Swal.fire({
-    icon: 'success',
-    title: 'Identifiants générés avec succès',
-    html: `
-        <div class="text-start mt-3">
-
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Nom d'utilisateur
-                </label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="${data.data.username}"
-                    readonly
-                >
-            </div>
-
-            <div>
-                <label class="form-label fw-semibold">
-                    Mot de passe
-                </label>
-                <input
-                    type="text"
-                    class="form-control font-monospace"
-                    value="${data.data.password}"
-                    readonly
-                >
-            </div>
-
-        </div>
-    `,
-    confirmButtonText: 'Fermer',
-    confirmButtonColor: '#0d6efd',
-    width: '450px'
-});
-} else {
-
-Swal.fire({icon: 'error', title: 'Erreur', text: data.message});
-
-}
-
-} catch (e) {
-
-Swal.close();
-
-Swal.fire({icon: 'error', title: 'Erreur', text: e.message});
-
-}
-
-});
-
 
 // ===============================
 // Réinitialisation

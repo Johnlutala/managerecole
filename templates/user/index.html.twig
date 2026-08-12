@@ -66,6 +66,7 @@
 										<tr class="text-uppercase fs-xxs">
 											<th>Noms</th>
 											<th>Nom Utilisateur</th>
+											<th>Email</th>
 											<th>Rôles</th>
 											<th>Statut</th>
 											<th class="text-center">Actions</th>
@@ -92,6 +93,7 @@
 													</div>
 												</td>
 												<td>{{ user.username ? user.username : '---' }}</td>
+												<td>{{ user.email ? user.email : '---' }}</td>
 												<td>{{ user.roles|join(', ') }}</td>
 												<td>
 													{% if user.enabled %}

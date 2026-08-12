@@ -24,7 +24,7 @@ final class ParticipantController extends AbstractController
 
         $status = $request->query->get('status');
 
-        if ($this->isGranted('ROLE_ADMIN')) {
+        // if ($this->isGranted('ROLE_ADMIN')) {
 
             // L'administrateur voit tous les participants
             if ($status === '0') {
@@ -39,20 +39,21 @@ final class ParticipantController extends AbstractController
                     'deleted' => false,
                 ], ['id' => 'ASC']);
             }
-        } else {
 
-            /** @var User $user */
-            $user = $this->getUser();
+        // } else {
 
-            // L'utilisateur ne voit que les participants qu'il a créés
-            if ($status === '0') {
-                $participants = $participantRepository->findActiveByUser($user);
-            } elseif ($status === '1') {
-                $participants = $participantRepository->findDisabledByUser($user);
-            } else {
-                $participants = $participantRepository->findAllNotDeletedByUser($user);
-            }
-        }
+        //     /** @var User $user */
+        //     $user = $this->getUser();
+
+        //     // L'utilisateur ne voit que les participants qu'il a créés
+        //     if ($status === '0') {
+        //         $participants = $participantRepository->findActiveByUser($user);
+        //     } elseif ($status === '1') {
+        //         $participants = $participantRepository->findDisabledByUser($user);
+        //     } else {
+        //         $participants = $participantRepository->findAllNotDeletedByUser($user);
+        //     }
+        // }
         $participant = new Participant();
         $form = $this->createForm(ParticipantType::class, $participant);
         $form->handleRequest($request);
