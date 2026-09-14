@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Service;
 
@@ -13,8 +13,7 @@ class JwtTokenService
     public function __construct(
         private string $secretKey,
         private string $algo
-    ) {
-    }
+    ) {}
 
     /**
      * Génère un token pour un utilisateur
@@ -36,14 +35,14 @@ class JwtTokenService
      */
     public function extractTokenFromRequest(Request $request): ?string
     {
-        $authHeader = $request->headers->get('x-api-token');
+        $authHeader = $request->headers->get('Authorization')
+            ?? $request->headers->get('x-api-token');
 
-
-        if (!$authHeader || str_starts_with($authHeader, 'Bearer ')) {
+        if (!$authHeader) {
             return null;
         }
 
-        return $authHeader;
+        return preg_replace('/^Bearer\s+/i', '', trim($authHeader)) ?: null;
     }
 
     /**
@@ -54,16 +53,14 @@ class JwtTokenService
     {
         try {
             $decoded = JWT::decode($token, new Key($this->secretKey, $this->algo));
-            
+
             // Retourne le payload sous forme de tableau
             return (array) $decoded;
-            
         } catch (ExpiredException $e) {
             //throw new \Exception("Le token a expiré le " . date('Y-m-d H:i:s', $e->getPayload()->exp));
             return [
                 "error" => "Token expiré"
             ];
-
         } catch (SignatureInvalidException $e) {
             //throw new \Exception("La signature du token est invalide.");
             return [

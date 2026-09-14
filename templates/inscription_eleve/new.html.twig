@@ -1,0 +1,3 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle inscription{% endblock %}
+{% block body %}<div class="wrapper"><div class="content-page"><div class="container-fluid"><div class="page-title-head"><h4 class="fs-xl fw-bold m-0">Nouvelle inscription</h4></div><div class="card"><div class="card-body">{{ include('inscription_eleve/_form.html.twig', {button_label: 'Enregistrer la demande'}) }}</div></div><a class="btn btn-light" href="{{ path('app_inscription_eleve_index') }}">Retour à la liste</a></div></div></div>{% endblock %}

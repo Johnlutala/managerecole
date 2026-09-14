@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit AnneeScolaire{% endblock %}
+
+{% block body %}
+    <h1>Edit AnneeScolaire</h1>
+
+    {{ include('annee_scolaire/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_annee_scolaire_index') }}">back to list</a>
+
+    {{ include('annee_scolaire/_delete_form.html.twig') }}
+{% endblock %}

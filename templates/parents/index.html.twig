@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Parents
+{% endblock %}
+
+{% block body %}
+	<div class="wrapper">
+		<div class="content-page">
+			<div class="container-fluid">
+				<div class="page-title-head d-flex align-items-center">
+					<div class="flex-grow-1">
+						<h4 class="fs-xl fw-bold m-0">Parents</h4>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-header border-light d-flex justify-content-between">
+						<div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
+						</div>
+						<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+							<i class="ti ti-plus me-1"></i>Ajouter</button>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-custom table-centered table-hover w-100 mb-0">
+							<thead class="bg-light bg-opacity-25 thead-sm">
+								<tr class="text-uppercase fs-xxs">
+									<th>Nom</th>
+									<th>Téléphone</th>
+									<th>Type</th>
+									<th class="text-center">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for parent in parents %}
+									<tr>
+										<td>{{ parent.nom }}
+											{{ parent.postnom }}
+											{{ parent.prenom }}</td>
+										<td>{{ parent.telephone }}</td>
+										<td>{{ parent.type }}</td>
+										<td>
+											<div class="d-flex justify-content-center gap-1">
+												<a href="{{ path('app_parents_show', {id: parent.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+													<i class="ti ti-eye fs-lg"></i>
+												</a>
+												<a href="{{ path('app_parents_edit', {id: parent.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+													<i class="ti ti-edit fs-lg"></i>
+												</a>
+											</div>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="4" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal" tabindex="-1">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">{{ form_start(form) }}<div class="modal-header">
+					<h5 class="modal-title">Nouveau parent</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">{% include 'crud/_form_fields.html.twig' with {form: form} %}</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+					<button class="btn btn-primary">Enregistrer</button>
+				</div>
+				{{ form_end(form) }}</div>
+		</div>
+	</div>
+{% endblock %}

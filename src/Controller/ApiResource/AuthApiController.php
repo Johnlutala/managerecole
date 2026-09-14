@@ -2,119 +2,63 @@
 
 namespace App\Controller\ApiResource;
 
-use App\Controller\ApiResource\AbstractApiController;
-use App\Dto\Api\LoginPayload;
 use App\Repository\UserRepository;
-use App\Service\JwtTokenService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/rest/v1/auth')]
+#[Route('/api')]
 final class AuthApiController extends AbstractApiController
 {
-    private UserRepository $repo;
-
-    public function __construct(
-        UserRepository $repo_
-    )
-    {
-        $this->repo = $repo_;
-        
-    }
-
-    
-
     #[Route('/login', name: 'api_login', methods: ['POST'])]
     public function login(
         Request $request,
-        JwtTokenService $jwt,
-    ): JsonResponse
-    {
+        UserRepository $userRepository,
+        UserPasswordHasherInterface $passwordHasher
+    ): JsonResponse {
+        $data = $this->getJsonData($request);
+        $username = trim((string) ($data['username'] ?? $data['email'] ?? ''));
+        $password = (string) ($data['password'] ?? '');
 
-        try {
-                
-            $operation = "Authentification";
-
-            $data = $this->getJsonData($request);
-            $payload = new LoginPayload(
-                $data['username'],
-                $data['password']
-            );
-
-            $validationMessages = $this->validateObject($payload);
-
-            if (count($validationMessages) > 0) {
-                
-                return $this->error(
-                    "Données invalides",
-                    $validationMessages,
-                    $operation,
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
-
-            $user = $this->repo->findOneBy([
-                'username' => $data['username'],
-            ]);
-
-            if (!$user) {
-                return $this->error(
-                    'Utilisateur invalide',
-                    [],
-                    $operation,
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
-
-            $isPasswordValid = $user->verifyPassword($data['password']);
-
-            if ($isPasswordValid === false) {
-                
-                return $this->error(
-                    'Mot de passe invalide',
-                    [],
-                    $operation,
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
-
-            // Vérifier que l'utilisateur a une configuration
-            $configuration = $user->getConfiguration();
-            if (!$configuration) {
-                return $this->error(
-                    "Utilisateur invalide",
-                    ['merchant' => $configuration],
-                    "Authentification",
-                    Response::HTTP_BAD_REQUEST
-                );
-            }
-
-            // Generer le token JWT
-            $token = $jwt->generateToken([
-                'username' => $user->getUsername(),
-                'shortcode' => $configuration->getShortcode()
-            ]);
-
-            return $this->success(
-                [
-                    'token' => $token                
-                ],
-                $operation,
-                Response::HTTP_OK
-            );
-
-
-        } catch (\Throwable $e) {
+        if ($username === '' || $password === '') {
             return $this->error(
-                "Une erreur est survenue lors de l'authentification",
-                ['exception' => $e->getMessage()],
-                "Authentification",
-                Response::HTTP_INTERNAL_SERVER_ERROR
+                'Les champs username et password sont obligatoires.',
+                [],
+                'Connexion mobile',
+                Response::HTTP_BAD_REQUEST
             );
         }
 
-    }
+        $user = $userRepository->findOneBy([
+            'username' => $username,
+            'enabled' => true,
+            'deleted' => false,
+        ]);
 
+        if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
+            return $this->error(
+                'Identifiants invalides.',
+                [],
+                'Connexion mobile',
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+
+        return $this->success([
+            'token' => $this->jwt->generateToken([
+                'shortcode' => $user->getCode() ?? (string) $user->getId(),
+                'username' => $user->getUserIdentifier(),
+            ]),
+            'expiresIn' => 1800,
+            'user' => [
+                'id' => $user->getId(),
+                'username' => $user->getUserIdentifier(),
+                'firstname' => $user->getFirstname(),
+                'lastname' => $user->getLastname(),
+                'roles' => $user->getRoles(),
+            ],
+        ], 'Connexion mobile');
+    }
 }

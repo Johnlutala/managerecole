@@ -1,0 +1,476 @@
+{% extends 'base.html.twig' %}
+{% block title %}Options
+{% endblock %}
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">Options</h4>
+                    </div>
+                </div>
+                <div data-table data-table-rows-per-page="8" class="card">
+                    <div class="card-header border-light d-flex justify-content-between">
+                        <div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                            <i class="ti ti-plus me-1"></i>Ajouter</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom table-centered table-hover w-100 mb-0">
+                            <thead class="bg-light bg-opacity-25 thead-sm">
+                                <tr class="text-uppercase fs-xxs">
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Classe</th>
+                                    <th>Ecole</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for option in options %}
+                                    <tr>
+                                        <td>{{ option.code }}</td>
+                                        <td>{{ option.nom }}</td>
+                                        <td>{{ option.classe ? option.classe.nom : '—' }}</td>
+                                        <td>{{ option.classe and option.classe.ecole ? option.classe.ecole.nom: '—'}}</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{{ path('app_option_show', {id: option.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-eye fs-lg"></i>
+                                                </a>
+                                                <a href="{{ path('app_option_edit', {id: option.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-edit fs-lg"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="10" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer border-0 d-flex justify-content-between">
+                        <div data-table-pagination-info></div>
+                        <div data-table-pagination></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                {{ form_start(form) }}
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Ajouter Option
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    >
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        {# ============================= #}
+                        {# FORMULAIRE                      #}
+                        {# ============================= #}
+
+                        <div class="col-lg-8">
+
+                            {% include 'crud/_form_fields.html.twig' with {
+                            form: form
+                        } %}
+
+                        </div>
+
+                        {# ============================= #}
+                        {# OPTIONS EXISTANTES              #}
+                        {# ============================= #}
+
+                        <div class="col-lg-4">
+
+                            <div
+                                id="optionsCard"
+                                class="card border shadow-none"
+                                style="display: none;"
+                            >
+
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0 fs-md">
+                                        <i class="ti ti-list-check me-1"></i>
+                                        Options disponibles
+                                    </h5>
+                                </div>
+
+                                <div class="card-body">
+
+                                    {# Chargement #}
+                                    <div
+                                        id="optionsLoading"
+                                        class="text-center py-3"
+                                        style="display: none;"
+                                    >
+
+                                        <div
+                                            class="spinner-border spinner-border-sm text-primary"
+                                            role="status"
+                                        >
+                                        </div>
+
+                                        <span class="ms-2 text-muted">
+                                            Chargement...
+                                        </span>
+
+                                    </div>
+
+
+                                    {# Message aucune option #}
+                                    <div
+                                        id="noOptions"
+                                        class="text-center text-muted py-3"
+                                        style="display: none;"
+                                    >
+
+                                        <i class="ti ti-info-circle fs-2 d-block mb-2"></i>
+
+                                        <span>
+                                            Aucune option n'est encore
+                                            associée à cette classe.
+                                        </span>
+
+                                    </div>
+
+
+                                    {# Liste des options #}
+                                    <div id="optionsList">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {# Message avant sélection classe #}
+
+                            <div
+                                id="selectClasseMessage"
+                                class="text-center text-muted py-5"
+                            >
+
+                                <i class="ti ti-school fs-1 d-block mb-2"></i>
+
+                                <span>
+                                    Sélectionnez une classe pour voir
+                                    les options disponibles.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+
+                        Annuler
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+
+                        <i class="ti ti-device-floppy me-1"></i>
+
+                        Enregistrer
+
+                    </button>
+
+                </div>
+
+                {{ form_end(form) }}
+
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ecoleSelect = document.getElementById("option_ecole");
+            const classeSelect = document.getElementById("option_classe");
+
+            const optionsCard = document.getElementById("optionsCard");
+            const optionsLoading = document.getElementById("optionsLoading");
+            const optionsList = document.getElementById("optionsList");
+            const noOptions = document.getElementById("noOptions");
+            const selectClasseMessage = document.getElementById("selectClasseMessage");
+
+            /*
+            |--------------------------------------------------------------------------
+            | ÉCOLE → CLASSES
+            |--------------------------------------------------------------------------
+            */
+
+            if (ecoleSelect && classeSelect) {
+                ecoleSelect.addEventListener("change", function () {
+                    const ecoleId = this.value;
+
+                    // Réinitialiser les classes
+                    classeSelect.innerHTML = "";
+
+                    // Réinitialiser le card des options
+                    resetOptionsCard();
+
+                    // Si aucune école
+                    if (!ecoleId) {
+                        const option = document.createElement("option");
+
+                        option.value = "";
+                        option.textContent = "Sélectionner d'abord une école";
+
+                        classeSelect.appendChild(option);
+
+                        return;
+                    }
+
+                    // Afficher chargement
+                    const loadingOption = document.createElement("option");
+
+                    loadingOption.value = "";
+                    loadingOption.textContent = "Chargement...";
+
+                    classeSelect.appendChild(loadingOption);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | AJAX : récupérer les classes de l'école
+                    |--------------------------------------------------------------------------
+                    */
+
+                    fetch("/option/classes/" + ecoleId)
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(
+                                    "Erreur lors du chargement des classes",
+                                );
+                            }
+
+                            return response.json();
+                        })
+
+                        .then((classes) => {
+                            classeSelect.innerHTML = "";
+
+                            // Option par défaut
+                            const optionDefault = document.createElement("option");
+
+                            optionDefault.value = "";
+                            optionDefault.textContent = "Sélectionner une classe";
+
+                            classeSelect.appendChild(optionDefault);
+
+                            // Ajouter les classes
+                            classes.forEach((classe) => {
+                                const option = document.createElement("option");
+
+                                option.value = classe.id;
+                                option.textContent = classe.nom;
+
+                                classeSelect.appendChild(option);
+                            });
+                        })
+
+                        .catch((error) => {
+                            console.error(error);
+
+                            classeSelect.innerHTML = "";
+
+                            const option = document.createElement("option");
+
+                            option.value = "";
+                            option.textContent = "Impossible de charger les classes";
+
+                            classeSelect.appendChild(option);
+                        });
+                });
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLASSE → OPTIONS EXISTANTES
+            |--------------------------------------------------------------------------
+            */
+
+            if (classeSelect) {
+                classeSelect.addEventListener("change", function () {
+                    const classeId = this.value;
+
+                    // Réinitialiser
+                    optionsList.innerHTML = "";
+
+                    noOptions.style.display = "none";
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Aucune classe sélectionnée
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (!classeId) {
+                        resetOptionsCard();
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Afficher le card
+                    |--------------------------------------------------------------------------
+                    */
+
+                    selectClasseMessage.style.display = "none";
+
+                    optionsCard.style.display = "block";
+
+                    optionsLoading.style.display = "block";
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | AJAX : récupérer les options
+                    |--------------------------------------------------------------------------
+                    */
+
+                    fetch("/option/options-by-classe/" + classeId)
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(
+                                    "Erreur lors du chargement des options",
+                                );
+                            }
+
+                            return response.json();
+                        })
+
+                        .then((options) => {
+                            optionsLoading.style.display = "none";
+
+                            optionsList.innerHTML = "";
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Aucune option
+                            |--------------------------------------------------------------------------
+                            */
+
+                            if (options.length === 0) {
+                                noOptions.style.display = "block";
+
+                                return;
+                            }
+
+                            /*
+                            |--------------------------------------------------------------------------
+                            | Afficher les options
+                            |--------------------------------------------------------------------------
+                            */
+
+                            options.forEach((option, index) => {
+                                const div = document.createElement("div");
+
+                                div.className =
+                                    "d-flex align-items-center border-bottom py-2";
+
+                                div.innerHTML = `
+
+							<span class="fw-semibold me-2">
+								${index + 1}.
+							</span>
+
+							<span>
+								${escapeHtml(option.nom)}
+							</span>
+
+						`;
+
+                                optionsList.appendChild(div);
+                            });
+                        })
+                        .catch((error) => {
+                            console.error(error);
+
+                            optionsLoading.style.display = "none";
+
+                            optionsList.innerHTML = `
+
+                        <div class="alert alert-danger mb-0">
+
+                            <i class="ti ti-alert-circle me-1"></i>
+
+                            Impossible de charger les options.
+
+                        </div>
+
+                    `;
+                        });
+                });
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | RESET DU CARD
+            |--------------------------------------------------------------------------
+            */
+
+            function resetOptionsCard() {
+                optionsCard.style.display = "none";
+
+                optionsLoading.style.display = "none";
+
+                optionsList.innerHTML = "";
+
+                noOptions.style.display = "none";
+
+                selectClasseMessage.style.display = "block";
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Sécurité affichage HTML
+            |--------------------------------------------------------------------------
+            */
+
+            function escapeHtml(value) {
+                const div = document.createElement("div");
+
+                div.textContent = value ?? "";
+
+                return div.innerHTML;
+            }
+        });
+    </script>
+
+{% endblock %}

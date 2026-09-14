@@ -1,0 +1,375 @@
+{{ form_start(form, {attr: { class: 'w-100'}}) }}
+
+
+<div class="card border mb-3">
+
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="ti ti-file-description me-2"></i>
+            Informations de l'inscription
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            {# Référence #}
+            <div class="col-md-6">
+                {{ form_row(form.reference, {
+                    label: 'Matricule / référence',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Ex. INS-2026-001'
+                    }
+                }) }}
+            </div>
+
+            {# Type d'inscription #}
+            <div class="col-md-6">
+                {{ form_row(form.typeInscription, {
+                    label: "Type d'élève",
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{# ========================================================= #}
+{# INFORMATIONS DE L'ÉLÈVE #}
+{# ========================================================= #}
+
+<div class="card border mb-3">
+
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="ti ti-user me-2"></i>
+            Informations de l'élève
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            {# Nom #}
+            <div class="col-md-4">
+                {{ form_row(form.nom, {
+                    label: 'Nom',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Nom'
+                    }
+                }) }}
+            </div>
+
+            {# Postnom #}
+            <div class="col-md-4">
+                {{ form_row(form.postnom, {
+                    label: 'Postnom',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Postnom'
+                    }
+                }) }}
+            </div>
+
+            {# Prénom #}
+            <div class="col-md-4">
+                {{ form_row(form.prenom, {
+                    label: 'Prénom',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Prénom'
+                    }
+                }) }}
+            </div>
+
+
+            {# Sexe #}
+            <div class="col-md-4">
+                {{ form_row(form.sexe, {
+                    label: 'Sexe',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+            {# Date naissance #}
+            <div class="col-md-4">
+                {{ form_row(form.dateNaissance, {
+                    label: 'Date de naissance',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+            {# Lieu naissance #}
+            <div class="col-md-4">
+                {{ form_row(form.lieuNaissance, {
+                    label: 'Lieu de naissance',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Lieu de naissance'
+                    }
+                }) }}
+            </div>
+
+
+            {# Nationalité #}
+            <div class="col-md-4">
+                {{ form_row(form.nationalite, {
+                    label: 'Nationalité',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Ex. Congolaise'
+                    }
+                }) }}
+            </div>
+
+            {# Téléphone #}
+            <div class="col-md-4">
+                {{ form_row(form.telephone, {
+                    label: 'Téléphone',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: '+243 ...'
+                    }
+                }) }}
+            </div>
+
+            {# Adresse #}
+            <div class="col-md-4">
+                {{ form_row(form.adresse, {
+                    label: 'Adresse',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'Adresse de résidence'
+                    }
+                }) }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{# ========================================================= #}
+{# INFORMATIONS DU PARENT / TUTEUR #}
+{# ========================================================= #}
+
+<div class="card border mb-3">
+
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="ti ti-users me-2"></i>
+            Informations du parent / tuteur
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            {# Nom parent #}
+            <div class="col-md-4">
+                {{ form_row(form.nomParent, {
+                    label: 'Nom',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+            {# Postnom parent #}
+            <div class="col-md-4">
+                {{ form_row(form.postnomParent, {
+                    label: 'Postnom',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+            {# Prénom parent #}
+            <div class="col-md-4">
+                {{ form_row(form.prenomParent, {
+                    label: 'Prénom',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+
+            {# Téléphone parent #}
+            <div class="col-md-4">
+                {{ form_row(form.telephoneParent, {
+                    label: 'Téléphone',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: '+243 ...'
+                    }
+                }) }}
+            </div>
+
+            {# Email parent #}
+            <div class="col-md-4">
+                {{ form_row(form.emailParent, {
+                    label: 'E-mail',
+                    attr: {
+                        class: 'form-control',
+                        placeholder: 'exemple@email.com'
+                    }
+                }) }}
+            </div>
+
+            {# Profession #}
+            <div class="col-md-4">
+                {{ form_row(form.professionParent, {
+                    label: 'Profession',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+
+            {# Lien parental #}
+            <div class="col-md-4">
+                {{ form_row(form.lienParental, {
+                    label: 'Lien avec l’élève',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+            {# Adresse parent #}
+            <div class="col-md-8">
+                {{ form_row(form.adresseParent, {
+                    label: 'Adresse',
+                    attr: {
+                        class: 'form-control'
+                    }
+                }) }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{# ========================================================= #}
+{# SCOLARITÉ #}
+{# ========================================================= #}
+
+<div class="card border mb-3">
+
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="ti ti-school me-2"></i>
+            Informations scolaires
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            {# Établissement #}
+            <div class="col-md-6">
+                {{ form_row(form.etablissement, {
+                    label: 'École',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+            {# Année scolaire #}
+            <div class="col-md-6">
+                {{ form_row(form.anneeScolaire, {
+                    label: 'Année scolaire',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+
+            {# Section #}
+            <div class="col-md-4">
+                {{ form_row(form.section, {
+                    label: 'Section',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+            {# Classe #}
+            <div class="col-md-4">
+                {{ form_row(form.classe, {
+                    label: 'Classe',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+            {# Option #}
+            <div class="col-md-4">
+                {{ form_row(form.options, {
+                    label: 'Option',
+                    attr: {
+                        class: 'form-select'
+                    }
+                }) }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{# ========================================================= #}
+{# BOUTONS #}
+{# ========================================================= #}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <a href="{{ path('app_inscription_eleve_index') }}"
+       class="btn btn-light">
+
+        <i class="ti ti-arrow-left me-1"></i>
+        Annuler
+
+    </a>
+
+    <button class="btn btn-primary">
+
+        <i class="ti ti-device-floppy me-1"></i>
+
+        {{ button_label|default('Enregistrer') }}
+
+    </button>
+
+</div>
+
+{{ form_end(form) }}

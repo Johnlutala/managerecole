@@ -1,16 +1,15 @@
 <div
-	class="wrapper">
-	<!-- Begin page --
-				            
-				  <!-- Sidenav Menu Start -->
+	class="wrapper"
+>
+
 	<div
-		class="sidenav-menu">
+		class="sidenav-menu"
+	>
 		<!-- Brand Logo -->
 		<a href="index-2.html" class="logo">
 			<span class="logo logo-light">
 				<span class="logo-lg"><img src="assets/images/enabel.png"></span>
 			</span>
-
 		</a>
 
 		<!-- Sidebar Hover Menu Toggle Button -->
@@ -22,88 +21,300 @@
 		<button class="button-close-offcanvas">
 			<i class="ti ti-x align-middle"></i>
 		</button>
+		<div class="scrollbar" data-simplebar>
 
-		<div
-			class="scrollbar" data-simplebar>
 			<!--- Sidenav Menu -->
 			<ul class="side-nav">
+
 				<li class="side-nav-title mt-2" data-lang="menu-title"></li>
 
+				{# ==================== TABLEAU DE BORD ==================== #}
 				<li class="side-nav-item">
-					<a href="{{ path('app_default') }}" class="side-nav-link">
+					<a href="{{ path('app_home') }}" class="side-nav-link">
 						<span class="menu-icon">
-							<i data-lucide="circle-gauge"></i>
+							<i data-lucide="layout-dashboard"></i>
 						</span>
-						<span class="menu-text" data-lang="Dashboard">
+						<span class="menu-text">
 							Tableau de bord
 						</span>
 					</a>
 				</li>
-				<li class="side-nav-title" data-lang="apps-title">ECOLE</li>
-                 <li class="side-nav-item">
-                        <a data-bs-toggle="collapse" href="#sidebarEcommerce" aria-expanded="false" aria-controls="sidebarEcommerce" class="side-nav-link">
-                            <span class="menu-icon"><i data-lucide="shopping-bag"></i></span>
-                            <span class="menu-text" data-lang="ecommerce">Ecole</span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <div class="collapse" id="sidebarEcommerce">
-                            <ul class="sub-menu">
-                                <li class="side-nav-item">
-                                    <a href="ecommerce-categories.html" class="side-nav-link">
-                                        <span class="menu-text" data-lang="eco-categories">Categories</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+
+
+				{# ==================== INSCRIPTION ==================== #}
+				<li class="side-nav-title">Gestion</li>
 
 				<li class="side-nav-item">
-					<a href="{{ path('app_workshop_index') }}" class="side-nav-link">
+					<a
+						data-bs-toggle="collapse"
+						href="#sidebarInscr"
+						aria-expanded="false"
+						aria-controls="sidebarInscr"
+						class="side-nav-link"
+					>
+
 						<span class="menu-icon">
-							<i data-lucide="graduation-cap"></i>
+							<i data-lucide="clipboard-pen-line"></i>
 						</span>
-						<span class="menu-text" data-lang="etelier">
-							Atéliers
+
+						<span class="menu-text">
+							Inscription
 						</span>
 					</a>
-				</li>
-				<li class="side-nav-item">
-					<a href="{{ path('app_participant_index') }}" class="side-nav-link">
-						<span class="menu-icon">
-							<i data-lucide="users"></i>
-						</span>
-						<span class="menu-text" data-lang="participant">
-							Participants
-						</span>
-					</a>
-				</li>
-				
-				 <li class="side-nav-title" data-lang="apps-title">PERSONNELS</li>
 
-                    <li class="side-nav-item">
-                        <a href="chat.html" class="side-nav-link">
-                            <span class="menu-icon"><i data-lucide="message-square-dot"></i></span>
-                            <span class="menu-text" data-lang="chat"> Chat </span>
-                        </a>
-                    </li>
-                    <li class="side-nav-title" data-lang="apps-title">Finance</li>
+					<div class="collapse" id="sidebarInscr">
 
-                    <li class="side-nav-title" data-lang="apps-title">Utilisteur</li>
-                     {% if is_granted('ROLE_ADMIN') %}
+						<ul class="sub-menu">
+
+							{# Élève #}
+							<li class="side-nav-item">
+								<a
+									href="{{ path('app_inscription_eleve_index') }}"
+									class="side-nav-link"
+								>
+
+									<span class="menu-icon">
+										<i data-lucide="user-round-plus"></i>
+									</span>
+
+									<span class="menu-text">
+										Élève
+									</span>
+								</a>
+							</li>
+
+							{# Enseignant #}
+							<li class="side-nav-item">
+								<a
+									href="#"
+									class="side-nav-link"
+								>
+
+									<span class="menu-icon">
+										<i data-lucide="presentation"></i>
+									</span>
+
+									<span class="menu-text">
+										Enseignant
+									</span>
+								</a>
+							</li>
+
+							{# Administratif #}
+							<li class="side-nav-item">
+								<a
+									href="#"
+									class="side-nav-link"
+								>
+
+									<span class="menu-icon">
+										<i data-lucide="briefcase-business"></i>
+									</span>
+
+									<span class="menu-text">
+										Administratif
+									</span>
+								</a>
+							</li>
+
+						</ul>
+					</div>
+				</li>
+
+
+				{# ==================== ETABLISSEMENT ==================== #}
+				{% if is_granted('ROLE_ADMIN') %}
+
 					<li class="side-nav-item">
-						<a href="{{ path('app_user_index') }}" class="side-nav-link">
+
+						<a
+							data-bs-toggle="collapse"
+							href="#sidebarEtablissement"
+							aria-expanded="false"
+							aria-controls="sidebarEtablissement"
+							class="side-nav-link"
+						>
+
 							<span class="menu-icon">
-								<i data-lucide="user"></i>
+								<i data-lucide="school"></i>
 							</span>
-							<span class="menu-text" data-lang="participant">
+
+							<span class="menu-text">
+								Établissement
+							</span>
+
+						</a>
+
+						<div class="collapse" id="sidebarEtablissement">
+
+							<ul class="sub-menu">
+
+								{# École #}
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_ecole_index') }}"
+										class="side-nav-link"
+									>
+
+										<span class="menu-icon">
+											<i data-lucide="school"></i>
+										</span>
+
+										<span class="menu-text">
+											École
+										</span>
+
+									</a>
+								</li>
+
+
+								{# Section #}
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_section_index') }}"
+										class="side-nav-link"
+									>
+
+										<span class="menu-icon">
+											<i data-lucide="panels-top-left"></i>
+										</span>
+
+										<span class="menu-text">
+											Section
+										</span>
+
+									</a>
+								</li>
+
+
+								{# Classes #}
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_classe_index') }}"
+										class="side-nav-link"
+									>
+
+										<span class="menu-icon">
+											<i data-lucide="book-open"></i>
+										</span>
+
+										<span class="menu-text">
+											Classes
+										</span>
+
+									</a>
+								</li>
+
+
+								{# Options #}
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_option_index') }}"
+										class="side-nav-link"
+									>
+
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+
+										<span class="menu-text">
+											Options
+										</span>
+
+									</a>
+								</li>
+
+							</ul>
+
+						</div>
+
+					</li>
+
+				{% endif %}
+
+
+				{# ==================== PERSONNELS ==================== #}
+				<li class="side-nav-title">
+					PERSONNELS
+				</li>
+
+
+				{# Élèves #}
+				<li class="side-nav-item">
+					<a
+						href="{{ path('app_eleve_index') }}"
+						class="side-nav-link"
+					>
+
+						<span class="menu-icon">
+							<i data-lucide="users-round"></i>
+						</span>
+
+						<span class="menu-text">
+							Élèves
+						</span>
+
+					</a>
+				</li>
+
+
+				{# Administrateurs #}
+				<li class="side-nav-item">
+					<a
+						href="#"
+						class="side-nav-link"
+					>
+
+						<span class="menu-icon">
+							<i data-lucide="user-cog"></i>
+						</span>
+
+						<span class="menu-text">
+							Admin
+						</span>
+
+					</a>
+				</li>
+
+
+				{# ==================== FINANCE ==================== #}
+				<li class="side-nav-title">
+					FINANCE
+				</li>
+
+
+				{# ==================== UTILISATEURS ==================== #}
+				<li class="side-nav-title">
+					UTILISATEURS
+				</li>
+
+				{% if is_granted('ROLE_ADMIN') %}
+
+					<li class="side-nav-item">
+
+						<a
+							href="{{ path('app_user_index') }}"
+							class="side-nav-link"
+						>
+
+							<span class="menu-icon">
+								<i data-lucide="users"></i>
+							</span>
+
+							<span class="menu-text">
 								Utilisateurs
 							</span>
+
 						</a>
+
 					</li>
+
 				{% endif %}
+
 			</ul>
 		</div>
 	</div>
+
 	<!-- Sidenav Menu End -->
 
 	<!-- Topbar Start -->
@@ -119,291 +330,313 @@
 			</div>
 
 			{# Navbar détail #}
-			<div class="d-flex align-items-center gap-2">
+			<div
+				class="d-flex align-items-center gap-2"
+			>
 				<!-- Notification Dropdown -->
-                    <div class="topbar-item">
-                        <div class="dropdown">
-                            <button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
-                                <i data-lucide="bell" class="fs-xxl"></i>
-                                <span class="badge text-bg-danger badge-circle topbar-badge">5</span>
-                            </button>
+				<div class="topbar-item">
+					<div class="dropdown">
+						<button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
+							<i data-lucide="bell" class="fs-xxl"></i>
+							<span class="badge text-bg-danger badge-circle topbar-badge">5</span>
+						</button>
 
-                            <div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
-                                <div class="px-3 py-2 border-bottom">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <h6 class="m-0 fs-md fw-semibold">Notifications</h6>
-                                        </div>
-                                        <div class="col text-end">
-                                            <a href="#!" class="badge badge-soft-success badge-label py-1">07 Notifications</a>
-                                        </div>
-                                    </div>
-                                </div>
+						<div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+							<div class="px-3 py-2 border-bottom">
+								<div class="row align-items-center">
+									<div class="col">
+										<h6 class="m-0 fs-md fw-semibold">Notifications</h6>
+									</div>
+									<div class="col text-end">
+										<a href="#!" class="badge badge-soft-success badge-label py-1">07 Notifications</a>
+									</div>
+								</div>
+							</div>
 
-                                <div style="max-height: 300px;" data-simplebar>
-                                    <!-- Notification 1 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="assets/images/users/user-4.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-                                                <span class="position-absolute rounded-pill bg-success notification-badge">
-                                                    <i class="ti ti-bell align-middle"></i>
-                                                    <span class="visually-hidden">unread notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Emily Johnson</span> commented on a task in <span class="fw-medium text-body">Design Sprint</span><br>
-                                                <span class="fs-xs">12 minutes ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-1">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+							<div
+								style="max-height: 300px;"
+								data-simplebar
+							>
+								<!-- Notification 1 -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<img src="assets/images/users/user-4.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+											<span class="position-absolute rounded-pill bg-success notification-badge">
+												<i class="ti ti-bell align-middle"></i>
+												<span class="visually-hidden">unread notification</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Emily Johnson</span>
+											commented on a task in
+											<span class="fw-medium text-body">Design Sprint</span><br>
+											<span class="fs-xs">12 minutes ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-1">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 2 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="assets/images/users/user-5.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-                                                <span class="position-absolute rounded-pill bg-info notification-badge">
-                                                    <i class="ti ti-cloud-upload align-middle"></i>
-                                                    <span class="visually-hidden">upload notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Michael Lee</span> uploaded files to <span class="fw-medium text-body">Marketing Assets</span><br>
-                                                <span class="fs-xs">25 minutes ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-2">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+								<!-- Notification 2 -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<img src="assets/images/users/user-5.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+											<span class="position-absolute rounded-pill bg-info notification-badge">
+												<i class="ti ti-cloud-upload align-middle"></i>
+												<span class="visually-hidden">upload notification</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Michael Lee</span>
+											uploaded files to
+											<span class="fw-medium text-body">Marketing Assets</span><br>
+											<span class="fs-xs">25 minutes ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-2">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 3 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="assets/images/users/user-6.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-                                                <span class="position-absolute rounded-pill bg-warning notification-badge">
-                                                    <i class="ti ti-alert-triangle align-middle"></i>
-                                                    <span class="visually-hidden">alert</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Sophia Ray</span> flagged an issue in <span class="fw-medium text-body">Bug Tracker</span><br>
-                                                <span class="fs-xs">40 minutes ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-3">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+								<!-- Notification 3 -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<img src="assets/images/users/user-6.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+											<span class="position-absolute rounded-pill bg-warning notification-badge">
+												<i class="ti ti-alert-triangle align-middle"></i>
+												<span class="visually-hidden">alert</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Sophia Ray</span>
+											flagged an issue in
+											<span class="fw-medium text-body">Bug Tracker</span><br>
+											<span class="fs-xs">40 minutes ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-3">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 4 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="assets/images/users/user-7.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-                                                <span class="position-absolute rounded-pill bg-primary notification-badge">
-                                                    <i class="ti ti-calendar-event align-middle"></i>
-                                                    <span class="visually-hidden">event notification</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">David Kim</span> scheduled a meeting for <span class="fw-medium text-body">UX Review</span><br>
-                                                <span class="fs-xs">1 hour ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-4">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+								<!-- Notification 4 -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<img src="assets/images/users/user-7.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+											<span class="position-absolute rounded-pill bg-primary notification-badge">
+												<i class="ti ti-calendar-event align-middle"></i>
+												<span class="visually-hidden">event notification</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">David Kim</span>
+											scheduled a meeting for
+											<span class="fw-medium text-body">UX Review</span><br>
+											<span class="fs-xs">1 hour ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-4">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 5 -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <img src="assets/images/users/user-8.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-                                                <span class="position-absolute rounded-pill bg-secondary notification-badge">
-                                                    <i class="ti ti-edit-circle align-middle"></i>
-                                                    <span class="visually-hidden">edit</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Isabella White</span> updated the document in <span class="fw-medium text-body">Product Specs</span><br>
-                                                <span class="fs-xs">2 hours ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-5">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+								<!-- Notification 5 -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<img src="assets/images/users/user-8.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+											<span class="position-absolute rounded-pill bg-secondary notification-badge">
+												<i class="ti ti-edit-circle align-middle"></i>
+												<span class="visually-hidden">edit</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Isabella White</span>
+											updated the document in
+											<span class="fw-medium text-body">Product Specs</span><br>
+											<span class="fs-xs">2 hours ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-5">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 6 - Server CPU Alert -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-server-bolt fs-4 text-danger"></i>
-                                                </span>
-                                                <span class="position-absolute rounded-pill bg-danger notification-badge">
-                                                    <i class="ti ti-alert-circle align-middle"></i>
-                                                    <span class="visually-hidden">server alert</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Server #3</span> CPU usage exceeded 90%<br>
-                                                <span class="fs-xs">Just now</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-6">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+								<!-- Notification 6 - Server CPU Alert -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
+												<i class="ti ti-server-bolt fs-4 text-danger"></i>
+											</span>
+											<span class="position-absolute rounded-pill bg-danger notification-badge">
+												<i class="ti ti-alert-circle align-middle"></i>
+												<span class="visually-hidden">server alert</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Server #3</span>
+											CPU usage exceeded 90%<br>
+											<span class="fs-xs">Just now</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-6">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
 
-                                    <!-- Notification 7 - Deployment Success -->
-                                    <div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
-                                        <span class="d-flex align-items-center gap-3">
-                                            <span class="flex-shrink-0 position-relative">
-                                                <span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-rocket fs-4 text-success"></i>
-                                                </span>
-                                                <span class="position-absolute rounded-pill bg-success notification-badge">
-                                                    <i class="ti ti-check align-middle"></i>
-                                                    <span class="visually-hidden">deployment</span>
-                                                </span>
-                                            </span>
-                                            <span class="flex-grow-1 text-muted">
-                                                <span class="fw-medium text-body">Production Server</span> deployment completed successfully<br>
-                                                <span class="fs-xs">30 minutes ago</span>
-                                            </span>
-                                            <button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-7">
-                                                <i class="ti ti-xbox-x-filled fs-xxl"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
+								<!-- Notification 7 - Deployment Success -->
+								<div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
+									<span class="d-flex align-items-center gap-3">
+										<span class="flex-shrink-0 position-relative">
+											<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
+												<i class="ti ti-rocket fs-4 text-success"></i>
+											</span>
+											<span class="position-absolute rounded-pill bg-success notification-badge">
+												<i class="ti ti-check align-middle"></i>
+												<span class="visually-hidden">deployment</span>
+											</span>
+										</span>
+										<span class="flex-grow-1 text-muted">
+											<span class="fw-medium text-body">Production Server</span>
+											deployment completed successfully<br>
+											<span class="fs-xs">30 minutes ago</span>
+										</span>
+										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-7">
+											<i class="ti ti-xbox-x-filled fs-xxl"></i>
+										</button>
+									</span>
+								</div>
+							</div>
 
 
-                                <!-- All-->
-                                <a href="javascript:void(0);" class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
-                                    Read All Messages
-                                </a>
+							<!-- All-->
+							<a href="javascript:void(0);" class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
+								Read All Messages
+							</a>
 
-                            </div> <!-- End dropdown-menu -->
-                        </div> <!-- end dropdown-->
-                    </div> <!-- end topbar item-->
+						</div>
+						<!-- End dropdown-menu -->
+					</div>
+					<!-- end dropdown-->
+				</div>
+				<!-- end topbar item-->
 
-                    <!-- Theme Mode Dropdown -->
-                    <div class="topbar-item">
-                        <div class="dropdown">
-                            <button class="topbar-link" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
-                                <i data-lucide="layout-grid" class="fs-xxl"></i>
-                            </button>
+				<!-- Theme Mode Dropdown -->
+				<div class="topbar-item">
+					<div class="dropdown">
+						<button class="topbar-link" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
+							<i data-lucide="layout-grid" class="fs-xxl"></i>
+						</button>
 
-                            <div class="dropdown-menu dropdown-menu-lg p-2 dropdown-menu-end">
-                                <div class="row align-items-center g-1">
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="assets/images/logos/google.svg" alt="Google Logo" height="18">
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Google</span>
-                                        </a>
-                                    </div>
+						<div class="dropdown-menu dropdown-menu-lg p-2 dropdown-menu-end">
+							<div class="row align-items-center g-1">
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title text-bg-light rounded-circle">
+												<img src="assets/images/logos/google.svg" alt="Google Logo" height="18">
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Google</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="assets/images/logos/figma.svg" alt="Figma Logo" height="18">
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Figma</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title text-bg-light rounded-circle">
+												<img src="assets/images/logos/figma.svg" alt="Figma Logo" height="18">
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Figma</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="assets/images/logos/slack.svg" alt="Slack Logo" height="18">
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Slack</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title text-bg-light rounded-circle">
+												<img src="assets/images/logos/slack.svg" alt="Slack Logo" height="18">
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Slack</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title text-bg-light rounded-circle">
-                                                    <img src="assets/images/logos/dropbox.svg" alt="Dropbox Logo" height="18">
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Dropbox</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title text-bg-light rounded-circle">
+												<img src="assets/images/logos/dropbox.svg" alt="Dropbox Logo" height="18">
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Dropbox</span>
+									</a>
+								</div>
 
-                                    <div class="col-4 text-center">
-                                        <a href="javascript:void(0);" class="btn btn-sm rounded-circle btn-icon btn-danger">
-                                            <i data-lucide="circle-plus" class="fs-18"></i>
-                                        </a>
-                                    </div>
+								<div class="col-4 text-center">
+									<a href="javascript:void(0);" class="btn btn-sm rounded-circle btn-icon btn-danger">
+										<i data-lucide="circle-plus" class="fs-18"></i>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i class="ti ti-calendar fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Calendar</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title bg-primary-subtle text-primary rounded-circle">
+												<i class="ti ti-calendar fs-18"></i>
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Calendar</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i class="ti ti-message-circle fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Chat</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title bg-primary-subtle text-primary rounded-circle">
+												<i class="ti ti-message-circle fs-18"></i>
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Chat</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i class="ti ti-folder fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Files</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title bg-primary-subtle text-primary rounded-circle">
+												<i class="ti ti-folder fs-18"></i>
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Files</span>
+									</a>
+								</div>
 
-                                    <div class="col-4">
-                                        <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                            <span class="avatar-sm d-block mx-auto mb-1">
-                                                <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                                    <i class="ti ti-users fs-18"></i>
-                                                </span>
-                                            </span>
-                                            <span class="align-middle fw-medium">Team</span>
-                                        </a>
-                                    </div>
+								<div class="col-4">
+									<a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
+										<span class="avatar-sm d-block mx-auto mb-1">
+											<span class="avatar-title bg-primary-subtle text-primary rounded-circle">
+												<i class="ti ti-users fs-18"></i>
+											</span>
+										</span>
+										<span class="align-middle fw-medium">Team</span>
+									</a>
+								</div>
 
-                                </div>
-                            </div>
+							</div>
+						</div>
 
-                        </div> <!-- end dropdown-->
-                    </div> <!-- end topbar item-->
+					</div>
+					<!-- end dropdown-->
+				</div>
+				<!-- end topbar item-->
 				<!-- Theme Mode Dropdown -->
 				<div class="topbar-item">
 					<div class="dropdown">
@@ -439,7 +672,6 @@
 					</div>
 				</div>
 
-
 				<!-- Light/Dark Mode Button -->
 				<div class="topbar-item d-none">
 					<button class="topbar-link" id="light-dark-mode" type="button">
@@ -451,32 +683,38 @@
 				<!-- User Dropdown -->
 				<div class="topbar-item nav-user">
 					<div class="dropdown">
-						<a class="topbar-link dropdown-toggle drop-arrow-none px-2 d-flex align-items-center" data-bs-toggle="dropdown" data-bs-offset="0,19" href="#!" aria-haspopup="false" aria-expanded="false">
+						<a
+							class="topbar-link dropdown-toggle drop-arrow-none px-2 d-flex align-items-center"
+							data-bs-toggle="dropdown"
+							data-bs-offset="0,19"
+							href="#!"
+							aria-haspopup="false"
+							aria-expanded="false"
+						>
 
 							<!-- Avatar -->
-							<div class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width:40px;height:40px;font-weight:600;font-size:15px;">
-
+							<div class="avatar avatar-sm rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width:40px;height:40px;font-weight:600;font-size:15px;">
 								{% if app.user %}
-									{{ app.user.firstname|first|upper }}{{ app.user.lastname|first|upper }}
+									{{ app.user.firstname|first|upper ? app.user.firstname|first|upper : '' }}{{ app.user.lastname|first|upper ? app.user.lastname|first|upper : '' }}
 								{% else %}
 									U
 								{% endif %}
-
 							</div>
 
 							<!-- Nom -->
 							<div class="d-lg-flex align-items-center gap-1 d-none">
 								<h5 class="my-0">
-									{% if app.user %}
-										{{ app.user.firstname }}
-										{{ app.user.lastname }}
+							
+									{% if 'ROLE_ADMIN' in app.user.roles %}
+										<span class="fw-semibold text-success">Admin</span>
+									{% elseif 'ROLE_USER' in app.user.roles %}
+										<span class="fw-semibold text-success">Utilisateur</span>
 									{% else %}
-										Utilisateur
+										<span class="fw-semibold text-secondary"></span>
 									{% endif %}
 								</h5>
-								<i class="ti ti-chevron-down align-middle"></i>
+								{# <i class="ti ti-chevron-down align-middle"></i> #}
 							</div>
-
 						</a>
 
 						<div class="dropdown-menu dropdown-menu-end" style="min-width: 280px;">
@@ -492,7 +730,6 @@
 										{% else %}
 											U
 										{% endif %}
-
 									</div>
 
 									<div>
@@ -546,9 +783,8 @@
 
 					</div>
 				</div>
-				
+
 			</div>
 		</div>
 	</header>
 	<div style="height:72px; visibility:hidden;"></div>
-	

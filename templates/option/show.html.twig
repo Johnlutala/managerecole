@@ -1,0 +1,341 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Option{% endblock %}
+
+{% block body %}
+
+	<div class="wrapper">
+
+		<div class="content-page">
+
+			<div class="container-fluid">
+
+				{# ==================== TITRE ==================== #}
+
+				<div class="page-title-head d-flex align-items-center">
+
+					<div class="flex-grow-1">
+
+						<h4 class="fs-xl fw-bold m-0">
+							Détail de l'option
+						</h4>
+
+					</div>
+
+					<div class="text-end">
+
+						<ol class="breadcrumb m-0 py-0">
+
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">
+									ADMIN
+								</a>
+							</li>
+
+							<li class="breadcrumb-item">
+								<a href="{{ path('app_option_index') }}">
+									Options
+								</a>
+							</li>
+
+							<li class="breadcrumb-item active">
+								Détail
+							</li>
+
+						</ol>
+
+					</div>
+
+				</div>
+
+
+				{# ==================== CONTENU ==================== #}
+
+				<div class="row">
+
+
+					{# ==================== INFORMATIONS RAPIDES ==================== #}
+
+					<div class="col-xl-3">
+
+						<div class="card">
+
+							<div class="card-header">
+
+								<h4 class="card-title">
+									Option N° :
+									{{ option.id }}
+								</h4>
+
+							</div>
+
+							<div class="card-body text-center">
+
+								<div class="avatar-xl mx-auto mb-3">
+
+									<div class="avatar-title bg-primary-subtle text-primary rounded">
+
+										<i class="ti ti-book fs-1"></i>
+
+									</div>
+
+								</div>
+
+								<h4 class="mb-1">
+									{{ option.nom }}
+								</h4>
+
+								<p class="text-muted mb-2">
+
+									Code :
+									<strong>
+										{{ option.code }}
+									</strong>
+
+								</p>
+
+								<hr>
+
+								<div class="d-grid gap-2">
+
+									<a href="{{ path('app_option_edit', {'id': option.id}) }}"
+									   class="btn btn-warning">
+
+										<i class="ti ti-edit me-1"></i>
+										Modifier
+
+									</a>
+
+									{% include 'option/_delete_form.html.twig' %}
+
+									<a href="{{ path('app_option_index') }}"
+									   class="btn btn-secondary">
+
+										<i class="ti ti-arrow-left me-1"></i>
+										Retour
+
+									</a>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+
+					{# ==================== INFORMATIONS OPTION ==================== #}
+
+					<div class="col-xl-6">
+
+						<div class="card h-100">
+
+							<div class="card-header">
+
+								<h4 class="card-title mb-0">
+									Informations de l'option
+								</h4>
+
+							</div>
+
+							<div class="card-body">
+
+								<div class="table-responsive">
+
+									<table class="table table-bordered align-middle mb-0">
+
+										<tbody>
+
+											<tr>
+
+												<th width="40%">
+													Code
+												</th>
+
+												<td>
+													{{ option.code }}
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Nom
+												</th>
+
+												<td>
+													{{ option.nom }}
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Classe
+												</th>
+
+												<td>
+
+													{% if option.classe %}
+
+														<a href="{{ path('app_classe_show', {'id': option.classe.id}) }}">
+
+															{{ option.classe.nom }}
+
+														</a>
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Description
+												</th>
+
+												<td>
+													{{ option.description ?: '—' }}
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Créé le
+												</th>
+
+												<td>
+													{{ option.createdAt ? option.createdAt|date('d/m/Y H:i') : '—' }}
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Créé par
+												</th>
+
+												<td>
+													{{ option.createdBy
+														? option.createdBy.firstname ~ ' ' ~ option.createdBy.lastname
+														: '—'
+													}}
+												</td>
+
+											</tr>
+
+											<tr>
+
+												<th>
+													Mis à jour le
+												</th>
+
+												<td>
+													{{ option.updatedAt ? option.updatedAt|date('d/m/Y H:i') : '—' }}
+												</td>
+
+											</tr>
+
+										</tbody>
+
+									</table>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+					{# ==================== CLASSE ==================== #}
+					<div class="col-xl-3 mt-1">
+
+						<div class="card">
+
+							<div class="card-header">
+
+								<h4 class="card-title mb-0">
+
+									<i class="ti ti-school me-2"></i>
+									Classe
+
+								</h4>
+
+							</div>
+
+							<div class="card-body text-center">
+
+								{% if option.classe %}
+
+									<div class="avatar-lg mx-auto mb-3">
+
+										<div class="avatar-title bg-primary-subtle text-primary rounded">
+
+											<i class="ti ti-school fs-2"></i>
+
+										</div>
+
+									</div>
+
+									<h4 class="mb-1">
+										{{ option.classe.nom }}
+									</h4>
+
+									<p class="text-muted mb-3">
+
+										Ecole :
+										<strong>
+											{{ option.classe.ecole.nom ?: '—' }}
+										</strong>
+
+									</p>
+
+									<a href="{{ path('app_classe_show', {'id': option.classe.id}) }}"
+									   class="btn btn-primary w-100">
+
+										<i class="ti ti-eye me-1"></i>
+										Voir la classe
+
+									</a>
+
+								{% else %}
+
+									<div class="text-center py-4 text-muted">
+
+										<i class="ti ti-school-off fs-1 d-block mb-2"></i>
+
+										<p class="mb-0">
+											Aucune classe associée à cette option.
+										</p>
+
+									</div>
+
+								{% endif %}
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

@@ -2,14 +2,10 @@
 
 namespace App\Form;
 
-use App\Entity\MerchantConfiguration;
 use App\Entity\User;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -22,6 +18,9 @@ class UserType extends AbstractType
 
             ->add('firstname', TextType::class, [
                 'label' => 'Prénom',
+                'row_attr' => [
+                    'class' => 'mb-0'
+                ],
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => '---'
@@ -30,6 +29,9 @@ class UserType extends AbstractType
 
             ->add('lastname', TextType::class, [
                 'label' => 'Nom',
+                'row_attr' => [
+                    'class' => 'mb-0'
+                ],
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => '---'
@@ -38,12 +40,14 @@ class UserType extends AbstractType
 
             ->add('email', EmailType::class, [
                 'label' => 'Adresse e-mail',
+                'row_attr' => [
+                    'class' => 'mb-0'
+                ],
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'exemple@email.com'
                 ]
             ])
-           
 
             ->add('roles', ChoiceType::class, [
                 'label' => 'Rôle(s)',
@@ -54,17 +58,9 @@ class UserType extends AbstractType
                 'multiple' => true,
                 'expanded' => true,
                 'required' => false,
-            ])
-            
-
-            ->add('configuration', EntityType::class, [
-                'class' => MerchantConfiguration::class,
-                'choice_label' => 'shortcode', // Remplace par 'name' si disponible
-                'label' => 'Configuration',
-                'placeholder' => '-- Sélectionner --',
-                'attr' => [
-                    'class' => 'form-select'
-                ]
+                'row_attr' => [
+                    'class' => 'mb-0'
+                ],
             ])
 
             ->add('enabled', ChoiceType::class, [
@@ -74,16 +70,13 @@ class UserType extends AbstractType
                     'Actif' => true,
                     'Inactif' => false,
                 ],
+                'row_attr' => [
+                    'class' => 'mb-0'
+                ],
                 'attr' => [
                     'class' => 'form-select'
                 ]
             ]);
-
-        // Champs supprimés :
-        // - code
-        // - deleted
-        // - createdAt
-        // - updatedAt
     }
 
     public function configureOptions(OptionsResolver $resolver): void

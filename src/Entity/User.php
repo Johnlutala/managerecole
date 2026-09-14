@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\Traits\EntityTrait;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,31 +21,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Groups(['user:read'])]
     private ?int $id = null;
-    
+
     #[Groups(['user:read'])]
-    #[ORM\Column(length: 255, unique:true, nullable: true)]
+    #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $username = null;
-    
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $password = null;
-    
+
     #[Groups(['user:read'])]
-    #[ORM\Column(length: 100, unique:true)]
+    #[ORM\Column(length: 100)]
     private ?string $email = null;
-    
+
     #[Groups(['user:read'])]
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $firstname = null;
-    
+
     #[Groups(['user:read'])]
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $lastname = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?MerchantConfiguration $configuration = null;
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    /**
+     * @var Collection<int, InscriptionEleve>
+     */
+    #[ORM\OneToMany(targetEntity: InscriptionEleve::class, mappedBy: 'createdBy')]
+    private Collection $inscriptionEleves;
 
     public function __construct()
     {
@@ -52,6 +58,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->deleted = false;
         $this->createdAt = new \DateTimeImmutable();
         $this->roles = ['ROLE_USER'];
+        $this->inscriptionEleves = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -119,18 +126,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getConfiguration(): ?MerchantConfiguration
-    {
-        return $this->configuration;
-    }
-
-    public function setConfiguration(?MerchantConfiguration $configuration): static
-    {
-        $this->configuration = $configuration;
-
-        return $this;
-    }
-
     /**
      * @see UserInterface
      */
@@ -185,4 +180,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return password_verify($plainPassword, $this->password);
     }
 
+    /**
+     * @return Collection<int, InscriptionEleve>
+     */
+    public function getInscriptionEleves(): Collection
+    {
+        return $this->inscriptionEleves;
+    }
+
+    public function addInscriptionElefe(InscriptionEleve $inscriptionElefe): static
+    {
+        if (!$this->inscriptionEleves->contains($inscriptionElefe)) {
+            $this->inscriptionEleves->add($inscriptionElefe);
+            $inscriptionElefe->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInscriptionElefe(InscriptionEleve $inscriptionElefe): static
+    {
+        if ($this->inscriptionEleves->removeElement($inscriptionElefe)) {
+            // set the owning side to null (unless already changed)
+            if ($inscriptionElefe->getCreatedBy() === $this) {
+                $inscriptionElefe->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
 }

@@ -1,0 +1,35 @@
+<div class="row g-3">
+
+    {# École #}
+    <div class="col-md-4">
+        {{ form_row(form.ecole, {
+            label: "École",
+            attr: {
+                class: 'form-select',
+                id: 'option_ecole'
+            }
+        }) }}
+    </div>
+
+    {# Classe #}
+    <div class="col-md-4">
+        {{ form_row(form.classe, {
+            label: "Classe",
+            attr: {
+                class: 'form-select',
+                id: 'option_classe'
+            }
+        }) }}
+    </div>
+    {# Nom de l'option #}
+    <div class="col-4">
+        {{ form_row(form.nom, {
+            label: "Nom de l'option",
+            attr: {
+                class: 'form-control',
+                placeholder: 'Ex. Informatique'
+            }
+        }) }}
+    </div>
+
+</div>
