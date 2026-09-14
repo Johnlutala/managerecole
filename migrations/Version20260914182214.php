@@ -14,7 +14,15 @@ final class Version20260914182214 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Create the initial school database schema.';
+    }
+
+    public function preUp(Schema $schema): void
+    {
+        $this->skipIf(
+            $this->connection->createSchemaManager()->tablesExist(['annee_scolaire']),
+            'The initial schema already exists; this migration is recorded without recreating it.'
+        );
     }
 
     public function up(Schema $schema): void
