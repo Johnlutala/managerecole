@@ -68,10 +68,7 @@
 
 							{# Élève #}
 							<li class="side-nav-item">
-								<a
-									href="{{ path('app_inscription_eleve_index') }}"
-									class="side-nav-link"
-								>
+								<a href="{{ path('app_inscription_eleve_index') }}" class="side-nav-link">
 
 									<span class="menu-icon">
 										<i data-lucide="user-round-plus"></i>
@@ -82,41 +79,7 @@
 									</span>
 								</a>
 							</li>
-
-							{# Enseignant #}
-							<li class="side-nav-item">
-								<a
-									href="#"
-									class="side-nav-link"
-								>
-
-									<span class="menu-icon">
-										<i data-lucide="presentation"></i>
-									</span>
-
-									<span class="menu-text">
-										Enseignant
-									</span>
-								</a>
-							</li>
-
-							{# Administratif #}
-							<li class="side-nav-item">
-								<a
-									href="#"
-									class="side-nav-link"
-								>
-
-									<span class="menu-icon">
-										<i data-lucide="briefcase-business"></i>
-									</span>
-
-									<span class="menu-text">
-										Administratif
-									</span>
-								</a>
-							</li>
-
+							
 						</ul>
 					</div>
 				</li>
@@ -167,22 +130,15 @@
 									</a>
 								</li>
 
-
 								{# Section #}
 								<li class="side-nav-item">
-									<a
-										href="{{ path('app_section_index') }}"
-										class="side-nav-link"
-									>
-
+									<a href="{{ path('app_section_index') }}" class="side-nav-link">
 										<span class="menu-icon">
 											<i data-lucide="panels-top-left"></i>
 										</span>
-
 										<span class="menu-text">
 											Section
 										</span>
-
 									</a>
 								</li>
 
@@ -208,19 +164,25 @@
 
 								{# Options #}
 								<li class="side-nav-item">
-									<a
-										href="{{ path('app_option_index') }}"
-										class="side-nav-link"
-									>
-
+									<a href="{{ path('app_option_index') }}" class="side-nav-link" >
 										<span class="menu-icon">
 											<i data-lucide="layers-3"></i>
 										</span>
-
 										<span class="menu-text">
 											Options
 										</span>
-
+									</a>
+								</li>
+								
+								{# Année Scolaire #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link" >
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Année Scolaire
+										</span>
 									</a>
 								</li>
 

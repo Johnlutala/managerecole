@@ -17,6 +17,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mime\Address;
 
 #[Route('/user', name: 'app_user_')]
 #[IsGranted('ROLE_ADMIN')]
@@ -143,10 +144,16 @@ final class UserController extends AbstractController
 
     private function sendCreationEmail(User $user, string $plainPassword, MailerInterface $mailer, LoggerInterface $logger): bool
     {
+
         try {
             $mailer->send(
                 (new TemplatedEmail())
-                    ->from($_ENV['SENDER_EMAIL'])
+                    ->from(
+                        new Address(
+                            $_ENV['SENDER_EMAIL'],
+                            $_ENV['SENDER_NAME']
+                        )
+                    )
                     ->to($user->getEmail())
                     ->subject('Vos identifiants de connexion')
                     ->htmlTemplate('email/user_create.html.twig')
@@ -160,11 +167,13 @@ final class UserController extends AbstractController
 
             return true;
         } catch (\Throwable $e) {
+
             $logger->error('Echec de l\'envoi du mail de creation utilisateur.', [
                 'user_id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

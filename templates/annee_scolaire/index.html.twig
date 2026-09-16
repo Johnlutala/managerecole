@@ -1,39 +1,234 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}AnneeScolaire index{% endblock %}
+{% block title %}Années scolaires{% endblock %}
 
 {% block body %}
-    <h1>AnneeScolaire index</h1>
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">Années scolaires</h4>
+                    </div>
+                </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Libelle</th>
-                <th>DateDebut</th>
-                <th>DateFin</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for annee_scolaire in annee_scolaires %}
-            <tr>
-                <td>{{ annee_scolaire.id }}</td>
-                <td>{{ annee_scolaire.libelle }}</td>
-                <td>{{ annee_scolaire.dateDebut ? annee_scolaire.dateDebut|date('Y-m-d') : '' }}</td>
-                <td>{{ annee_scolaire.dateFin ? annee_scolaire.dateFin|date('Y-m-d') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_annee_scolaire_show', {'id': annee_scolaire.id}) }}">show</a>
-                    <a href="{{ path('app_annee_scolaire_edit', {'id': annee_scolaire.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                {% for type in ['success', 'warning'] %}
+                    {% for message in app.flashes(type) %}
+                        <div class="d-flex justify-content-center">
+                            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert" style="width: 500px;">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
 
-    <a href="{{ path('app_annee_scolaire_new') }}">Create new</a>
+                <div data-table data-table-rows-per-page="8" class="card">
+                    <div class="card-header border-light d-flex justify-content-between">
+                        <div class="app-search">
+                            <input data-table-search type="search" class="form-control" placeholder="Rechercher...">
+                            <i data-lucide="search" class="app-search-icon text-muted"></i>
+                        </div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                            <i class="ti ti-plus me-1"></i>Ajouter
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-custom table-centered table-hover w-100 mb-0">
+                            <thead class="bg-light bg-opacity-25 thead-sm">
+                                <tr class="text-uppercase fs-xxs">
+                                    <th>Libellé</th>
+                                    <th>École</th>
+                                    <th>Date de début</th>
+                                    <th>Date de fin</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for annee_scolaire in annee_scolaires %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ annee_scolaire.libelle }}</td>
+                                        <td>{{ annee_scolaire.ecole ? annee_scolaire.ecole.nom : '—' }}</td>
+                                        <td>{{ annee_scolaire.dateDebut ? annee_scolaire.dateDebut|date('d/m/Y') : '—' }}</td>
+                                        <td>{{ annee_scolaire.dateFin ? annee_scolaire.dateFin|date('d/m/Y') : '—' }}</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{{ path('app_annee_scolaire_show', {id: annee_scolaire.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle" title="Voir">
+                                                    <i class="ti ti-eye fs-lg"></i>
+                                                </a>
+                                                <a href="{{ path('app_annee_scolaire_edit', {id: annee_scolaire.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle" title="Modifier">
+                                                    <i class="ti ti-edit fs-lg"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer border-0 d-flex justify-content-between">
+                        <div data-table-pagination-info></div>
+                        <div data-table-pagination></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                {{ form_start(form) }}
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="addModalLabel">
+                            <i class="ti ti-calendar-plus me-2 text-primary"></i>Ajouter une année scolaire
+                        </h5>
+                        <small class="text-muted">Associez une année scolaire à une école.</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    {{ form_row(form.ecole, {label: 'École', attr: {class: 'form-select', id: 'annee_scolaire_ecole'}}) }}
+                                </div>
+                                <div class="col-12">
+                                    {{ form_row(form.libelle, {label: 'Libellé de l’année scolaire', attr: {class: 'form-control', placeholder: 'Ex. 2026-2027', id: 'annee_scolaire_libelle'}}) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.dateDebut, {label: 'Date de début', attr: {class: 'form-control'}}) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.dateFin, {label: 'Date de fin', attr: {class: 'form-control'}}) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div id="anneesCard" class="card border shadow-none" style="display: none;">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0 fs-md"><i class="ti ti-list-check me-1"></i>Années existantes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="noAnnees" class="text-center text-muted py-3" style="display: none;">
+                                        <i class="ti ti-info-circle fs-2 d-block mb-2"></i>
+                                        Aucune année scolaire n’est encore associée à cette école.
+                                    </div>
+                                    <div id="anneesList"></div>
+                                    <div id="anneeDuplicateMessage" class="alert alert-warning mt-3 mb-0" style="display: none;">
+                                        <i class="ti ti-alert-triangle me-1"></i>Cette année scolaire existe déjà pour cette école.
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="selectEcoleMessage" class="text-center text-muted py-5">
+                                <i class="ti ti-school fs-1 d-block mb-2"></i>
+                                Sélectionnez une école pour voir les années disponibles.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="saveAnneeButton">
+                        <i class="ti ti-device-floppy me-1"></i>Enregistrer
+                    </button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <script type="application/json" id="annees-data">
+        [
+            {% for annee_scolaire in annee_scolaires %}
+                {
+                    "id": {{ annee_scolaire.id }},
+                    "libelle": {{ annee_scolaire.libelle|json_encode|raw }},
+                    "ecole": {{ annee_scolaire.ecole ? annee_scolaire.ecole.id : 'null' }}
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ecoleSelect = document.querySelector("#annee_scolaire_ecole");
+            const libelleInput = document.querySelector("#annee_scolaire_libelle");
+            const anneesCard = document.querySelector("#anneesCard");
+            const anneesList = document.querySelector("#anneesList");
+            const noAnnees = document.querySelector("#noAnnees");
+            const selectEcoleMessage = document.querySelector("#selectEcoleMessage");
+            const duplicateMessage = document.querySelector("#anneeDuplicateMessage");
+            const saveButton = document.querySelector("#saveAnneeButton");
+            const dataElement = document.querySelector("#annees-data");
+
+            if (!ecoleSelect || !libelleInput || !dataElement) {
+                return;
+            }
+
+            const anneesData = JSON.parse(dataElement.textContent);
+
+            function afficherAnnees() {
+                const ecoleId = ecoleSelect.value;
+                const anneesFiltrees = anneesData.filter(function (annee) {
+                    return String(annee.ecole) === String(ecoleId);
+                });
+
+                anneesList.innerHTML = "";
+                duplicateMessage.style.display = "none";
+                saveButton.disabled = false;
+
+                if (!ecoleId) {
+                    anneesCard.style.display = "none";
+                    selectEcoleMessage.style.display = "block";
+                    return;
+                }
+
+                anneesCard.style.display = "block";
+                selectEcoleMessage.style.display = "none";
+                noAnnees.style.display = anneesFiltrees.length ? "none" : "block";
+
+                anneesFiltrees.forEach(function (annee) {
+                    const item = document.createElement("div");
+                    item.className = "d-flex align-items-center border-bottom py-2";
+                    item.innerHTML =
+                        '<i class="ti ti-calendar me-2 text-primary"></i><span>' +
+                        annee.libelle +
+                        "</span>";
+                    anneesList.appendChild(item);
+                });
+
+                verifierDoublon();
+            }
+
+            function verifierDoublon() {
+                const libelle = libelleInput.value.trim().toLowerCase();
+                const existe =
+                    libelle &&
+                    anneesData.some(function (annee) {
+                        return (
+                            String(annee.ecole) === String(ecoleSelect.value) &&
+                            annee.libelle.trim().toLowerCase() === libelle
+                        );
+                    });
+
+                duplicateMessage.style.display = existe ? "block" : "none";
+                saveButton.disabled = Boolean(existe);
+            }
+
+            ecoleSelect.addEventListener("change", afficherAnnees);
+            libelleInput.addEventListener("input", verifierDoublon);
+        });
+    </script>
 {% endblock %}

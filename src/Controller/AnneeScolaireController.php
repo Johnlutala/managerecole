@@ -14,11 +14,37 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/annee/scolaire')]
 final class AnneeScolaireController extends AbstractController
 {
-    #[Route(name: 'app_annee_scolaire_index', methods: ['GET'])]
-    public function index(AnneeScolaireRepository $anneeScolaireRepository): Response
-    {
+    #[Route(name: 'app_annee_scolaire_index', methods: ['GET', 'POST'])]
+    public function index(
+        Request $request,
+        AnneeScolaireRepository $anneeScolaireRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $anneeScolaire = new AnneeScolaire();
+        $form = $this->createForm(AnneeScolaireType::class, $anneeScolaire);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $anneeExistante = $anneeScolaireRepository->findOneBy([
+                'libelle' => $anneeScolaire->getLibelle(),
+                'ecole' => $anneeScolaire->getEcole(),
+            ]);
+
+            if ($anneeExistante) {
+                $this->addFlash('warning', 'Cette année scolaire existe déjà pour cette école.');
+            } else {
+                $entityManager->persist($anneeScolaire);
+                $entityManager->flush();
+                $this->addFlash('success', 'Année scolaire enregistrée avec succès.');
+            }
+
+            return $this->redirectToRoute('app_annee_scolaire_index');
+        }
+
         return $this->render('annee_scolaire/index.html.twig', [
             'annee_scolaires' => $anneeScolaireRepository->findAll(),
+            'annee_scolaire' => $anneeScolaire,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -71,7 +97,7 @@ final class AnneeScolaireController extends AbstractController
     #[Route('/{id}', name: 'app_annee_scolaire_delete', methods: ['POST'])]
     public function delete(Request $request, AnneeScolaire $anneeScolaire, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$anneeScolaire->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $anneeScolaire->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($anneeScolaire);
             $entityManager->flush();
         }

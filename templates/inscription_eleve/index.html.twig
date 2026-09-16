@@ -1,19 +1,285 @@
 {% extends 'base.html.twig' %}
 {% block title %}Inscriptions des élèves{% endblock %}
 {% block body %}
-  <div class="wrapper"><div class="content-page"><div class="container-fluid">
-        <div class="page-title-head d-flex align-items-center"><div class="flex-grow-1"><h4 class="fs-xl fw-bold m-0">Inscriptions des élèves</h4><p class="text-muted mb-0">Demandes à valider avant la création définitive de l'élève.</p></div></div>
-        {% for type, messages in app.flashes %}{% for message in messages %}<div class="alert alert-{{ type == 'success' ? 'success' : 'info' }}">{{ message }}</div>{% endfor %}{% endfor %}
-        <div data-table data-table-rows-per-page="8" class="card"><div class="card-header border-light d-flex justify-content-between"><div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."></div><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inscriptionModal"><i class="ti ti-plus me-1"></i>Nouvelle inscription</button></div>
-          <div class="table-responsive"><table class="table table-custom table-centered table-hover w-100 mb-0"><thead class="bg-light bg-opacity-25 thead-sm"><tr class="text-uppercase fs-xxs"><th>Référence</th><th>Élève</th><th>Classe</th><th>Type</th><th>Statut</th><th class="text-center">Actions</th></tr></thead><tbody>{% for item in inscription_eleves %}<tr><td>{{ item.reference ?: '—' }}</td><td>{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</td><td>{{ item.classe ? item.classe.nom : '—' }}</td><td><span class="badge badge-soft-info">{{ item.typeInscription ?: '—' }}</span></td><td><span class="badge badge-soft-{{ item.statut == 'validee' ? 'success' : 'warning' }}">{{ item.statut|replace({'_': ' '})|title }}</span></td><td><div class="d-flex justify-content-center gap-1"><a href="{{ path('app_inscription_eleve_show', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle"><i class="ti ti-eye fs-lg"></i></a><a href="{{ path('app_inscription_eleve_edit', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle"><i class="ti ti-edit fs-lg"></i></a>{% if item.statut != 'validee' %}<form method="post" action="{{ path('app_inscription_eleve_validate', {id: item.id}) }}"><input type="hidden" name="_token" value="{{ csrf_token('validate' ~ item.id) }}"><button class="btn btn-success btn-sm">Valider</button></form>{% endif %}</div></td></tr>{% else %}<tr><td colspan="6" class="text-center py-5 text-muted">Aucune demande d'inscription.</td></tr>{% endfor %}</tbody></table></div><div class="card-footer border-0 d-flex justify-content-between"><div data-table-pagination-info></div><div data-table-pagination></div></div></div>
-      </div></div></div>
-  <div class="modal fade" id="inscriptionModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">{{ form_start(form, {attr: {id: 'inscription-form', novalidate: 'novalidate'}}) }}<div class="modal-header"><div><h5 class="modal-title">Inscription élève</h5><small class="text-muted">Les informations seront sauvegardées comme demande en attente de validation.</small></div><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">
-          <div class="d-flex align-items-center gap-2 mb-4 step-meter">{% for label in ['Recherche', 'Élève', 'Parent / tuteur', 'Scolarité'] %}<span class="step-chip {{ loop.first ? 'is-active' : '' }}" data-step-chip="{{ loop.index }}"><b>{{ loop.index }}</b><small>{{ label }}</small></span>{% endfor %}</div>
-          <div class="form-step" data-form-step="1"><div class="alert alert-light border">Commencez par identifier l'élève. Pour un ancien élèves, saisissez son matricule puis lancez la recherche.</div><div class="row g-3"><div class="col-md-6">{{ form_row(form.typeInscription) }}</div><div class="col-md-6">{{ form_row(form.reference) }}<button class="btn btn-outline-primary btn-sm mt-1" type="button" id="lookup-student">Rechercher dans la base</button></div></div><div id="lookup-result" class="mt-3"></div></div>
-          <div class="form-step d-none" data-form-step="2"><h6>Identité de l'élève</h6><div class="row g-3"><div class="col-md-4">{{ form_row(form.nom) }}</div><div class="col-md-4">{{ form_row(form.postnom) }}</div><div class="col-md-4">{{ form_row(form.prenom) }}</div><div class="col-md-4">{{ form_row(form.sexe) }}</div><div class="col-md-4">{{ form_row(form.dateNaissance) }}</div><div class="col-md-4">{{ form_row(form.lieuNaissance) }}</div><div class="col-md-6">{{ form_row(form.nationalite) }}</div><div class="col-md-6">{{ form_row(form.telephone) }}</div><div class="col-12">{{ form_row(form.adresse) }}</div></div></div>
-          <div class="form-step d-none" data-form-step="3"><h6>Parent ou tuteur légal</h6><div class="row g-3"><div class="col-md-4">{{ form_row(form.nomParent) }}</div><div class="col-md-4">{{ form_row(form.postnomParent) }}</div><div class="col-md-4">{{ form_row(form.prenomParent) }}</div><div class="col-md-4">{{ form_row(form.telephoneParent) }}</div><div class="col-md-4">{{ form_row(form.emailParent) }}</div><div class="col-md-4">{{ form_row(form.lienParental) }}</div><div class="col-md-6">{{ form_row(form.professionParent) }}</div><div class="col-md-6">{{ form_row(form.adresseParent) }}</div></div></div>
-          <div class="form-step d-none" data-form-step="4"><h6>Affectation scolaire</h6><div class="row g-3"><div class="col-md-6">{{ form_row(form.etablissement) }}</div><div class="col-md-6">{{ form_row(form.anneeScolaire) }}</div><div class="col-md-4">{{ form_row(form.section) }}</div><div class="col-md-4">{{ form_row(form.classe) }}</div><div class="col-md-4">{{ form_row(form.options) }}</div></div><div class="alert alert-info mt-3 mb-0">Après l'enregistrement, utilisez le bouton <strong>Valider</strong> dans la liste pour créer ou mettre à jour l'élève et enregistrer le parent.</div></div>
-        </div><div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button><button type="button" class="btn btn-secondary d-none" data-step-prev>Précédent</button><button type="button" class="btn btn-primary" data-step-next>Suivant</button><button type="submit" class="btn btn-success d-none" data-step-save>Enregistrer la demande</button></div>{{ form_end(form) }}</div></div></div>
+  <div class="wrapper">
+    <div class="content-page">
+      <div class="container-fluid">
+        <div class="page-title-head d-flex align-items-center">
+          <div class="flex-grow-1">
+            <h4 class="fs-xl fw-bold m-0">Inscriptions des élèves</h4>
+            <p class="text-muted mb-0">Demandes à valider avant la création définitive de l'élève.</p>
+          </div>
+        </div>
+        {% for type, messages in app.flashes %}{% for message in messages %}
+            <div class="alert alert-{{ type == 'success' ? 'success' : 'info' }}">{{ message }}
+
+            </div>{% endfor %}{% endfor %}
+        <div data-table data-table-rows-per-page="8" class="card">
+          <div class="card-header border-light d-flex justify-content-between">
+            <div class="app-search">
+              <input data-table-search type="search" class="form-control" placeholder="Rechercher...">
+            </div><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inscriptionModal">
+              <i class="ti ti-plus me-1"></i>Nouvelle inscription</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-custom table-centered table-hover w-100 mb-0">
+              <thead class="bg-light bg-opacity-25 thead-sm">
+                <tr class="text-uppercase fs-xxs">
+                  <th>Référence</th>
+                  <th>Élève</th>
+                  <th>Classe</th>
+                  <th>Ecole</th>
+                  <th>Année Scolaire</th>
+                  <th>Type</th>
+                  <th>Statut</th>
+                  <th>Etat</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>{% for item in inscription_eleves %}
+                  <tr>
+                    <td>{{ item.reference ?: '—' }}</td>
+                    <td>{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</td>
+                    <td>
+                      {{ item.classe ? item.classe.nom : '—' }}
+                    </td>
+                    <td>
+                      {{ item.etablissement ? item.etablissement.nom : '—' }}
+                    </td>
+                    <td>
+                      {{ item.anneeScolaire ? item.anneeScolaire.libelle : '—' }}
+                    </td>
+                    <td>
+                      <span class="badge badge-soft-info">
+                        {{ item.typeInscription ?: '—' }}
+                      </span>
+                    </td>
+                    <td><span class="badge badge-soft-info">
+                        {{ item.typeInscription ?: '—' }}</span>
+                    </td>
+                    <td><span class="badge badge-soft-{{ item.statut == 'validee' ? 'success' : 'warning' }}">
+                        {{ item.statut|replace({'_': ' '})|title }}</span>
+                    </td>
+                    
+                    <td>
+                      <div class="d-flex justify-content-center gap-1">
+                        <a href="{{ path('app_inscription_eleve_show', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                          <i class="ti ti-eye fs-lg"></i></a>
+                        <a href="{{ path('app_inscription_eleve_edit', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                          <i class="ti ti-edit fs-lg"></i></a>{% if item.statut != 'validee' %}
+                          <form method="post" action="{{ path('app_inscription_eleve_validate', {id: item.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ item.id) }}">
+                            <button class="btn btn-success btn-sm">Valider</button>
+                          </form>{% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">Aucune demande d'inscription.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer border-0 d-flex justify-content-between">
+            <div data-table-pagination-info></div>
+            <div data-table-pagination></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="inscriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        {{ form_start(form, {attr: {id: 'inscription-form', novalidate: 'novalidate'}}) }}
+        <div class="modal-header"><div><h5 class="modal-title">Inscription élève</h5>
+            <small class="text-muted">Les informations seront sauvegardées comme demande en attente de validation.</small>
+          </div><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div><div class="modal-body">
+          <div class="d-flex align-items-center gap-2 mb-4 step-meter">
+            {% for label in ['Recherche', 'Élève', 'Parent / tuteur', 'Scolarité'] %}
+              <span class="step-chip {{ loop.first ? 'is-active' : '' }}" data-step-chip="{{ loop.index }}"><b>
+                  {{ loop.index }}</b><small>{{ label }}</small></span>{% endfor %}</div>
+      
+        
+          <div class="form-step" data-form-step="1">
+
+            <div class="mb-3">
+              <h6 class="mb-1">Type d'inscription</h6>
+              <p class="text-muted mb-0">
+                Sélectionnez le type d'élève à inscrire.
+              </p>
+            </div>
+
+            {# Champ Symfony conservé mais masqué #}
+            <div class="d-none">
+              {{ form_row(form.typeInscription) }}
+            </div>
+
+
+            {# ============================= #}
+            {# CHOIX ANCIEN / NOUVEAU         #}
+            {# ============================= #}
+
+            <div class="enrollment-types">
+
+              {# Ancien élève #}
+              <div class="enrollment-type">
+
+                <input
+                  type="radio"
+                  name="inscription_type_choice"
+                  id="type-ancien"
+                  value="ancien"
+                >
+
+                <label for="type-ancien" class="enrollment-option">
+
+                  <div class="enrollment-option-icon">
+                    <i class="ti ti-user-search"></i>
+                  </div>
+
+                  <div class="enrollment-option-text">
+                    <strong>Ancien élève</strong>
+                    <span>Élève déjà enregistré</span>
+                  </div>
+
+                  <div class="enrollment-option-check">
+                    <i class="ti ti-check"></i>
+                  </div>
+
+                </label>
+              </div>
+
+
+              {# Nouvel élève #}
+              <div class="enrollment-type">
+
+                <input
+                  type="radio"
+                  name="inscription_type_choice"
+                  id="type-nouveau"
+                  value="nouveau"
+                >
+
+                <label for="type-nouveau" class="enrollment-option">
+
+                  <div class="enrollment-option-icon">
+                    <i class="ti ti-user-plus"></i>
+                  </div>
+
+                  <div class="enrollment-option-text">
+                    <strong>Nouvel élève</strong>
+                    <span>Créer une nouvelle fiche</span>
+                  </div>
+
+                  <div class="enrollment-option-check">
+                    <i class="ti ti-check"></i>
+                  </div>
+
+                </label>
+              </div>
+
+            </div>
+
+
+            {# ============================= #}
+            {# RECHERCHE ANCIEN ÉLÈVE         #}
+            {# ============================= #}
+
+            <div id="ancien-eleve-search" class="d-none mt-4">
+              <div class="student-search-box">
+                <div class="student-search-header">
+                  <div class="student-search-icon">
+                    <i class="ti ti-search"></i>
+                  </div>
+                  <div>
+                    <h6>Rechercher l'élève</h6>
+                    <p>
+                      Entrez le matricule ou la référence de l'élève.
+                    </p>
+                  </div>
+
+                </div>
+                <div class="row g-3 align-items-end">
+
+                  <div class="col-md-8">
+                    <label class="form-label">
+                      Matricule / Référence
+                    </label>
+
+                    {{ form_widget(form.reference, {
+                        attr: { class: 'form-control form-control-lg',placeholder: 'Rechercher par son : Matricule, Nom ou encore Postnom' }
+                    }) }}
+                  </div>
+                  <div class="col-md-4">
+                    <button
+                      type="button"
+                      id="lookup-student"
+                      class="btn btn-primary btn-lg w-100"
+                    >
+                      <i class="ti ti-search me-1"></i>
+                      Rechercher
+                    </button>
+                  </div>
+                </div>
+                <div id="lookup-result" class="mt-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-step d-none" data-form-step="2">
+            <h6>Identité de l'élève</h6><div class="row g-3">
+              <div class="col-md-4">{{ form_row(form.nom) }}</div>
+              <div class="col-md-4">{{ form_row(form.postnom) }}</div>
+              <div class="col-md-4">{{ form_row(form.prenom) }}</div>
+              <div class="col-md-4">{{ form_row(form.sexe) }}</div>
+              <div class="col-md-4">{{ form_row(form.dateNaissance) }}</div>
+              <div class="col-md-4">{{ form_row(form.lieuNaissance) }}</div>
+              <div class="col-md-4">{{ form_row(form.nationalite) }}</div>
+              <div class="col-md-4">{{ form_row(form.telephone) }}</div>
+              <div class="col-4">{{ form_row(form.adresse) }}</div>
+            </div>
+          </div>
+          <div class="form-step d-none" data-form-step="3">
+            <h6>Parent ou tuteur légal</h6>
+            <div class="row g-3">
+              <div class="col-md-4">{{ form_row(form.nomParent) }}</div>
+              <div class="col-md-4">{{ form_row(form.postnomParent) }}</div>
+              <div class="col-md-4">{{ form_row(form.prenomParent) }}</div>
+              <div class="col-md-4">{{ form_row(form.telephoneParent) }}</div>
+              <div class="col-md-4">{{ form_row(form.emailParent) }}</div>
+              <div class="col-md-4">{{ form_row(form.lienParental) }}</div>
+              <div class="col-md-6">{{ form_row(form.professionParent) }}</div>
+              <div class="col-md-6">{{ form_row(form.adresseParent) }}</div>
+            </div>
+          </div>
+          <div class="form-step d-none" data-form-step="4">
+            <h6>Affectation scolaire</h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                {{ form_row(form.etablissement) }}</div>
+              <div class="col-md-6">{{ form_row(form.anneeScolaire) }}</div>
+              <div class="col-md-4">{{ form_row(form.section) }}</div>
+              <div class="col-md-4">{{ form_row(form.classe) }}</div>
+              <div class="col-md-4">{{ form_row(form.options) }}</div>
+            </div>
+            <div class="alert alert-info mt-3 mb-0">Après l'enregistrement, utilisez le bouton 
+              <strong>Valider</strong> dans la liste pour créer ou mettre à jour l'élève et enregistrer le parent.</div>
+          </div>
+        </div><div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-secondary d-none" data-step-prev>Précédent</button>
+          <button type="button" class="btn btn-primary" data-step-next>Suivant</button>
+          <button type="submit" class="btn btn-success d-none" data-step-save>Enregistrer la demande</button>
+        </div>{{ form_end(form) }}</div>
+    </div>
+  </div>
   <style>
     .step-chip {
       display: flex;
@@ -29,6 +295,7 @@
       place-items: center;
       background: #e9ecef;
     }
+
     .step-chip small {
       font-weight: 600;
     }
@@ -39,71 +306,494 @@
       background: #0d6efd;
       color: #fff;
     }
+    .inscription-choice {
+      cursor: pointer;
+    }
+
+    .enrollment-types {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .enrollment-type {
+      position: relative;
+    }
+
+    .enrollment-type input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .enrollment-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 78px;
+      padding: 14px 16px;
+
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+
+      cursor: pointer;
+
+      transition: all 0.2s ease;
+    }
+
+    .enrollment-option:hover {
+      border-color: #b8c4d1;
+      background: #f8fafc;
+    }
+
+    .enrollment-option-icon {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 9px;
+
+      background: #f1f5f9;
+      color: #64748b;
+
+      font-size: 20px;
+
+      transition: all 0.2s ease;
+    }
+
+    .enrollment-option-text {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .enrollment-option-text strong {
+      color: #1e293b;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .enrollment-option-text span {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .enrollment-option-check {
+      width: 21px;
+      height: 21px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid #d1d5db;
+      border-radius: 50%;
+
+      color: transparent;
+      font-size: 11px;
+
+      transition: all 0.2s ease;
+    }
+
+    .enrollment-type input:checked + .enrollment-option {
+      border-color: #0d6efd;
+      background: #f8fbff;
+    }
+
+    .enrollment-type input:checked + .enrollment-option .enrollment-option-icon {
+      background: #0d6efd;
+      color: #fff;
+    }
+
+    .enrollment-type input:checked + .enrollment-option .enrollment-option-check {
+      border-color: #0d6efd;
+      background: #0d6efd;
+      color: #fff;
+    }
+
+    /* ========================= */
+    /* RECHERCHE ANCIEN ÉLÈVE    */
+    /* ========================= */
+
+    .student-search-box {
+      padding: 20px;
+
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+
+      background: #f8fafc;
+    }
+
+    .student-search-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      margin-bottom: 18px;
+    }
+
+    .student-search-icon {
+      width: 40px;
+      height: 40px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 9px;
+
+      background: #eaf2ff;
+      color: #0d6efd;
+
+      font-size: 18px;
+    }
+
+    .student-search-header h6 {
+      margin: 0 0 3px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .student-search-header p {
+      margin: 0;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    #ancien-eleve-search {
+      animation: searchBoxIn 0.2s ease;
+    }
+
+    @keyframes searchBoxIn {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .enrollment-types {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       let step = 1;
-      const form = document.querySelector("#inscription-form"),
-        show = (n) => {
-          step = n;
-          document
-            .querySelectorAll("[data-form-step]")
-            .forEach((x) =>
-              x.classList.toggle("d-none", +x.dataset.formStep !== n),
-            );
-          document
-            .querySelectorAll("[data-step-chip]")
-            .forEach((x) =>
-              x.classList.toggle("is-active", +x.dataset.stepChip === n),
-            );
-          document
-            .querySelector("[data-step-prev]")
-            .classList.toggle("d-none", n === 1);
-          document
-            .querySelector("[data-step-next]")
-            .classList.toggle("d-none", n === 4);
-          document
-            .querySelector("[data-step-save]")
-            .classList.toggle("d-none", n !== 4);
-        };
-      document.querySelector("[data-step-next]").onclick = () => {
-        const inputs = [
-          ...document
-            .querySelector(`[data-form-step="${step}"]`)
-            .querySelectorAll("input,select"),
-        ];
+
+      const form = document.querySelector("#inscription-form");
+
+      const nextButton = document.querySelector("[data-step-next]");
+      const prevButton = document.querySelector("[data-step-prev]");
+      const saveButton = document.querySelector("[data-step-save]");
+
+      const typeAncien = document.querySelector("#type-ancien");
+      const typeNouveau = document.querySelector("#type-nouveau");
+
+      const ancienSearch = document.querySelector("#ancien-eleve-search");
+
+      const typeInscription = document.querySelector(
+        "#inscription_eleve_typeInscription",
+      );
+
+      const lookupButton = document.querySelector("#lookup-student");
+      const referenceInput = document.querySelector("#inscription_eleve_reference");
+
+      const lookupResult = document.querySelector("#lookup-result");
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Gestion des étapes
+                            |--------------------------------------------------------------------------
+                            */
+
+      const show = (n) => {
+        step = n;
+
+        document.querySelectorAll("[data-form-step]").forEach((x) => {
+          x.classList.toggle("d-none", +x.dataset.formStep !== n);
+        });
+
+        document.querySelectorAll("[data-step-chip]").forEach((x) => {
+          x.classList.toggle("is-active", +x.dataset.stepChip === n);
+        });
+
+        prevButton.classList.toggle("d-none", n === 1);
+
+        nextButton.classList.toggle("d-none", n === 4);
+
+        saveButton.classList.toggle("d-none", n !== 4);
+      };
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | État initial
+                            |--------------------------------------------------------------------------
+                            */
+
+      // Au départ, aucun type n'est sélectionné.
+      // Donc impossible d'aller au Step 2.
+      nextButton.disabled = true;
+
+      show(1);
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Choix : ANCIEN ÉLÈVE
+                            |--------------------------------------------------------------------------
+                            */
+
+      typeAncien.addEventListener("change", () => {
+        typeInscription.value = "ancien";
+
+        // On affiche la zone de recherche
+        ancienSearch.classList.remove("d-none");
+
+        // Tant que la recherche n'est pas réussie,
+        // on ne peut pas continuer.
+        nextButton.disabled = true;
+
+        // On réinitialise l'état précédent
+        lookupResult.innerHTML = "";
+      });
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Choix : NOUVEL ÉLÈVE
+                            |--------------------------------------------------------------------------
+                            */
+
+      typeNouveau.addEventListener("change", () => {
+        typeInscription.value = "nouveau";
+
+        // Pas besoin de recherche
+        ancienSearch.classList.add("d-none");
+
+        // On peut directement passer au Step 2
+        nextButton.disabled = false;
+
+        lookupResult.innerHTML = "";
+      });
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Bouton SUIVANT
+                            |--------------------------------------------------------------------------
+                            */
+
+      nextButton.addEventListener("click", () => {
+        /*
+                                | Step 1
+                                */
+
+        if (step === 1) {
+          // Aucun choix
+          if (!typeAncien.checked && !typeNouveau.checked) {
+            return;
+          }
+
+          /*
+                                    | Ancien élève
+                                    |
+                                    | Le bouton est normalement désactivé tant que
+                                    | la recherche n'a pas réussi.
+                                    */
+
+          if (typeAncien.checked && nextButton.disabled) {
+            return;
+          }
+        }
+
+        /*
+                                | Validation des autres étapes
+                                */
+
+        const currentStep = document.querySelector(`[data-form-step="${step}"]`);
+
+        const inputs = [...currentStep.querySelectorAll("input, select, textarea")];
+
         if (inputs.some((x) => !x.checkValidity())) {
           form.classList.add("was-validated");
+
           return;
         }
+
+        /*
+                                | Passage à l'étape suivante
+                                */
+
         show(step + 1);
-      };
-      document.querySelector("[data-step-prev]").onclick = () => show(step - 1);
-      document.querySelector("#lookup-student").onclick = async () => {
-        const ref = document.querySelector("#inscription_eleve_reference").value,
-          result = document.querySelector("#lookup-result");
+      });
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Bouton PRÉCÉDENT
+                            |--------------------------------------------------------------------------
+                            */
+
+      prevButton.addEventListener("click", () => {
+        show(step - 1);
+
+        /*
+                                | Si on revient au Step 1, on conserve l'état
+                                | correspondant au choix effectué.
+                                */
+
+        if (step === 1) {
+          if (typeNouveau.checked) {
+            nextButton.disabled = false;
+          }
+
+          if (typeAncien.checked) {
+            nextButton.disabled = true;
+          }
+        }
+      });
+
+      /*
+                            |--------------------------------------------------------------------------
+                            | Recherche de l'ancien élève
+                            |--------------------------------------------------------------------------
+                            */
+
+      lookupButton.addEventListener("click", async () => {
+        const ref = referenceInput.value.trim();
+
+        /*
+                                | Vérification du matricule
+                                */
+
         if (!ref) {
-          result.innerHTML =
-            '<span class="text-danger">Saisissez un matricule.</span>';
+          lookupResult.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <i class="ti ti-alert-circle me-1"></i>
+                    Veuillez saisir un matricule ou une référence.
+                </div>
+            `;
+
+          nextButton.disabled = true;
+
+          referenceInput.focus();
+
           return;
         }
-        const data = await fetch(
-          `{{ path('app_inscription_eleve_lookup') }}?reference=${encodeURIComponent(ref)}`,
-        ).then((r) => r.json());
-        if (!data.found) {
-          result.innerHTML =
-            '<span class="text-warning">Aucun élève trouvé : poursuivez comme nouvel élève.</span>';
-          return;
+
+        /*
+                                | Recherche en cours
+                                */
+
+        lookupButton.disabled = true;
+
+        nextButton.disabled = true;
+
+        lookupButton.innerHTML = `
+            <span
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+            ></span>
+            Recherche...
+        `;
+
+        lookupResult.innerHTML = "";
+
+        try {
+          const response = await fetch(
+            `{{ path('app_inscription_eleve_lookup') }}?reference=${encodeURIComponent(ref)}`,
+          );
+
+          if (!response.ok) {
+            throw new Error("Erreur serveur");
+          }
+
+          const data = await response.json();
+
+          /*
+                                    |--------------------------------------------------------------------------
+                                    | Aucun élève trouvé
+                                    |--------------------------------------------------------------------------
+                                    */
+
+          if (!data.found) {
+            lookupResult.innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <i class="ti ti-user-x me-1"></i>
+                        Aucun élève ne correspond à cette référence.
+                    </div>
+                `;
+
+            nextButton.disabled = true;
+
+            return;
+          }
+
+          /*
+                                    |--------------------------------------------------------------------------
+                                    | Élève trouvé
+                                    |--------------------------------------------------------------------------
+                                    */
+
+          Object.entries(data.eleve).forEach(([k, v]) => {
+            const el = document.querySelector(`#inscription_eleve_${k}`);
+
+            if (el && v !== null) {
+              el.value = v;
+            }
+          });
+
+          typeInscription.value = "ancien";
+
+          lookupResult.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <i class="ti ti-circle-check me-1"></i>
+                    Élève existant trouvé. Ses informations ont été récupérées.
+                </div>
+            `;
+
+          /*
+                                    | Maintenant seulement, on autorise
+                                    | le passage au Step 2.
+                                    */
+
+          nextButton.disabled = false;
+        } catch (error) {
+          console.error(error);
+
+          lookupResult.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="ti ti-alert-circle me-1"></i>
+                    Une erreur est survenue pendant la recherche.
+                    Veuillez réessayer.
+                </div>
+            `;
+
+          nextButton.disabled = true;
+        } finally {
+          /*
+                                    | On remet le bouton Recherche dans son état normal.
+                                    */
+
+          lookupButton.disabled = false;
+
+          lookupButton.innerHTML = `
+                <i class="ti ti-search me-1"></i>
+                Rechercher
+            `;
         }
-        Object.entries(data.eleve).forEach(([k, v]) => {
-          const el = document.querySelector(`#inscription_eleve_${k}`);
-          if (el && v !== null) el.value = v;
-        });
-        document.querySelector("#inscription_eleve_typeInscription").value =
-          "ancien";
-        result.innerHTML =
-          '<span class="text-success">Élève existant trouvé : ses informations ont été récupérées.</span>';
-      };
+      });
     });
   </script>
 {% endblock %}

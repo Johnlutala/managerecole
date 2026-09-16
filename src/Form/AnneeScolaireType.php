@@ -14,12 +14,21 @@ class AnneeScolaireType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('libelle')
-            ->add('dateDebut')
-            ->add('dateFin')
+            ->add('libelle', null, [
+                'label' => 'Libellé de l’année scolaire',
+            ])
+            ->add('dateDebut', null, [
+                'label' => 'Date de début',
+                'widget' => 'single_text',
+            ])
+            ->add('dateFin', null, [
+                'label' => 'Date de fin',
+                'widget' => 'single_text',
+            ])
             ->add('ecole', EntityType::class, [
                 'class' => Ecole::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
+                'placeholder' => 'Sélectionnez une école',
             ])
         ;
     }

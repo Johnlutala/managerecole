@@ -1,13 +1,92 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit AnneeScolaire{% endblock %}
+{% block title %}Modifier | Année scolaire{% endblock %}
 
 {% block body %}
-    <h1>Edit AnneeScolaire</h1>
 
-    {{ include('annee_scolaire/_form.html.twig', {'button_label': 'Update'}) }}
+<div class="container-fluid">
 
-    <a href="{{ path('app_annee_scolaire_index') }}">back to list</a>
+    <div class="row justify-content-center">
 
-    {{ include('annee_scolaire/_delete_form.html.twig') }}
+        <div class="col-xl-8">
+
+            {# ==================== PAGE TITLE ==================== #}
+
+            <div class="page-title-head d-flex align-items-center">
+
+                <div class="flex-grow-1">
+
+                    <h4 class="fs-xl fw-bold m-0">
+                        Mise à jour de l'année scolaire
+                    </h4>
+
+                </div>
+
+                <div class="text-end">
+
+                    <ol class="breadcrumb m-0 py-0">
+
+                        <li class="breadcrumb-item">
+                            <a href="javascript:void(0);">
+                                ADMIN
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_annee_scolaire_index') }}">
+                                Années scolaires
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active">
+                            Modifier
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+
+            {# ==================== CARD ==================== #}
+
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <h4 class="card-title mb-0">
+
+                        <i class="ti ti-calendar-event me-2"></i>
+
+                        Modifier l'année scolaire
+
+                    </h4>
+
+                    <a
+                        href="{{ path('app_annee_scolaire_index') }}"
+                        class="btn btn-secondary"
+                    >
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour
+                    </a>
+
+                </div>
+
+                <div class="card-body">
+
+                    {{ include('annee_scolaire/_form.html.twig', {
+                        button_label: 'Mettre à jour'
+                    }) }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 {% endblock %}

@@ -10,6 +10,23 @@
                         <h4 class="fs-xl fw-bold m-0">Classes</h4>
                     </div>
                 </div>
+
+                {% for message in app.flashes('success') %}
+                    <div class="d-flex justify-content-center">
+                        <div class="alert alert-success alert-dismissible fade show"
+                            role="alert"
+                            style="width: 500px;">
+                            {{ message }}
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Fermer"
+                            ></button>
+                        </div>
+                    </div>
+                {% endfor %}
+
                 <div data-table data-table-rows-per-page="8" class="card">
                     <div class="card-header border-light d-flex justify-content-between">
                         <div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
@@ -34,7 +51,7 @@
                                     <tr>
                                         <td>{{ classe.code }}</td>
                                         <td>{{ classe.nom }}</td>
-                                        <td>{{ classe.ecole ? classe.section.nom : '—' }}</td>
+                                        <td>{{ classe.section ? classe.section.nom : '—' }}</td>
                                         <td>{{ classe.ecole ? classe.ecole.nom : '—' }}</td>
                                         <td>{{ classe.capacite ?: '—' }}</td>
                                         <td>
@@ -65,18 +82,20 @@
         </div>
     </div>
 
-    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal fade" id="addModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
 
                 {{ form_start(form) }}
 
                 <div class="modal-header">
+
                     <div>
-                        <h5 class="modal-title fw-bold" id="addModalLabel">
+                        <h5 class="modal-title">
                             <i class="ti ti-school me-2 text-primary"></i>
-                            Nouvelle classe
+                            Ajouter une classe
                         </h5>
+
                         <small class="text-muted">
                             Ajouter une nouvelle classe
                         </small>
@@ -87,69 +106,235 @@
                         class="btn-close"
                         data-bs-dismiss="modal"
                         aria-label="Fermer"
-                    ></button>
+                    >
+                    </button>
+
                 </div>
 
+
                 <div class="modal-body">
-                    
-                    <div class="row g-3">
 
-                        <div class="col-6">
-                            {{ form_row(form.ecole, {
-                                label: 'École',
-                                attr: {
-                                    class: 'form-select'
-                                }
-                            }) }}
+                    <div class="row">
+
+
+                        {# ================================================== #}
+                        {# FORMULAIRE                                         #}
+                        {# ================================================== #}
+
+                        <div class="col-lg-8">
+
+                            <div class="row g-3">
+
+                                {# École #}
+
+                                <div class="col-md-6">
+
+                                    {{ form_row(form.ecole, {
+                                    label: 'École',
+                                    attr: {
+                                        class: 'form-select'
+                                    }
+                                }) }}
+
+                                </div>
+
+
+                                {# Section #}
+
+                                <div class="col-md-6">
+
+                                    {{ form_row(form.section, {
+                                    label: 'Section',
+                                    attr: {
+                                        class: 'form-select'
+                                    }
+                                }) }}
+
+                                </div>
+
+
+                                {# Nom de la classe #}
+
+                                <div class="col-md-6">
+
+                                    {{ form_row(form.nom, {
+                                    label: 'Nom de la classe',
+                                    attr: {
+                                        class: 'form-control',
+                                        placeholder: 'Ex. 4e Primaire'
+                                    }
+                                }) }}
+
+                                </div>
+
+
+                                {# Capacité #}
+
+                                <div class="col-md-6">
+
+                                    {{ form_row(form.capacite, {
+                                    label: 'Capacité',
+                                    attr: {
+                                        class: 'form-control',
+                                        placeholder: 'Ex. 40'
+                                    }
+                                }) }}
+
+                                </div>
+
+                            </div>
+
                         </div>
 
-                        <div class="col-6">
-                            {{ form_row(form.section, {
-                                label: 'Section',
-                                attr: {
-                                    class: 'form-select'
-                                }
-                            }) }}
-                        </div>
+                        <div class="col-lg-4">
 
-                        <div class="col-6">
-                            {{ form_row(form.nom, {
-                                label: 'Nom de la classe',
-                                attr: {
-                                    class: 'form-control',
-                                    placeholder: 'Ex. 4e Primaire'
-                                }
-                            }) }}
-                        </div>
+                            {# Carte des classes #}
 
-                        <div class="col-6">
-                            {{ form_row(form.capacite, {
-                                label: 'Capacité',
-                                attr: {
-                                    class: 'form-control',
-                                    placeholder: 'Ex. 40'
-                                }
-                            }) }}
+                            <div
+                                id="classesCard"
+                                class="card border shadow-none"
+                                style="display: none;"
+                            >
+
+                                <div class="card-header bg-light">
+
+                                    <h5 class="mb-0 fs-md">
+
+                                        <i class="ti ti-list-check me-1"></i>
+
+                                        Classes existantes
+
+                                    </h5>
+
+                                </div>
+
+
+                                <div class="card-body">
+
+
+                                    {# Chargement #}
+
+                                    <div
+                                        id="classesLoading"
+                                        class="text-center py-3"
+                                        style="display: none;"
+                                    >
+
+                                        <div
+                                            class="spinner-border spinner-border-sm text-primary"
+                                            role="status"
+                                        >
+                                        </div>
+
+                                        <span class="ms-2 text-muted">
+                                            Chargement...
+                                        </span>
+
+                                    </div>
+
+
+                                    {# Aucune classe #}
+
+                                    <div
+                                        id="noClasses"
+                                        class="text-center text-muted py-3"
+                                        style="display: none;"
+                                    >
+
+                                        <i
+                                            class="ti ti-info-circle fs-2 d-block mb-2"
+                                        ></i>
+
+                                        <span>
+                                            Aucune classe n'est encore
+                                            associée à cette section.
+                                        </span>
+
+                                    </div>
+
+
+                                    {# Liste des classes #}
+
+                                    <div id="classesList">
+                                    </div>
+
+
+                                    {# Message doublon #}
+
+                                    <div
+                                        id="classeDuplicateMessage"
+                                        class="alert alert-warning mt-3 mb-0"
+                                        style="display: none;"
+                                    >
+
+                                        <i class="ti ti-alert-triangle me-1"></i>
+
+                                        Cette classe existe déjà
+                                        dans cette section.
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {# ==================================================
+                           MESSAGE AVANT SELECTION
+                        ================================================== #}
+
+                            <div
+                                id="selectSectionMessage"
+                                class="text-center text-muted py-5"
+                            >
+
+                                <i
+                                    class="ti ti-school fs-1 d-block mb-2"
+                                ></i>
+
+                                <span>
+                                    Sélectionnez une section pour voir
+                                    les classes disponibles.
+                                </span>
+
+                            </div>
+
                         </div>
 
                     </div>
-                 
 
                 </div>
 
+
+                {# ==========================================================
+               FOOTER
+            ========================================================== #}
+
                 <div class="modal-footer">
+
                     <button
                         type="button"
                         class="btn btn-light"
                         data-bs-dismiss="modal"
                     >
+
                         Annuler
+
                     </button>
 
-                    <button type="submit" class="btn btn-primary">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="saveClasseButton"
+                    >
+
                         <i class="ti ti-device-floppy me-1"></i>
+
                         Enregistrer
+
                     </button>
+
                 </div>
 
                 {{ form_end(form) }}
@@ -158,44 +343,260 @@
         </div>
     </div>
 
+
+    {# ================================================================
+   DONNEES DES CLASSES
+================================================================ #}
+
+    <script type="application/json" id="classes-data">
+
+[
+    {% for classe in classes %}
+
+        {
+            "id": {{ classe.id }},
+            "nom": {{ classe.nom|json_encode|raw }},
+            "ecole": {{ classe.ecole ? classe.ecole.id : 'null' }},
+            "section": {{ classe.section ? classe.section.id : 'null' }}
+        }
+
+        {% if not loop.last %},{% endif %}
+
+    {% endfor %}
+]
+
+</script>
+
+
+    {# ================================================================
+   JAVASCRIPT
+================================================================ #}
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const ecoleSelect = document.querySelector("#classe_ecole");
+
             const sectionSelect = document.querySelector("#classe_section");
 
-            if (!ecoleSelect || !sectionSelect) {
+            const nomInput = document.querySelector("#classe_nom");
+
+            const classesCard = document.querySelector("#classesCard");
+
+            const classesList = document.querySelector("#classesList");
+
+            const noClasses = document.querySelector("#noClasses");
+
+            const selectSectionMessage = document.querySelector(
+                "#selectSectionMessage",
+            );
+
+            const duplicateMessage = document.querySelector("#classeDuplicateMessage");
+
+            const saveButton = document.querySelector("#saveClasseButton");
+
+            const classesDataElement = document.querySelector("#classes-data");
+
+            if (!ecoleSelect || !sectionSelect || !nomInput || !classesDataElement) {
                 return;
             }
 
-            // Au démarrage : section désactivée
+            const classesData = JSON.parse(classesDataElement.textContent);
+
+            /* ================================================================
+               SECTION DESACTIVEE AU DEPART
+            ================================================================ */
+
             sectionSelect.disabled = true;
+
+            /* ================================================================
+               CHANGEMENT ECOLE
+            ================================================================ */
 
             ecoleSelect.addEventListener("change", function () {
                 const ecoleId = this.value;
 
-                // Aucune école sélectionnée
+                // Réinitialiser section
+                sectionSelect.value = "";
+
+                // Désactiver si aucune école
                 if (!ecoleId) {
                     sectionSelect.disabled = true;
-                    sectionSelect.value = "";
+
+                    cacherClasses();
+
                     return;
                 }
 
-                // Activer la section
+                // Activer section
                 sectionSelect.disabled = false;
 
                 // Filtrer les sections
                 Array.from(sectionSelect.options).forEach(function (option) {
                     if (option.value === "") {
                         option.hidden = false;
+
                         return;
                     }
 
                     option.hidden = option.dataset.ecole !== ecoleId;
                 });
 
-                // Réinitialiser la sélection
-                sectionSelect.value = "";
+                // Cacher les classes
+                cacherClasses();
             });
+
+            /* ================================================================
+               CHANGEMENT SECTION
+            ================================================================ */
+
+            sectionSelect.addEventListener("change", function () {
+                afficherClasses();
+            });
+
+            /* ================================================================
+               SAISIE NOM CLASSE
+            ================================================================ */
+
+            nomInput.addEventListener("input", function () {
+                verifierDoublon();
+            });
+
+            /* ================================================================
+               AFFICHER LES CLASSES
+            ================================================================ */
+
+            function afficherClasses() {
+                const ecoleId = ecoleSelect.value;
+
+                const sectionId = sectionSelect.value;
+
+                classesList.innerHTML = "";
+
+                duplicateMessage.style.display = "none";
+
+                if (!ecoleId || !sectionId) {
+                    cacherClasses();
+
+                    return;
+                }
+
+                // Cacher le message initial
+                selectSectionMessage.style.display = "none";
+
+                // Afficher la carte
+                classesCard.style.display = "block";
+
+                // Filtrer les classes
+                const classesFiltrees = classesData.filter(function (classe) {
+                    return (
+                        String(classe.ecole) === String(ecoleId) &&
+                        String(classe.section) === String(sectionId)
+                    );
+                });
+
+                // Aucune classe
+                if (classesFiltrees.length === 0) {
+                    noClasses.style.display = "block";
+
+                    return;
+                }
+
+                noClasses.style.display = "none";
+
+                // Afficher les classes
+                classesFiltrees.forEach(function (classe) {
+                    const item = document.createElement("div");
+
+                    item.className =
+                        "d-flex justify-content-between align-items-center border-bottom py-2";
+
+                    item.innerHTML = `
+
+                <div>
+
+                    <i class="ti ti-school me-1 text-primary"></i>
+
+                    ${classe.nom}
+
+                </div>
+
+                <span class="badge bg-light text-dark">
+
+                    Existe
+
+                </span>
+
+            `;
+
+                    classesList.appendChild(item);
+                });
+
+                verifierDoublon();
+            }
+
+            /* ================================================================
+               CACHER LES CLASSES
+            ================================================================ */
+
+            function cacherClasses() {
+                classesCard.style.display = "none";
+
+                selectSectionMessage.style.display = "block";
+
+                classesList.innerHTML = "";
+
+                noClasses.style.display = "none";
+
+                duplicateMessage.style.display = "none";
+
+                if (saveButton) {
+                    saveButton.disabled = false;
+                }
+            }
+
+            /* ================================================================
+               VERIFIER DOUBLON
+            ================================================================ */
+
+            function verifierDoublon() {
+                const ecoleId = ecoleSelect.value;
+
+                const sectionId = sectionSelect.value;
+
+                const nom = nomInput.value.trim().toLowerCase();
+
+                if (!ecoleId || !sectionId || !nom) {
+                    duplicateMessage.style.display = "none";
+
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                    }
+
+                    return;
+                }
+
+                const existe = classesData.some(function (classe) {
+                    return (
+                        String(classe.ecole) === String(ecoleId) &&
+                        String(classe.section) === String(sectionId) &&
+                        classe.nom.trim().toLowerCase() === nom
+                    );
+                });
+
+                if (existe) {
+                    duplicateMessage.style.display = "block";
+
+                    if (saveButton) {
+                        saveButton.disabled = true;
+                    }
+                } else {
+                    duplicateMessage.style.display = "none";
+
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                    }
+                }
+            }
         });
     </script>
 {% endblock %}

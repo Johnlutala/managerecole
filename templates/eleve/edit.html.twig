@@ -1,1 +1,90 @@
-{% extends 'base.html.twig' %}{% block body %}<div class="container-fluid"><h4>Modifier Élève</h4>{% include 'eleve/_form.html.twig' with {button_label: 'Mettre à jour'} %}</div>{% endblock %}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier | Élève{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center">
+
+        <div class="col-xl-8">
+
+            {# ==================== PAGE TITLE ==================== #}
+            <div class="page-title-head d-flex align-items-center">
+
+                <div class="flex-grow-1">
+
+                    <h4 class="fs-xl fw-bold m-0">
+                        Mise à jour de l'élève
+                    </h4>
+
+                </div>
+
+                <div class="text-end">
+
+                    <ol class="breadcrumb m-0 py-0">
+
+                        <li class="breadcrumb-item">
+                            <a href="javascript:void(0);">
+                                ADMIN
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_eleve_index') }}">
+                                Élèves
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active">
+                            Modifier
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+
+            {# ==================== CARD ==================== #}
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <h4 class="card-title mb-0">
+
+                        <i class="ti ti-user-edit me-2"></i>
+
+                        Modifier l'élève
+
+                    </h4>
+
+                    <a href="{{ path('app_eleve_show', {'id': eleve.id}) }}"
+                       class="btn btn-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour
+                    </a>
+
+                </div>
+
+                <div class="card-body">
+
+                    {{ include('eleve/_form.html.twig', {
+                        button_label: 'Mettre à jour'
+                    }) }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+

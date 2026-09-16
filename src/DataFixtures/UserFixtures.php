@@ -11,19 +11,19 @@ class UserFixtures extends Fixture
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher
-    ) {
-    }
+    ) {}
 
     public function load(ObjectManager $manager): void
     {
         $users = [
-            
+
+
             [
                 'firstname' => 'John',
                 'lastname' => 'KISINA',
                 'username' => 'johnkisina',
                 'email' => 'jk.lutala@gmail.com',
-                'password' => 'Admin123', 
+                'password' => 'Admin123',
                 'roles' => ['ROLE_ADMIN'],
             ],
         ];

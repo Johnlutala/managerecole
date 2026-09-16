@@ -1,68 +1,117 @@
+
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
-    <title>Vos identifiants</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation du mot de passe</title>
 </head>
 
-<div style="max-width:560px; margin:30px auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:28px; font-family:Arial, Helvetica, sans-serif; color:#333333;">
+<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#333333;">
 
-<div style="text-align:center; margin-bottom:25px;">
-    <div style="font-size:24px; font-weight:bold; color:#1f3c88;">
-       TECHNOLOGIES MODERNES
-    </div>
-    <div style="font-size:12px; color:#888888; margin-top:4px;">
-        Plateforme de gestion
-    </div>
-</div>
+    <div style="max-width:560px; margin:30px auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:28px;">
 
-<p style="font-size:15px; margin:0 0 15px;">
-    Bonjour
-    <strong>
-        {{ user.firstname }} {{ user.lastname }}
-    </strong>,
-</p>
- 
-<p style="font-size:14px; line-height:1.6; margin:0 0 18px; color:#555555;">
-    <strong style="color:#1f3c88;">
-        Votre mot de passe a &eacute;t&eacute; r&eacute;initialis&eacute; avec succ&egrave;s.
-    </strong>
-    <br>
-    Voici vos nouveaux identifiants de connexion :
-</p>
+        {# En-tête #}
+        <div style="text-align:center; margin-bottom:25px;">
 
-<div style="background:#f7f8fa; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:20px;">
-    <div style="margin-bottom:15px;">
-        <div style="font-size:11px; color:#777777; margin-bottom:6px;">
-            NOM D'UTILISATEUR
-        </div>
-        <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
-            <span style="font-weight:bold; color:#222222;">
-                {{ username }}
-            </span>
+            <div style="font-size:24px; font-weight:bold; color:#1f3c88;">
+                SCHOOL MANAGER
+            </div>
+
+            <div style="font-size:12px; color:#888888; margin-top:5px;">
+                Plateforme de gestion scolaire
+            </div>
 
         </div>
 
-    </div>
-  
-    <div>
-        <div style="font-size:11px; color:#777777; margin-bottom:6px;">
-            NOUVEAU MOT DE PASSE
+
+        {# Salutation #}
+        <p style="font-size:15px; margin:0 0 15px;">
+            Bonjour
+            <strong>
+                {{ user.firstname }} {{ user.lastname }}
+            </strong>,
+        </p>
+
+
+        {# Message #}
+        <p style="font-size:14px; line-height:1.6; margin:0 0 18px; color:#555555;">
+
+            <strong style="color:#1f3c88;">
+                Votre mot de passe a été réinitialisé avec succès.
+            </strong>
+
+            <br>
+
+            Voici vos nouveaux identifiants de connexion :
+        </p>
+
+
+        {# Bloc des identifiants #}
+        <div style="background:#f7f8fa; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:20px;">
+
+            {# Nom utilisateur #}
+            <div style="margin-bottom:15px;">
+
+                <div style="font-size:11px; color:#777777; margin-bottom:6px;">
+                    NOM D'UTILISATEUR
+                </div>
+
+                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
+
+                    <span style="font-weight:bold; color:#222222;">
+                        {{ username }}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            {# Nouveau mot de passe #}
+            <div>
+
+                <div style="font-size:11px; color:#777777; margin-bottom:6px;">
+                    NOUVEAU MOT DE PASSE
+                </div>
+
+                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
+
+                    <span style="font-family:monospace; font-weight:bold; color:#222222;">
+                        {{ password }}
+                    </span>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
-            <span style="font-family:monospace; font-weight:bold; color:#222222;">
-                {{ password }}
-            </span>
-        </div>
-    </div>
-</div>
 
-<p style="font-size:13px; line-height:1.5; color:#666666; margin:0;">
-    Cordialement,<br>
-    <strong style="color:#1f3c88;">
-        L'&eacute;quipe école Technologies Modernes
-    </strong>
-</p>
-</div>
+        {# Sécurité #}
+        <p style="font-size:13px; line-height:1.5; color:#666666; margin:0 0 20px;">
+
+            Pour votre sécurité, nous vous recommandons de vous connecter
+            rapidement et de modifier ce mot de passe après votre connexion.
+
+        </p>
+
+
+        {# Signature #}
+        <p style="font-size:13px; line-height:1.5; color:#666666; margin:0;">
+
+            Cordialement,<br>
+
+            <strong style="color:#1f3c88;">
+                L'équipe School Manager
+            </strong>
+
+        </p>
+
+    </div>
+
+</body>
+
 </html>
+

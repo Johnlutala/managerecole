@@ -40,19 +40,60 @@ final class InscriptionEleveController extends AbstractController
     }
 
     #[Route('/lookup', name: 'lookup', methods: ['GET'])]
-    public function lookup(Request $request, EleveRepository $eleves): JsonResponse
-    {
+    public function lookup(
+        Request $request,
+        EleveRepository $eleves,
+        InscriptionEleveRepository $inscriptions
+    ): JsonResponse {
         $reference = trim((string) $request->query->get('reference', ''));
+
         if ($reference === '') {
             return $this->json(['found' => false]);
         }
-        $eleve = $eleves->findOneBy(['matricule' => $reference]);
-        if (!$eleve) {
-            return $this->json(['found' => false]);
-        }
-        return $this->json(['found' => true, 'eleve' => ['matricule' => $eleve->getMatricule(), 'nom' => $eleve->getNom(), 'postnom' => $eleve->getPostnom(), 'prenom' => $eleve->getPrenom(), 'sexe' => $eleve->getSexe(), 'dateNaissance' => $eleve->getDateNaissance()?->format('Y-m-d'), 'lieuNaissance' => $eleve->getLieuNaissance(), 'adresse' => $eleve->getAdresse(), 'telephone' => $eleve->getPhone()]]);
-    }
 
+        // Recherche de l'élève existant
+        $eleve = $eleves->findOneBy([
+            'matricule' => $reference
+        ]);
+
+        if (!$eleve) {
+            return $this->json([
+                'found' => false
+            ]);
+        }
+
+        // Recherche de son ancienne inscription
+        $inscription = $inscriptions->findOneBy([
+            'reference' => $reference
+        ]);
+
+        return $this->json([
+            'found' => true,
+
+            'eleve' => [
+                'matricule' => $eleve->getMatricule(),
+                'nom' => $eleve->getNom(),
+                'postnom' => $eleve->getPostnom(),
+                'prenom' => $eleve->getPrenom(),
+                'sexe' => $eleve->getSexe(),
+                'dateNaissance' => $eleve->getDateNaissance()?->format('Y-m-d'),
+                'lieuNaissance' => $eleve->getLieuNaissance(),
+                'adresse' => $eleve->getAdresse(),
+                'telephone' => $eleve->getPhone(),
+
+                // Informations du parent
+                'nomParent' => $inscription?->getNomParent(),
+                'postnomParent' => $inscription?->getPostnomParent(),
+                'prenomParent' => $inscription?->getPrenomParent(),
+                'telephoneParent' => $inscription?->getTelephoneParent(),
+                'emailParent' => $inscription?->getEmailParent(),
+                'lienParental' => $inscription?->getLienParental(),
+                'professionParent' => $inscription?->getProfessionParent(),
+                'adresseParent' => $inscription?->getAdresseParent(),
+            ]
+
+        ]);
+    }
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {

@@ -1,1 +1,398 @@
-{% extends 'base.html.twig' %}{% block title %}Détail Élève{% endblock %}{% block body %}<div class="container-fluid"><div class="page-title-head d-flex justify-content-between align-items-center"><h4 class="fs-xl fw-bold m-0">Détail Élève</h4><a href="{{ path('app_eleve_' ~ 'index') }}" class="btn btn-secondary"><i class="ti ti-arrow-left me-1"></i>Retour</a></div><div class="row"><div class="col-lg-3"><div class="card"><div class="card-body d-grid gap-2"><a href="{{ path('app_eleve_' ~ 'edit', {id: eleve.id}) }}" class="btn btn-warning">Modifier</a>{% include 'eleve/_delete_form.html.twig' %}</div></div></div><div class="col-lg-9"><div class="card"><div class="table-responsive"><table class="table table-bordered align-middle mb-0"><tbody><tr><th>Matricule</th><td>{{ eleve.matricule }}</td></tr><tr><th>Nom complet</th><td>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</td></tr><tr><th>Sexe</th><td>{{ eleve.sexe }}</td></tr><tr><th>Date de naissance</th><td>{{ eleve.dateNaissance|date('d/m/Y') }}</td></tr><tr><th>Lieu de naissance</th><td>{{ eleve.lieuNaissance }}</td></tr><tr><th>Classe</th><td>{{ eleve.classe ? eleve.classe.nom : '—' }}</td></tr><tr><th>École</th><td>{{ eleve.ecole ? eleve.ecole.nom : '—' }}</td></tr><tr><th>Créé le</th><td>{{ eleve.createdAt ? eleve.createdAt|date('d/m/Y H:i') : '—' }}</td></tr><tr><th>Créé par</th><td>{{ eleve.createdBy ? eleve.createdBy.firstname ~ ' ' ~ eleve.createdBy.lastname : '—' }}</td></tr><tr><th>Mis à jour le</th><td>{{ eleve.updatedAt ? eleve.updatedAt|date('d/m/Y H:i') : '—' }}</td></tr></tbody></table></div></div></div></div></div>{% endblock %}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Élève{% endblock %}
+
+{% block body %}
+
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                {# ==================== TITRE ==================== #}
+                <div class="page-title-head d-flex align-items-center mb-3">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Détail de l'élève
+                        </h4>
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_eleve_index') }}">
+                                    Élèves
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+
+                {# ==================== CONTENU ==================== #}
+                <div class="row g-3">
+
+                    {# ============================================================
+                   1. INFORMATIONS RAPIDES
+                   ============================================================ #}
+                    <div class="col-xl-2">
+
+                        <div class="card h-100">
+
+                            <div class="card-header py-2">
+                                <h4 class="card-title mb-0">
+                                    Élève N° {{ eleve.id }}
+                                </h4>
+                            </div>
+
+                            <div class="card-body text-center py-3">
+
+                                <div class="avatar-xl mx-auto mb-2">
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+                                        <i class="ti ti-school fs-1"></i>
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-1">
+                                    {{ eleve.nom }}
+                                    {{ eleve.postnom }}
+                                </h5>
+
+                                <p class="text-muted mb-1">
+                                    {{ eleve.prenom }}
+                                </p>
+
+                                <p class="text-muted small mb-3">
+                                    Matricule<br>
+                                    <strong>{{ eleve.matricule }}</strong>
+                                </p>
+
+                                <hr class="my-2">
+
+                                <div class="d-grid gap-2">
+
+                                    <a
+                                        href="{{ path('app_eleve_edit', {'id': eleve.id}) }}"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier
+                                    </a>
+
+                                    {% include 'eleve/_delete_form.html.twig' %}
+
+                                    <a
+                                        href="{{ path('app_eleve_index') }}"
+                                        class="btn btn-secondary btn-sm"
+                                    >
+                                        <i class="ti ti-arrow-left me-1"></i>
+                                        Retour
+                                    </a>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================================
+                   2. INFORMATIONS ÉLÈVE
+                   ============================================================ #}
+                    <div class="col-xl-4">
+
+                        <div class="card h-100">
+
+                            <div class="card-header py-2">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-user me-2"></i>
+                                    Informations de l'élève
+                                </h4>
+                            </div>
+
+                            <div class="card-body p-2">
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm align-middle mb-0">
+
+                                        <tbody>
+
+                                            <tr>
+                                                <th width="38%">Matricule</th>
+                                                <td>{{ eleve.matricule ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Nom</th>
+                                                <td>{{ eleve.nom ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Postnom</th>
+                                                <td>{{ eleve.postnom ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Prénom</th>
+                                                <td>{{ eleve.prenom ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Sexe</th>
+                                                <td>{{ eleve.sexe ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Date de naissance</th>
+                                                <td>
+                                                    {{ eleve.dateNaissance
+                                                    ? eleve.dateNaissance|date('d/m/Y')
+                                                    : '—'
+                                                }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Lieu de naissance</th>
+                                                <td>{{ eleve.lieuNaissance ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Adresse</th>
+                                                <td>{{ eleve.adresse ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Téléphone</th>
+                                                <td>{{ eleve.phone ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Email</th>
+                                                <td>{{ eleve.email ?: '—' }}</td>
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================================
+                   3. PARENT / TUTEUR
+                   ============================================================ #}
+
+                    {% set parent = eleve.parents|first %}
+
+                    <div class="col-xl-3">
+
+                        <div class="card h-100">
+
+                            <div class="card-header py-2">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-users me-2"></i>
+                                    Parent / Tuteur
+                                </h4>
+                            </div>
+
+                            <div class="card-body p-2">
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm align-middle mb-0">
+
+                                        <tbody>
+
+                                            <tr>
+                                                <th width="42%">Nom</th>
+                                                <td>
+                                                    {{ parent ? parent.nom : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Postnom</th>
+                                                <td>
+                                                    {{ parent ? parent.postnom : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Prénom</th>
+                                                <td>
+                                                    {{ parent ? parent.prenom : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Téléphone</th>
+                                                <td>
+                                                    {{ parent ? parent.telephone : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Adresse</th>
+                                                <td>
+                                                    {{ parent ? parent.adresse : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Profession</th>
+                                                <td>
+                                                    {{ parent ? parent.profession : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Lien</th>
+                                                <td>
+                                                    {{ parent ? parent.type : '—' }}
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    {# ============================================================
+                   4. ÉTABLISSEMENT
+                   ============================================================ #}
+
+                    <div class="col-xl-3">
+
+                        <div class="card h-100">
+
+                            <div class="card-header py-2">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-school me-2"></i>
+                                    Établissement
+                                </h4>
+                            </div>
+
+                            <div class="card-body p-2">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm align-middle mb-0">
+
+                                        {# Informations établissement #}
+                                        <tbody>
+                                            <tr>
+                                                <th colspan="2" class="bg-light">
+                                                    <i class="ti ti-school me-1"></i>
+                                                    Informations établissement
+                                                </th>
+                                            </tr>
+
+                                            <tr>
+                                                <th width="42%">École</th>
+                                                <td>
+                                                    {% if eleve.ecole %}
+                                                        <a href="{{ path('app_ecole_show', {'id': eleve.ecole.id}) }}">
+                                                            {{ eleve.ecole.nom }}
+                                                        </a>
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Classe</th>
+                                                <td>
+                                                    {{ eleve.classe ? eleve.classe.nom : '—' }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Date inscription</th>
+                                                <td>
+                                                    {{ eleve.dateInscription
+                                                        ? eleve.dateInscription|date('d/m/Y')
+                                                        : '—'
+                                                    }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Statut</th>
+                                                <td>
+                                                    {% if eleve.statut %}
+                                                        <span class="badge bg-success-subtle text-success">
+                                                            Actif
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger-subtle text-danger">
+                                                            Inactif
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                        {# Séparation : suivi général de l'élève #}
+                                        <tbody>
+                                            <tr>
+                                                <th colspan="2" class="bg-light border-top border-4">
+                                                    <i class="ti ti-history me-1"></i>
+                                                    Suivi de l’élève
+                                                </th>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Créé par</th>
+                                                <td>
+                                                    {{ eleve.createdBy
+                                                        ? eleve.createdBy.firstname ~ ' ' ~ eleve.createdBy.lastname
+                                                        : '—'
+                                                    }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Mis à jour le</th>
+                                                <td>
+                                                    {{ eleve.updatedAt
+                                                        ? eleve.updatedAt|date('d/m/Y H:i')
+                                                        : '—'
+                                                    }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    </div>
+    </div>
+
+{% endblock %}
