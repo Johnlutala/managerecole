@@ -33,8 +33,8 @@ class InscriptionEleve
     #[ORM\Column(length: 50)]
     private ?string $lieuNaissance = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $nationalite = null;
+    #[ORM\Column(length: 50, unique:true, nullable: true)]
+    private ?string $email = null;
 
     #[ORM\Column(length: 255)]
     private ?string $adresse = null;
@@ -237,14 +237,14 @@ class InscriptionEleve
         return $this;
     }
 
-    public function getNationalite(): ?string
+    public function getEmail(): ?string
     {
-        return $this->nationalite;
+        return $this->email;
     }
 
-    public function setNationalite(?string $nationalite): static
+    public function setEmail(?string $email): static
     {
-        $this->nationalite = $nationalite;
+        $this->email = $email;
 
         return $this;
     }

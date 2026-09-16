@@ -1,274 +1,454 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Utilisateur
-{% endblock %}
+{% block title %}Utilisateur{% endblock %}
 
 {% block body %}
-	<div class="container-fluid">
-		<div class="row justify-content-center">
-			<div class="col-xl-8">
-				<div class="page-title-head d-flex align-items-center">
-					<div class="flex-grow-1">
-						<h4 class="fs-xl fw-bold m-0">Détail utilisateur</h4>
-					</div>
 
-					<div class="text-end">
-						<ol class="breadcrumb m-0 py-0">
-							<li class="breadcrumb-item">
-								<a href="javascript: void(0);">ENABEL</a>
-							</li>
-							<li class="breadcrumb-item">
-								<a href="javascript: void(0);">Utilisateurs</a>
-							</li>
-							<li class="breadcrumb-item active">Détail</li>
-						</ol>
-					</div>
-				</div>
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
 
-				<div class="card">
-					<div class="card-header d-flex justify-content-between align-items-center">
-						<h3 class="card-title mb-0">
-							<i class="ti ti-user me-2"></i>
-							{{ user.firstname }}
-							{{ user.lastname }}
-						</h3>
+                {# Titre de la page #}
+                <div class="page-title-head d-flex flex-column flex-md-row align-items-md-center gap-2 mb-3">
 
-						<a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-							<i class="ti ti-arrow-left"></i>
-							Retour
-						</a>
-					</div>
-				</div>
-				<div class="row">
-
-					<div class="col-xl-3">
-						<div class="card">
-							<div class="card-header d-flex justify-content-center">
-								<h4 class="card-title mb-0">
-									Actions
-								</h4>
-							</div>
-
-							<div class="card-body text-center">
-								<div class="d-grid gap-2">
-									<a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal">
-										<i class="ti ti-key fs-lg"></i>
-										Mot de passe
-									</a>
-									<a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning">
-										<i class="ti ti-edit"></i>
-										Modifier
-									</a>
-
-									{% include 'user/_delete_form.html.twig' %}
-
-									{# <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
-										<i class="ti ti-arrow-left"></i>
-										Retour
-									</a> #}
-								</div>
-							</div>
-
-						</div>
-
-					</div>
-
-					<div class="col-xl-9">
-						<div class="card">
-							<div class="table-responsive">
-								<table class="table table-bordered align-middle">
-									<tbody>
-										<tr>
-											<th>Nom</th>
-											<td>{{ user.lastname }}</td>
-										</tr>
-										<tr>
-											<th>Prénom</th>
-											<td>{{ user.firstname }}</td>
-										</tr>
-										<tr>
-											<th>Nom d'utilisateur</th>
-											<td>{{ user.username }}</td>
-										</tr>
-										<tr>
-											<th>Email</th>
-											<td>{{ user.email }}</td>
-										</tr>
-										<tr>
-											<th>Rôles</th>
-											<td>{{ user.roles|join(', ') }}</td>
-										</tr>
-										<tr>
-											<th>Statut</th>
-											<td>
-												{% if user.enabled %}
-													<span class="badge bg-success">Actif</span>
-												{% else %}
-													<span class="badge bg-danger">Inactif</span>
-												{% endif %}
-											</td>
-										</tr>
-										<tr>
-											<th>Code</th>
-											<td>{{ user.code }}</td>
-										</tr>
-										<tr>
-											<th>Créé par
-											</th>
-											<td>
-												{% if user.createdBy is not null %}
-													{{ user.createdBy.firstname }}
-													{{ user.createdBy.lastname }}
-												{% else %}
-													---
-												{% endif %}
-											</td>
-										</tr>
-										<tr>
-											<th>Date de création</th>
-											<td>{{ user.createdAt ? user.createdAt|date('d/m/Y H:i') : 'Non renseignée' }}</td>
-										</tr>
-										<tr>
-											<th>Date de mise à jour</th>
-											<td>{{ user.updatedAt ? user.updatedAt|date('d/m/Y H:i') : 'Non renseignée' }}</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header bg-secondary text-white">
-				<h4 class="modal-title" id="passwordModalLabel">
-					<i class="ti ti-user me-2"></i>
-					{{ user.firstname }}
-					{{ user.lastname }}
-				</h4>
-
-				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-
-			<div class="modal-body text-center">
-				<div class="d-flex align-items-center justify-content-center mb-2">
-					<i class="ti ti-lock me-2"></i>
-					<h4 class="mb-0">Gestion des identifiants</h4>
-				</div>
-
-				<p class="text-muted mt-2">Utilisez le bouton <strong>&laquo; R&eacute;initialiser &raquo;</strong> pour remplacer le mot de passe actuel.</p>
-
-				<div class="d-flex justify-content-center gap-3 mt-4">
-
-					<button class="btn btn-warning" id="btnResetPassword">
-						<i class="ti ti-refresh me-2"></i>
-						Réinitialiser
-					</button>
-
-				</div>
-
-			</div>
-
-			<div class="modal-footer">
-				<button class="btn btn-secondary" data-bs-dismiss="modal">
-					Fermer
-				</button>
-			</div>
-
-		</div>
-	</div>
-</div>
-
-<script>
-
-	const userId = {{ user.id }};
-
-// ===============================
-// Réinitialisation
-// ===============================
-document.getElementById('btnResetPassword').addEventListener('click', async function () {
-
-const result = await Swal.fire({
-title: 'Réinitialiser le mot de passe ?',
-text: 'Le mot de passe actuel sera remplacé.',
-icon: 'warning',
-showCancelButton: true,
-confirmButtonText: 'Oui, réinitialiser',
-cancelButtonText: 'Annuler',
-confirmButtonColor: '#dc3545'
-});
-
-if (! result.isConfirmed) {
-return;
-}
-
-Swal.fire({
-title: 'Réinitialisation...',
-text: 'Veuillez patienter quelques instants.',
-allowOutsideClick: false,
-allowEscapeKey: false,
-didOpen: () => {
-Swal.showLoading();
-}
-});
-
-try {
-
-const response = await fetch('/api/rest/v1/users/' + userId + '/reset-password', {method: 'POST'});
-
-const data = await response.json();
-
-Swal.close();
-
-if (response.ok && data.code === "0") {
-
-Swal.fire({
-icon: 'success',
-title: 'Mot de passe réinitialisé',
-html: `
-                    <div class="text-start">
-                        <div class="mb-3">
-                            <label class="fw-bold">Nom d'utilisateur</label>
-                            <div class="form-control bg-light">
-                                ${
-data.data.username
-}
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="fw-bold">Nouveau mot de passe</label>
-                            <div class="form-control bg-light">
-                                ${
-data.data.password
-}
-                            </div>
-                        </div>
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Détail utilisateur
+                        </h4>
                     </div>
-                `,
-confirmButtonText: '<i class="ti ti-check"></i> Fermer',
-confirmButtonColor: '#198754'
-});
 
-} else {
+                    <div class="text-md-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ENABEL</a>
+                            </li>
 
-Swal.fire({icon: 'error', title: 'Erreur', text: data.message});
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_user_index') }}">
+                                    Utilisateurs
+                                </a>
+                            </li>
 
-}
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+                        </ol>
+                    </div>
 
-} catch (e) {
+                </div>
 
-Swal.close();
+                {# En-tête utilisateur #}
+                <div class="card mb-3">
 
-Swal.fire({icon: 'error', title: 'Erreur', text: e.message});
+                    <div class="card-header d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2">
 
-}
+                        <h3 class="card-title mb-0 text-break">
+                            <i class="ti ti-user me-2"></i>
+                            {{ user.firstname }}
+                            {{ user.lastname }}
+                        </h3>
 
-});
-</script>{% endblock %}
+                        <a href="{{ path('app_user_index') }}"
+                           class="btn btn-secondary">
+                            <i class="ti ti-arrow-left me-1"></i>
+                            Retour
+                        </a>
+
+                    </div>
+
+                </div>
+
+                {# Contenu principal #}
+                <div class="row g-3">
+
+                    {# Actions #}
+                    <div class="col-12 col-md-4 col-xl-3">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-settings me-1"></i>
+                                    Actions
+                                </h4>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="d-grid gap-2">
+
+                                    <button type="button"
+                                            class="btn btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#passwordModal">
+
+                                        <i class="ti ti-key me-1"></i>
+                                        Mot de passe
+
+                                    </button>
+
+                                    <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+                                       class="btn btn-warning">
+
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier
+
+                                    </a>
+
+                                    {% include 'user/_delete_form.html.twig' %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {# Informations utilisateur #}
+                    <div class="col-12 col-md-8 col-xl-9">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-user me-1"></i>
+                                    Informations utilisateur
+                                </h4>
+                            </div>
+
+                            <div class="card-body p-0">
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-bordered table-sm align-middle mb-0">
+
+                                        <tbody>
+
+                                            <tr>
+                                                <th style="width: 40%;">
+                                                    Nom
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.lastname }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Prénom
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.firstname }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Nom d'utilisateur
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.username }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Email
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.email }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Rôles
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.roles|join(', ') }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Statut
+                                                </th>
+                                                <td>
+                                                    {% if user.enabled %}
+                                                        <span class="badge bg-success">
+                                                            Actif
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger">
+                                                            Inactif
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Code
+                                                </th>
+                                                <td class="text-break">
+                                                    {{ user.code }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Créé par
+                                                </th>
+                                                <td class="text-break">
+                                                    {% if user.createdBy is not null %}
+                                                        {{ user.createdBy.firstname }}
+                                                        {{ user.createdBy.lastname }}
+                                                    {% else %}
+                                                        —
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Date de création
+                                                </th>
+                                                <td>
+                                                    {{ user.createdAt
+                                                        ? user.createdAt|date('d/m/Y H:i')
+                                                        : 'Non renseignée'
+                                                    }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>
+                                                    Date de mise à jour
+                                                </th>
+                                                <td>
+                                                    {{ user.updatedAt
+                                                        ? user.updatedAt|date('d/m/Y H:i')
+                                                        : 'Non renseignée'
+                                                    }}
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {# Modal mot de passe #}
+    <div class="modal fade"
+         id="passwordModal"
+         tabindex="-1"
+         aria-labelledby="passwordModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+
+            <div class="modal-content">
+
+                <div class="modal-header bg-secondary text-white">
+
+                    <h4 class="modal-title text-break" id="passwordModalLabel">
+
+                        <i class="ti ti-user me-2"></i>
+
+                        {{ user.firstname }}
+                        {{ user.lastname }}
+
+                    </h4>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Fermer">
+                    </button>
+
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+
+                        <i class="ti ti-lock"></i>
+
+                        <h4 class="mb-0">
+                            Gestion des identifiants
+                        </h4>
+
+                    </div>
+
+                    <p class="text-muted mt-2">
+
+                        Utilisez le bouton
+                        <strong>« Réinitialiser »</strong>
+                        pour remplacer le mot de passe actuel.
+
+                    </p>
+
+                    <div class="d-flex justify-content-center mt-4">
+
+                        <button type="button"
+                                class="btn btn-warning"
+                                id="btnResetPassword">
+
+                            <i class="ti ti-refresh me-2"></i>
+                            Réinitialiser
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+
+                        Fermer
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+
+    {{ parent() }}
+
+    <script>
+
+        const userId = {{ user.id }};
+
+        const resetButton = document.getElementById('btnResetPassword');
+
+        if (resetButton) {
+
+            resetButton.addEventListener('click', async function () {
+
+                const result = await Swal.fire({
+                    title: 'Réinitialiser le mot de passe ?',
+                    text: 'Le mot de passe actuel sera remplacé.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, réinitialiser',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#dc3545'
+                });
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Réinitialisation...',
+                    text: 'Veuillez patienter quelques instants.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+
+                    const response = await fetch(
+                        '/api/rest/v1/users/' + userId + '/reset-password',
+                        {
+                            method: 'POST'
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    Swal.close();
+
+                    if (response.ok && data.code === "0") {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Mot de passe réinitialisé',
+                            html: `
+                                <div class="text-start">
+
+                                    <div class="mb-3">
+                                        <label class="fw-bold">
+                                            Nom d'utilisateur
+                                        </label>
+
+                                        <div class="form-control bg-light text-break">
+                                            ${data.data.username}
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="fw-bold">
+                                            Nouveau mot de passe
+                                        </label>
+
+                                        <div class="form-control bg-light text-break">
+                                            ${data.data.password}
+                                        </div>
+                                    </div>
+
+                                </div>
+                            `,
+                            confirmButtonText: '<i class="ti ti-check"></i> Fermer',
+                            confirmButtonColor: '#198754'
+                        });
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: data.message || 'Une erreur est survenue.'
+                        });
+
+                    }
+
+                } catch (error) {
+
+                    Swal.close();
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: error.message
+                    });
+
+                }
+
+            });
+
+        }
+
+    </script>
+
+{% endblock %}

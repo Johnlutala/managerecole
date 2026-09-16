@@ -87,6 +87,11 @@
                                         Modifier
                                     </a>
 
+                                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#accountModal">
+                                        <i class="ti ti-key me-1"></i>
+                                        Gérer les identifiants
+                                    </button>
+
                                     {% include 'eleve/_delete_form.html.twig' %}
 
                                     <a
@@ -179,6 +184,17 @@
                                             <tr>
                                                 <th>Email</th>
                                                 <td>{{ eleve.email ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Compte utilisateur</th>
+                                                <td>
+                                                    {% if iscompte %}
+                                                        <span class="badge bg-success-subtle text-success">Déjà un compte</span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning-subtle text-warning">Pas encore de compte</span>
+                                                    {% endif %}
+                                                </td>
                                             </tr>
 
                                         </tbody>
@@ -393,6 +409,51 @@
 
     </div>
     </div>
+    </div>
+
+    <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="accountModalLabel">
+                        <i class="ti ti-key me-2"></i>
+                        Gestion des identifiants
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Élève : <strong>{{ eleve.prenom }} {{ eleve.nom }}</strong><br>
+                        Identifiant : <strong>{{ eleve.matricule }}</strong>
+                    </p>
+
+                    {% if not eleve.email %}
+                        <div class="alert alert-warning mb-0">Ajoutez une adresse e-mail avant de gérer ce compte.</div>
+                    {% endif %}
+                </div>
+
+                <div class="modal-footer">
+                    <form method="post" action="{{ path('app_eleve_create_account', {'id': eleve.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('create-account' ~ eleve.id) }}">
+                        <button class="btn btn-primary" type="submit" {% if iscompte or not eleve.email %}disabled{% endif %}>
+                            <i class="ti ti-user-plus me-1"></i>
+                            Création
+                        </button>
+                    </form>
+
+                    <form method="post" action="{{ path('app_eleve_reset_account', {'id': eleve.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reset-account' ~ eleve.id) }}">
+                        <button class="btn btn-warning" type="submit" {% if not iscompte or not eleve.email %}disabled{% endif %}>
+                            <i class="ti ti-refresh me-1"></i>
+                            Réinitialiser
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 {% endblock %}

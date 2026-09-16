@@ -141,7 +141,6 @@ final class UserController extends AbstractController
 
         return $plainPassword;
     }
-
     private function sendCreationEmail(User $user, string $plainPassword, MailerInterface $mailer, LoggerInterface $logger): bool
     {
 

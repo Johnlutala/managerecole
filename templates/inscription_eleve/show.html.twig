@@ -1,58 +1,495 @@
 {% extends 'base.html.twig' %}
-{% block title %}Détail de l'inscription{% endblock %}
+
+{% block title %}Détail | Inscription élève{% endblock %}
+
 {% block body %}
+
     <div class="wrapper">
+
         <div class="content-page">
+
             <div class="container-fluid">
-                <div class="page-title-head d-flex justify-content-between">
-                    <div><h4 class="fs-xl fw-bold m-0">{{ inscription_eleve.nom }} {{ inscription_eleve.postnom }} {{ inscription_eleve.prenom }}</h4>
-                        <p class="text-muted mb-0">Demande d'inscription</p>
+
+                {# ==================== PAGE TITLE ==================== #}
+                <div class="page-title-head d-flex align-items-center">
+
+                    <div class="flex-grow-1">
+
+                        <h4 class="fs-xl fw-bold m-0">
+                            {{ inscription_eleve.nom }}
+                            {{ inscription_eleve.postnom }}
+                            {{ inscription_eleve.prenom }}
+                        </h4>
+
+                        <p class="text-muted mb-0">
+                            Détail de la demande d'inscription
+                        </p>
+
                     </div>
-                    <span class="badge badge-soft-{{ inscription_eleve.statut == 'validee' ? 'success' : 'warning' }}">{{ inscription_eleve.statut|replace({'_': ' '})|title }}</span>
+
+                    <div class="text-end">
+
+                        <ol class="breadcrumb m-0 py-0">
+
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">
+                                    ADMIN
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_inscription_eleve_index') }}">
+                                    Inscriptions
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+
+                        </ol>
+
+                    </div>
+
                 </div>
-                <div class="row">
+
+
+                {# ==================== STATUT ==================== #}
+                <div class="mb-3">
+
+                    {% if inscription_eleve.statut == 'validee' %}
+
+                        <span class="badge bg-success-subtle text-success">
+                            <i class="ti ti-circle-check me-1"></i>
+                            Validée
+                        </span>
+
+                    {% elseif inscription_eleve.statut == 'rejetee' %}
+
+                        <span class="badge bg-danger-subtle text-danger">
+                            <i class="ti ti-circle-x me-1"></i>
+                            Rejetée
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-warning-subtle text-warning">
+                            <i class="ti ti-clock me-1"></i>
+                            {{ inscription_eleve.statut|replace({'_': ' '})|title }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <div class="row g-3">
+
+                    {# ==================== INFORMATIONS ÉLÈVE ==================== #}
                     <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header"><strong>Élève</strong>
-                            </div>
-                            <div class="card-body">
-                                <dl class="row mb-0">
-                                    <dt class="col-sm-5">Référence</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.reference ?: '—' }}</dd>
-                                    <dt class="col-sm-5">Sexe</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.sexe }}</dd>
-                                    <dt class="col-sm-5">Naissance</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.dateNaissance|date('d/m/Y') }} à {{ inscription_eleve.lieuNaissance }}</dd>
-                                    <dt class="col-sm-5">Téléphone</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.telephone ?: '—' }}</dd>
-                                    <dt class="col-sm-5">Adresse</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.adresse }}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="card">
+
+                        <div class="card h-100">
+
                             <div class="card-header">
-                                <strong>Parent et scolarité</strong>
-                            </div><div class="card-body">
-                                <dl class="row mb-0">
-                                    <dt class="col-sm-5">Parent</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.nomParent }} {{ inscription_eleve.postnomParent }} {{ inscription_eleve.prenomParent }}</dd><dt class="col-sm-5">Lien</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.lienParental }}</dd>
-                                    <dt class="col-sm-5">École</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.etablissement ? inscription_eleve.etablissement.nom : '—' }}</dd>
-                                    <dt class="col-sm-5">Classe</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.classe ? inscription_eleve.classe.nom : '—' }}</dd>
-                                    <dt class="col-sm-5">Année</dt>
-                                    <dd class="col-sm-7">{{ inscription_eleve.anneeScolaire ? inscription_eleve.anneeScolaire.libelle : '—' }}</dd>
-                                </dl>
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-user me-2"></i>
+
+                                    Informations de l'élève
+
+                                </h4>
+
                             </div>
+
+                            <div class="card-body">
+
+                                <table class="table table-bordered table-sm align-middle mb-0">
+
+                                    <tbody>
+
+                                        <tr>
+                                            <th width="40%">Référence</th>
+                                            <td>
+                                                {{ inscription_eleve.reference ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Nom complet</th>
+                                            <td>
+                                                {{ inscription_eleve.nom }}
+                                                {{ inscription_eleve.postnom }}
+                                                {{ inscription_eleve.prenom }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Sexe</th>
+                                            <td>
+                                                {{ inscription_eleve.sexe ?: '—' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Adresse mail</th>
+                                            <td>
+                                                {{ inscription_eleve.email ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Date de naissance</th>
+                                            <td>
+                                                {{ inscription_eleve.dateNaissance
+                                    ? inscription_eleve.dateNaissance|date('d/m/Y')
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Lieu de naissance</th>
+                                            <td>
+                                                {{ inscription_eleve.lieuNaissance ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Téléphone</th>
+                                            <td>
+                                                {{ inscription_eleve.telephone ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Adresse</th>
+                                            <td>
+                                                {{ inscription_eleve.adresse ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
                         </div>
+
                     </div>
+
+
+                    {# ==================== PARENT ==================== #}
+                    <div class="col-lg-6">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-users me-2"></i>
+
+                                    Parent / Tuteur
+
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <table class="table table-bordered table-sm align-middle mb-0">
+
+                                    <tbody>
+
+                                        <tr>
+                                            <th width="40%">Nom complet</th>
+                                            <td>
+                                                {{ inscription_eleve.nomParent }}
+                                                {{ inscription_eleve.postnomParent }}
+                                                {{ inscription_eleve.prenomParent }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Lien parental</th>
+                                            <td>
+                                                {{ inscription_eleve.lienParental ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Téléphone</th>
+                                            <td>
+                                                {{ inscription_eleve.telephoneParent ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>E-mail</th>
+                                            <td>
+                                                {{ inscription_eleve.emailParent ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Adresse</th>
+                                            <td>
+                                                {{ inscription_eleve.adresseParent ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Profession</th>
+                                            <td>
+                                                {{ inscription_eleve.professionParent ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ==================== SCOLARITÉ ==================== #}
+                    <div class="col-lg-6">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-school me-2"></i>
+
+                                    Informations scolaires
+
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <table class="table table-bordered table-sm align-middle mb-0">
+
+                                    <tbody>
+
+                                        <tr>
+                                            <th width="40%">École</th>
+                                            <td>
+                                                {% if inscription_eleve.etablissement %}
+                                                    {{ inscription_eleve.etablissement.nom }}
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Section</th>
+                                            <td>
+                                                {{ inscription_eleve.section
+                                    ? inscription_eleve.section.nom
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Classe</th>
+                                            <td>
+                                                {{ inscription_eleve.classe
+                                    ? inscription_eleve.classe.nom
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Option</th>
+                                            <td>
+                                                {{ inscription_eleve.options
+                                    ? inscription_eleve.options.nom
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Année scolaire</th>
+                                            <td>
+                                                {{ inscription_eleve.anneeScolaire
+                                    ? inscription_eleve.anneeScolaire.libelle
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Type d'inscription</th>
+                                            <td>
+                                                {{ inscription_eleve.typeInscription ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ==================== SUIVI DE LA DEMANDE ==================== #}
+                    <div class="col-lg-6">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-history me-2"></i>
+
+                                    Suivi de la demande
+
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <table class="table table-bordered table-sm align-middle mb-0">
+
+                                    <tbody>
+
+                                        <tr>
+                                            <th width="40%">Statut</th>
+                                            <td>
+
+                                                {% if inscription_eleve.statut == 'validee' %}
+
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        Validée
+                                                    </span>
+
+                                                {% elseif inscription_eleve.statut == 'rejetee' %}
+
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        Rejetée
+                                                    </span>
+
+                                                {% else %}
+
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        {{ inscription_eleve.statut|replace({'_': ' '})|title }}
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Date de validation</th>
+                                            <td>
+                                                {{ inscription_eleve.dateValidation
+                                    ? inscription_eleve.dateValidation|date('d/m/Y H:i')
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Motif du rejet</th>
+                                            <td>
+                                                {{ inscription_eleve.motifRejet ?: '—' }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Créé le</th>
+                                            <td>
+                                                {{ inscription_eleve.createdAt
+                                    ? inscription_eleve.createdAt|date('d/m/Y H:i')
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Créé par</th>
+                                            <td>
+                                                {{ inscription_eleve.createdBy
+                                    ? inscription_eleve.createdBy.firstname ~ ' ' ~ inscription_eleve.createdBy.lastname
+                                    : '—'
+                                }}
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
-                <a class="btn btn-light" href="{{ path('app_inscription_eleve_index') }}">Retour à la liste</a>
+
+
+                {# ==================== ACTIONS ==================== #}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+
+                    <a
+                        href="{{ path('app_inscription_eleve_index') }}"
+                        class="btn btn-light"
+                    >
+
+                        <i class="ti ti-arrow-left me-1"></i>
+
+                        Retour à la liste
+
+                    </a>
+
+                    {% if inscription_eleve.statut != 'validee' %}
+
+                        <form
+                            method="post"
+                            action="{{ path('app_inscription_eleve_validate', {'id': inscription_eleve.id}) }}"
+                            onsubmit="return confirm('Voulez-vous valider cette inscription ?');"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('validate' ~ inscription_eleve.id) }}"
+                            >
+
+                            <button type="submit" class="btn btn-success" >
+                                <i class="ti ti-check me-1"></i>
+                                Valider l'inscription
+                            </button>
+                        </form>
+
+                    {% endif %}
+
+                </div>
             </div>
         </div>
+
+
     </div>
+
 {% endblock %}

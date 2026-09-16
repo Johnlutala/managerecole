@@ -45,6 +45,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
+    #[ORM\OneToOne(inversedBy: 'user')]
+    #[ORM\JoinColumn(name: 'eleve_id', referencedColumnName: 'id', unique: true, nullable: true, onDelete: 'SET NULL')]
+    private ?Eleve $eleve = null;
+
     /**
      * @var Collection<int, InscriptionEleve>
      */
@@ -149,6 +153,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getEleve(): ?Eleve
+    {
+        return $this->eleve;
+    }
+
+    public function setEleve(?Eleve $eleve): static
+    {
+        $this->eleve = $eleve;
 
         return $this;
     }

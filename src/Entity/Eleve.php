@@ -68,6 +68,9 @@ class Eleve
     #[ORM\ManyToMany(targetEntity: Parents::class, mappedBy: 'eleve')]
     private Collection $parents;
 
+    #[ORM\OneToOne(mappedBy: 'eleve')]
+    private ?User $user = null;
+
     /**
      * @var Collection<int, Note>
      */
@@ -267,6 +270,26 @@ class Eleve
     public function setClasse(?Classe $classe): static
     {
         $this->classe = $classe;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        if ($user === null && $this->user !== null) {
+            $this->user->setEleve(null);
+        }
+
+        if ($user !== null && $user->getEleve() !== $this) {
+            $user->setEleve($this);
+        }
+
+        $this->user = $user;
 
         return $this;
     }

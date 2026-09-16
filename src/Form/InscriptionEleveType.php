@@ -30,7 +30,7 @@ final class InscriptionEleveType extends AbstractType
             ->add('sexe', ChoiceType::class, ['label' => 'Sexe', 'choices' => ['Masculin' => 'M', 'Féminin' => 'F'], 'placeholder' => 'Sélectionner'])
             ->add('dateNaissance', DateType::class, ['label' => 'Date de naissance', 'widget' => 'single_text'])
             ->add('lieuNaissance', TextType::class, ['label' => 'Lieu de naissance'])
-            ->add('nationalite', TextType::class, ['label' => 'Nationalité', 'required' => false])
+            ->add('email', TextType::class, ['label' => 'Gmail', 'required' => false])
             ->add('adresse', TextType::class, ['label' => 'Adresse'])
             ->add('telephone', TextType::class, ['label' => 'Téléphone', 'required' => false])
             ->add('nomParent', TextType::class, ['label' => 'Nom du parent / tuteur'])

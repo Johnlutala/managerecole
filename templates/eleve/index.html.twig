@@ -46,6 +46,7 @@
                                     <th>Classe</th>
                                     <th>École</th>
                                     <th>Statut</th>
+                                    <th>Compte</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -60,15 +61,22 @@
                                             <span class="badge badge-soft-{{ eleve.statut ? 'success' : 'danger' }}">
                                                 {{ eleve.statut ? 'Actif' : 'Inactif' }}
                                             </span>
+                                        </td> 
+                                        <td>
+                                            {% if eleve.user %}
+                                                <span class="badge bg-success-subtle text-success">Déjà un compte</span>
+                                            {% else %}
+                                                <span class="badge bg-warning-subtle text-warning">Pas encore de compte</span>
+                                            {% endif %}
                                         </td>
                                         <td>
-                                            <div class="d-flex justify-content-center gap-1">
-                                                <a href="{{ path('app_eleve_show', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-                                                    <i class="ti ti-eye fs-lg"></i></a>
-                                                <a href="{{ path('app_eleve_edit', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-                                                    <i class="ti ti-edit fs-lg"></i>
-                                                </a>
-                                            </div>
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <a href="{{ path('app_eleve_show', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                <i class="ti ti-eye fs-lg"></i></a>
+                                            <a href="{{ path('app_eleve_edit', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                <i class="ti ti-edit fs-lg"></i>
+                                            </a>
+                                        </div>
                                         </td>
                                     </tr>
                                 {% else %}
