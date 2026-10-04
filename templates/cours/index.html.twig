@@ -1,3 +1,752 @@
-{% extends 'base.html.twig' %}
+﻿{% extends 'base.html.twig' %}
+
 {% block title %}Cours{% endblock %}
-{% block body %}<div class="wrapper"><div class="content-page"><div class="container-fluid"><div class="page-title-head d-flex align-items-center"><div class="flex-grow-1"><h4 class="fs-xl fw-bold m-0">Cours</h4></div></div><div data-table data-table-rows-per-page="8" class="card"><div class="card-header border-light d-flex justify-content-between"><div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i></div><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal"><i class="ti ti-plus me-1"></i>Nouvel(le) Cours</button></div><div class="table-responsive"><table class="table table-custom table-centered table-hover w-100 mb-0"><thead class="bg-light bg-opacity-25 thead-sm"><tr class="text-uppercase fs-xxs"><th>Code</th><th>Nom</th><th>Classe</th><th>Professeur</th><th class="text-center">Actions</th></tr></thead><tbody>{% for cour in cours %}<tr><td>{{ cour.code }}</td><td>{{ cour.nom }}</td><td>{{ cour.classe ? cour.classe.nom : '—' }}</td><td>{{ cour.professeur ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom : '—' }}</td><td><div class="d-flex justify-content-center gap-1"><a href="{{ path('app_cours_show', {id: cour.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle"><i class="ti ti-eye fs-lg"></i></a><a href="{{ path('app_cours_edit', {id: cour.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle"><i class="ti ti-edit fs-lg"></i></a></div></td></tr>{% else %}<tr><td colspan="10" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td></tr>{% endfor %}</tbody></table></div><div class="card-footer border-0 d-flex justify-content-between"><div data-table-pagination-info></div><div data-table-pagination></div></div></div></div></div></div><div class="modal fade" id="addModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">{{ form_start(form) }}<div class="modal-header"><h5 class="modal-title">Ajouter Cours</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">{% include 'crud/_form_fields.html.twig' with {form: form} %}</div><div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>{{ form_end(form) }}</div></div></div>{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">Cours</h4>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addModal"
+                        >
+                            <i class="ti ti-plus me-1"></i>
+                            Ajouter
+                        </button>
+
+                        <button
+                            class="btn btn-outline-primary"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#coursGestionPanel"
+                            aria-expanded="false"
+                            aria-controls="coursGestionPanel"
+                        >
+                            <i class="ti ti-book me-1"></i>
+                            Gestion cours
+                        </button>
+                    </div>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : 'info' }} mt-3">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div data-table data-table-rows-per-page="8" class="card">
+                    <div class="card-header border-light d-flex justify-content-between">
+                        <div class="app-search">
+                            <input data-table-search type="search" class="form-control" placeholder="Rechercher...">
+                            <i data-lucide="search" class="app-search-icon text-muted"></i>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-custom table-centered table-hover w-100 mb-0">
+                            <thead class="bg-light bg-opacity-25 thead-sm">
+                                <tr class="text-uppercase fs-xxs">
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Classe</th>
+                                    <th>Professeur</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cour in cours %}
+                                    <tr>
+                                        <td>{{ cour.code }}</td>
+                                        <td>{{ cour.nom }}</td>
+                                        <td>{{ cour.classe ? cour.classe.nom : '—' }}</td>
+                                        <td>{{ cour.professeur ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom : '—' }}</td>
+                                        <td>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{{ path('app_cours_show', {id: cour.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-eye fs-lg"></i>
+                                                </a>
+                                                <a href="{{ path('app_cours_edit', {id: cour.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-edit fs-lg"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="10" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer border-0 d-flex justify-content-between">
+                        <div data-table-pagination-info></div>
+                        <div data-table-pagination></div>
+                    </div>
+                </div>
+
+
+                {# Partie Modal #}
+
+                <div id="coursGestionPanel" class="collapse mt-4">
+                    <div class="row g-4">
+
+                        <div class="col-lg-5">
+                            <div class="card h-100 shadow-sm border-0">
+
+                                <div class="card-header border-light">
+                                    <h5 class="mb-0">Attribuer un cours</h5>
+                                </div>
+
+                                <div class="card-body">
+                                    <form
+                                        id="course-assignment-form"
+                                        method="post"
+                                        action="{{ path('app_cours_assign') }}"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="_token"
+                                            value="{{ csrf_token('assign_course') }}"
+                                        >
+
+                                        <div class="row g-3">
+
+                                            {# ÉCOLE #}
+                                            <div class="col-12">
+                                                <label for="assignment-ecole" class="form-label">
+                                                    École
+                                                </label>
+
+                                                <select
+                                                    id="assignment-ecole"
+                                                    class="form-select"
+                                                >
+                                                    <option value="">
+                                                        Sélectionner une école
+                                                    </option>
+
+                                                    {% for ecole in ecoles %}
+                                                        <option value="{{ ecole.id }}">
+                                                            {{ ecole.nom }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+
+                                            {# SECTION #}
+                                            <div class="col-12">
+                                                <label for="assignment-section" class="form-label">
+                                                    Section
+                                                </label>
+
+                                                <select
+                                                    id="assignment-section"
+                                                    class="form-select"
+                                                    disabled
+                                                >
+                                                    <option value="">
+                                                        Sélectionner une section
+                                                    </option>
+                                                </select>
+                                            </div>
+
+
+                                            {# CLASSE #}
+                                            <div class="col-12">
+                                                <label for="assignment-classe" class="form-label">
+                                                    Classe
+                                                </label>
+
+                                                <select
+                                                    id="assignment-classe"
+                                                    name="classe"
+                                                    class="form-select"
+                                                    disabled
+                                                >
+                                                    <option value="">
+                                                        Sélectionner une classe
+                                                    </option>
+                                                </select>
+                                            </div>
+
+
+                                            {# PROFESSEUR #}
+                                            <div class="col-12">
+                                                <label for="assignment-professeur" class="form-label">
+                                                    Professeur
+                                                </label>
+
+                                                <select
+                                                    id="assignment-professeur"
+                                                    name="professeur"
+                                                    class="form-select"
+                                                    disabled
+                                                >
+                                                    <option value="">
+                                                        Sélectionner un professeur
+                                                    </option>
+                                                </select>
+                                            </div>
+
+
+                                            {# COURS #}
+                                            <div class="col-12">
+                                                <label for="assignment-cours" class="form-label">
+                                                    Cours
+                                                </label>
+
+                                                <select
+                                                    id="assignment-cours"
+                                                    name="cours"
+                                                    class="form-select"
+                                                >
+                                                    <option value="">
+                                                        Sélectionner un cours
+                                                    </option>
+
+                                                    {% for cour in cours %}
+                                                        <option
+                                                            value="{{ cour.id }}"
+                                                            data-classe-id="{{ cour.classe ? cour.classe.id : '' }}"
+                                                        >
+                                                            {{ cour.nom }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="d-flex justify-content-end mt-4">
+                                            <button
+                                                type="submit"
+                                                class="btn btn-primary"
+                                            >
+                                                <i class="ti ti-device-floppy me-1"></i>
+                                                Enregistrer
+                                            </button>
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {# COURS DISPONIBLES #}
+
+                        <div class="col-lg-7">
+                            <div class="card h-100 shadow-sm border-0">
+
+                                <div class="card-header border-light">
+                                    <h5 class="mb-0">
+                                        Cours disponibles et professeurs affectés
+                                    </h5>
+                                </div>
+
+                                <div class="card-body">
+
+                                    {% for cour in cours %}
+
+                                        <div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2">
+
+                                            <div>
+                                                <strong>{{ cour.nom }}</strong>
+
+                                                <div class="text-muted small">
+                                                    {{ cour.classe ? cour.classe.nom : '—' }}
+                                                    ·
+                                                    {{ cour.classe and cour.classe.section
+                                        ? cour.classe.section.nom
+                                        : '—'
+                                    }}
+                                                </div>
+                                            </div>
+
+                                            <span
+                                                class="badge {{ cour.professeur
+                                ? 'bg-success-subtle text-success'
+                                : 'bg-warning-subtle text-warning'
+                            }}"
+                                            >
+                                                {{ cour.professeur
+                                    ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom
+                                    : 'Non attribué'
+                                }}
+                                            </span>
+
+                                        </div>
+
+                                    {% else %}
+
+                                        <div class="text-center text-muted py-5">
+                                            Aucun cours enregistré pour le moment.
+                                        </div>
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+
+                            {{ form_start(form, {attr: {'id': 'cours-form', 'novalidate': 'novalidate'}}) }}
+                            <div class="modal-header">
+                                <div>
+                                    <h5 class="modal-title" id="addModalLabel">
+                                        Ajouter un cours
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Sélectionnez d’abord l’école, la section, la classe et l’option.
+                                    </small>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Fermer"
+                                >
+                                </button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="row g-3">
+
+                                    <div class="col-md-6">
+                                        {{ form_row(form.ecole, {
+                                            'attr': {'id': 'cours_ecole'}
+                                        }) }}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        {{ form_row(form.section, {
+                                            'attr': {'id': 'cours_section'}
+                                        }) }}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        {{ form_row(form.classe, {
+                                            'attr': {'id': 'cours_classe'}
+                                        }) }}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        {{ form_row(form.option, {
+                                            'attr': {'id': 'cours_option'}
+                                        }) }}
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        {{ form_row(form.nom) }}
+                                    </div>
+                                    
+
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button
+                                    type="button"
+                                    class="btn btn-light"
+                                    data-bs-dismiss="modal"
+                                >
+                                    Annuler
+                                </button>
+
+                                <button type="submit" class="btn btn-primary">
+                                    Enregistrer
+                                </button>
+                            </div>
+
+                            {{ form_end(form) }}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>   
+    
+   
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const resetSelect = function (select, placeholder) {
+                if (!select) {
+                    return;
+                }
+
+                select.innerHTML = '<option value="">' + placeholder + '</option>';
+            };
+
+            const loadData = async function (url, select, placeholder, labelField) {
+                if (!select) {
+                    return;
+                }
+
+                resetSelect(select, 'Chargement...');
+                select.disabled = true;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error('Erreur serveur');
+                    }
+
+                    const data = await response.json();
+                    resetSelect(select, placeholder);
+
+                    data.forEach(function (item) {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = item[labelField];
+                        select.appendChild(option);
+                    });
+
+                    select.disabled = data.length === 0;
+                } catch (error) {
+                    console.error(error);
+                    resetSelect(select, 'Erreur de chargement');
+                    select.disabled = true;
+                }
+            };
+
+             const modalEcole = document.getElementById('cours_ecole');
+            const modalSection = document.getElementById('cours_section');
+            const modalClasse = document.getElementById('cours_classe');
+            const modalOption = document.getElementById('cours_option');
+
+            if (modalEcole && modalSection && modalClasse && modalOption) {
+                modalSection.disabled = true;
+                modalClasse.disabled = true;
+                modalOption.disabled = true;
+
+                modalEcole.addEventListener('change', function () {
+                    const ecoleId = this.value;
+                    resetSelect(modalSection, 'Sélectionner une section');
+                    resetSelect(modalClasse, 'Sélectionner une classe');
+                    resetSelect(modalOption, 'Sélectionner une option');
+
+                    modalSection.disabled = true;
+                    modalClasse.disabled = true;
+                    modalOption.disabled = true;
+
+                    if (!ecoleId) {
+                        return;
+                    }
+
+                    loadData(
+                        '{{ path('app_cours_ajax_sections', {'ecole': '__ID__'}) }}'.replace('__ID__', ecoleId),
+                        modalSection,
+                        'Sélectionner une section',
+                        'nom'
+                    );
+
+                    loadData(
+                        '{{ path('app_cours_ajax_professeurs', {'ecole': '__ID__'}) }}'.replace('__ID__', ecoleId),
+                        modalProfesseur,
+                        'Sélectionner un professeur',
+                        'nom'
+                    );
+                });
+
+                modalSection.addEventListener('change', function () {
+                    const sectionId = this.value;
+                    resetSelect(modalClasse, 'Sélectionner une classe');
+                    resetSelect(modalOption, 'Sélectionner une option');
+                    modalClasse.disabled = true;
+                    modalOption.disabled = true;
+
+                    if (!sectionId) {
+                        return;
+                    }
+
+                    const sectionNom = this.options[this.selectedIndex].textContent.trim().toLowerCase();
+                    if (sectionNom === 'primaire' || sectionNom === 'c.o' || sectionNom === 'co') {
+                        resetSelect(modalOption, 'Aucune option pour cette section');
+                        modalOption.disabled = true;
+                    }
+
+                    loadData(
+                        '{{ path('app_cours_ajax_classes', {'section': '__ID__'}) }}'.replace('__ID__', sectionId),
+                        modalClasse,
+                        'Sélectionner une classe',
+                        'nom'
+                    );
+                });
+
+                modalClasse.addEventListener('change', function () {
+                    const classeId = this.value;
+                    resetSelect(modalOption, 'Sélectionner une option');
+                    modalOption.disabled = true;
+
+                    if (!classeId) {
+                        return;
+                    }
+
+                    const sectionNom = modalSection.options[modalSection.selectedIndex].textContent.trim().toLowerCase();
+                    if (sectionNom === 'primaire' || sectionNom === 'c.o' || sectionNom === 'co') {
+                        resetSelect(modalOption, 'Aucune option pour cette section');
+                        modalOption.disabled = true;
+                        return;
+                    }
+
+                    loadData(
+                        '{{ path('app_cours_ajax_options', {'classe': '__ID__'}) }}'.replace('__ID__', classeId),
+                        modalOption,
+                        'Sélectionner une option',
+                        'nom'
+                    );
+                });
+
+                const coursForm = document.getElementById('cours-form');
+                if (coursForm) {
+                coursForm.addEventListener('submit', function () {
+                    modalSection.disabled = false;
+                    modalClasse.disabled = false;
+                    modalOption.disabled = false;
+                });
+            }
+            }
+
+                      // =========================================================
+            // GESTION DE L'AFFECTATION D'UN COURS
+            // École → Section → Classe → Professeur
+            // =========================================================
+
+            const assignmentForm = document.getElementById('course-assignment-form');
+            const assignmentEcole = document.getElementById('assignment-ecole');
+            const assignmentSection = document.getElementById('assignment-section');
+            const assignmentClasse = document.getElementById('assignment-classe');
+            const assignmentProfesseur = document.getElementById('assignment-professeur');
+            const assignmentCours = document.getElementById('assignment-cours');
+
+            if (
+                assignmentEcole &&
+                assignmentSection &&
+                assignmentClasse &&
+                assignmentProfesseur &&
+                assignmentCours
+            ) {
+
+                // ---------------------------------------------------------
+                // État initial
+                // ---------------------------------------------------------
+
+                assignmentSection.disabled = true;
+                assignmentClasse.disabled = true;
+                assignmentProfesseur.disabled = true;
+
+                // ---------------------------------------------------------
+                // ÉCOLE → SECTION
+                // ---------------------------------------------------------
+
+                assignmentEcole.addEventListener('change', function () {
+
+                    const ecoleId = this.value;
+
+                    resetSelect(
+                        assignmentSection,
+                        'Sélectionner une section'
+                    );
+
+                    resetSelect(
+                        assignmentClasse,
+                        'Sélectionner une classe'
+                    );
+
+                    resetSelect(
+                        assignmentProfesseur,
+                        'Sélectionner un professeur'
+                    );
+
+                    assignmentSection.disabled = true;
+                    assignmentClasse.disabled = true;
+                    assignmentProfesseur.disabled = true;
+
+                    if (!ecoleId) {
+                        return;
+                    }
+
+                    loadData(
+                        '{{ path('app_cours_ajax_sections', {'ecole': '__ID__'}) }}'
+                            .replace('__ID__', ecoleId),
+                        assignmentSection,
+                        'Sélectionner une section',
+                        'nom'
+                    );
+                });
+
+
+                // ---------------------------------------------------------
+                // SECTION → CLASSE
+                // ---------------------------------------------------------
+
+                assignmentSection.addEventListener('change', function () {
+
+                    const sectionId = this.value;
+
+                    resetSelect(
+                        assignmentClasse,
+                        'Sélectionner une classe'
+                    );
+
+                    resetSelect(
+                        assignmentProfesseur,
+                        'Sélectionner un professeur'
+                    );
+
+                    assignmentClasse.disabled = true;
+                    assignmentProfesseur.disabled = true;
+
+                    if (!sectionId) {
+                        return;
+                    }
+
+                    loadData(
+                        '{{ path('app_cours_ajax_classes', {'section': '__ID__'}) }}'
+                            .replace('__ID__', sectionId),
+                        assignmentClasse,
+                        'Sélectionner une classe',
+                        'nom'
+                    );
+                });
+
+
+                // ---------------------------------------------------------
+                // CLASSE → PROFESSEUR
+                // ---------------------------------------------------------
+
+                assignmentClasse.addEventListener('change', function () {
+
+                    const classeId = this.value;
+                    const ecoleId = assignmentEcole.value;
+
+                    resetSelect(
+                        assignmentProfesseur,
+                        'Sélectionner un professeur'
+                    );
+
+                    assignmentProfesseur.disabled = true;
+
+                    if (!classeId || !ecoleId) {
+                        return;
+                    }
+
+                    // -----------------------------------------------------
+                    // Filtrer les cours correspondant à la classe
+                    // -----------------------------------------------------
+
+                    assignmentCours.value = '';
+
+                    Array.from(assignmentCours.options).forEach(function (option) {
+
+                        if (!option.value) {
+                            option.hidden = false;
+                            return;
+                        }
+
+                        const optionClasseId = option.dataset.classeId;
+
+                        option.hidden = optionClasseId !== classeId;
+                    });
+                });
+
+
+                // ---------------------------------------------------------
+                // Si on change d'école ou de section :
+                // réinitialiser les cours
+                // ---------------------------------------------------------
+
+                assignmentEcole.addEventListener('change', function () {
+
+                    assignmentCours.value = '';
+
+                    Array.from(assignmentCours.options).forEach(function (option) {
+                        option.hidden = false;
+                    });
+                });
+
+
+                assignmentSection.addEventListener('change', function () {
+
+                    assignmentCours.value = '';
+
+                    Array.from(assignmentCours.options).forEach(function (option) {
+                        option.hidden = false;
+                    });
+                });
+
+
+                // ---------------------------------------------------------
+                // SOUMISSION
+                // ---------------------------------------------------------
+
+                if (assignmentForm) {
+
+                    assignmentForm.addEventListener('submit', function (event) {
+
+                        if (!assignmentEcole.value) {
+                            event.preventDefault();
+                            alert('Veuillez sélectionner une école.');
+                            return;
+                        }
+
+                        if (!assignmentSection.value) {
+                            event.preventDefault();
+                            alert('Veuillez sélectionner une section.');
+                            return;
+                        }
+
+                        if (!assignmentClasse.value) {
+                            event.preventDefault();
+                            alert('Veuillez sélectionner une classe.');
+                            return;
+                        }
+
+                        if (!assignmentProfesseur.value) {
+                            event.preventDefault();
+                            alert('Veuillez sélectionner un professeur.');
+                            return;
+                        }
+
+                        if (!assignmentCours.value) {
+                            event.preventDefault();
+                            alert('Veuillez sélectionner un cours.');
+                            return;
+                        }
+
+                        // Les champs disabled ne sont pas envoyés par le navigateur.
+                        assignmentSection.disabled = false;
+                        assignmentClasse.disabled = false;
+                        assignmentProfesseur.disabled = false;
+                    });
+                }
+            }
+        });
+    </script>
+
+{% endblock %}
+

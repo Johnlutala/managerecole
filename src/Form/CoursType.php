@@ -4,7 +4,9 @@ namespace App\Form;
 
 use App\Entity\Classe;
 use App\Entity\Cours;
-use App\Entity\Professeur;
+use App\Entity\Ecole;
+use App\Entity\Option;
+use App\Entity\Section;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -16,10 +18,48 @@ final class CoursType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('nom', TextType::class, ['label' => 'Nom du cours'])->add('code', TextType::class, ['label' => 'Code'])->add('description', TextareaType::class, ['label' => 'Description', 'required' => false])->add('classe', EntityType::class, ['class' => Classe::class, 'choice_label' => 'nom', 'placeholder' => 'Sélectionner une classe'])->add('professeur', EntityType::class, ['class' => Professeur::class, 'choice_label' => fn(Professeur $p) => trim($p->getNom() . ' ' . $p->getPrenom()), 'placeholder' => 'Sélectionner un professeur']);
+        $builder
+            ->add('ecole', EntityType::class, [
+                'class' => Ecole::class,
+                'mapped' => false,
+                'label' => 'École',
+                'placeholder' => 'Sélectionner une école',
+                'choice_label' => 'nom',
+            ])
+
+            ->add('section', EntityType::class, [
+                'class' => Section::class,
+                'mapped' => false,
+                'label' => 'Section',
+                'placeholder' => 'Sélectionner une section',
+                'choice_label' => 'nom',
+            ])
+
+            ->add('classe', EntityType::class, [
+                'class' => Classe::class,
+                'label' => 'Classe',
+                'choice_label' => 'nom',
+                'placeholder' => 'Sélectionner une classe',
+            ])
+
+            ->add('option', EntityType::class, [
+                'class' => Option::class,
+                'mapped' => false,
+                'required' => false,
+                'label' => 'Option',
+                'placeholder' => 'Sélectionner une option',
+                'choice_label' => 'nom',
+            ])
+
+            ->add('nom', TextType::class, [
+                'label' => 'Nom du cours',
+            ]);
     }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['data_class' => Cours::class]);
+        $resolver->setDefaults([
+            'data_class' => Cours::class,
+        ]);
     }
 }

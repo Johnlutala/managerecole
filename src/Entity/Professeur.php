@@ -56,6 +56,14 @@ class Professeur
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $statut = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?AnneeScolaire $anneeScolaire = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Section $section = null;
+
     private function generateMatricule(): string
     {
         return 'PROF' . date('Y') . str_pad(
@@ -66,11 +74,9 @@ class Professeur
         );
     }
 
-    /**
-     * @var Collection<int, Ecole>
-     */
-    #[ORM\ManyToMany(targetEntity: Ecole::class, inversedBy: 'professeurs')]
-    private Collection $ecoles;
+    #[ORM\ManyToOne(inversedBy: 'professeurs')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Ecole $ecole = null;
 
     /**
      * @var Collection<int, Cours>
@@ -83,9 +89,9 @@ class Professeur
 
     public function __construct()
     {
-        $this->ecoles = new ArrayCollection();
+
         $this->cours = new ArrayCollection();
-         $this->matricule = $this->generateMatricule();
+        $this->matricule = $this->generateMatricule();
     }
 
     public function getId(): ?int
@@ -240,31 +246,17 @@ class Professeur
 
         return $this;
     }
-
-    /**
-     * @return Collection<int, Ecole>
-     */
-    public function getEcoles(): Collection
+    public function getEcole(): ?Ecole
     {
-        return $this->ecoles;
+        return $this->ecole;
     }
 
-    public function addEcole(Ecole $ecole): static
+    public function setEcole(?Ecole $ecole): static
     {
-        if (!$this->ecoles->contains($ecole)) {
-            $this->ecoles->add($ecole);
-        }
+        $this->ecole = $ecole;
 
         return $this;
     }
-
-    public function removeEcole(Ecole $ecole): static
-    {
-        $this->ecoles->removeElement($ecole);
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Cours>
      */
@@ -303,6 +295,30 @@ class Professeur
     public function setGrade(string $grade): static
     {
         $this->grade = $grade;
+
+        return $this;
+    }
+
+    public function getAnneeScolaire(): ?AnneeScolaire
+    {
+        return $this->anneeScolaire;
+    }
+
+    public function setAnneeScolaire(?AnneeScolaire $anneeScolaire): static
+    {
+        $this->anneeScolaire = $anneeScolaire;
+
+        return $this;
+    }
+
+    public function getSection(): ?Section
+    {
+        return $this->section;
+    }
+
+    public function setSection(?Section $section): static
+    {
+        $this->section = $section;
 
         return $this;
     }

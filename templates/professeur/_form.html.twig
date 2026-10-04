@@ -1,1 +1,401 @@
-{{ form_start(form) }}{% include 'crud/_form_fields.html.twig' with {form: form} %}<div class="text-end mt-4"><button class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>{{ button_label|default('Enregistrer') }}</button></div>{{ form_end(form) }}
+{{ form_start(form, {
+    'attr': {
+        'class': 'needs-validation',
+        'novalidate': 'novalidate'
+    }
+}) }}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+
+    <div>
+        <h5 class="mb-1 fw-bold">
+            Informations du professeur
+        </h5>
+
+        <p class="text-muted mb-0">
+            Gérez les informations personnelles et professionnelles de l'enseignant.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+    {# ========================================================
+       BLOC 1 — INFORMATIONS PERSONNELLES
+       ======================================================== #}
+
+    <div class="col-lg-6">
+
+        <div class="card border shadow-none h-100">
+
+            <div class="card-header bg-transparent border-bottom py-3">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="avatar-sm bg-primary-subtle rounded-2 d-flex align-items-center justify-content-center me-3">
+                        <i class="ti ti-user text-primary fs-20"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="mb-0 fs-15">
+                            Informations personnelles
+                        </h5>
+
+                        <small class="text-muted">
+                            Identité et coordonnées
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    {# Nom #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Nom <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.nom, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Nom'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.nom) }}
+
+                    </div>
+
+
+                    {# Postnom #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Postnom
+                        </label>
+
+                        {{ form_widget(form.postnom, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Postnom'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.postnom) }}
+
+                    </div>
+
+
+                    {# Prénom #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Prénom <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.prenom, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Prénom'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.prenom) }}
+
+                    </div>
+
+
+                    {# Sexe #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Sexe <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.sexe, {
+                            'attr': {
+                                'class': 'form-select'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.sexe) }}
+
+                    </div>
+
+
+                    {# Date naissance #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Date de naissance
+                        </label>
+
+                        {{ form_widget(form.dateNaissance, {
+                            'attr': {
+                                'class': 'form-control'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.dateNaissance) }}
+
+                    </div>
+
+
+                    {# Téléphone #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Téléphone
+                        </label>
+
+                        {{ form_widget(form.phone, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': '+243 8XX XXX XXX'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.phone) }}
+
+                    </div>
+
+
+                    {# Email #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Adresse e-mail
+                        </label>
+
+                        {{ form_widget(form.email, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'professeur@ecole.cd'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.email) }}
+
+                    </div>
+
+
+                    {# Adresse #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Adresse
+                        </label>
+
+                        {{ form_widget(form.adresse, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Adresse complète'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.adresse) }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {# ========================================================
+       BLOC 2 — INFORMATIONS PROFESSIONNELLES
+       ======================================================== #}
+
+    <div class="col-lg-6">
+
+        <div class="card border shadow-none h-100">
+
+            <div class="card-header bg-transparent border-bottom py-3">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="avatar-sm bg-warning-subtle rounded-2 d-flex align-items-center justify-content-center me-3">
+                        <i class="ti ti-briefcase text-warning fs-20"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="mb-0 fs-15">
+                            Informations professionnelles
+                        </h5>
+
+                        <small class="text-muted">
+                            Profil et affectation scolaire
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    {# Spécialité #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Spécialité
+                        </label>
+
+                        {{ form_widget(form.specialite, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Ex. : Mathématiques'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.specialite) }}
+
+                    </div>
+
+
+                    {# Grade #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Grade
+                        </label>
+
+                        {{ form_widget(form.grade, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Grade du professeur'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.grade) }}
+
+                    </div>
+
+
+                    {# Date embauche #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Date d'embauche
+                        </label>
+
+                        {{ form_widget(form.dateEmbauche, {
+                            'attr': {
+                                'class': 'form-control'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.dateEmbauche) }}
+
+                    </div>
+
+
+                    {# École #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            École <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.ecole, {
+                            'attr': {
+                                'class': 'form-select'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.ecole) }}
+
+                    </div>
+
+
+                    {# Année scolaire #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Année scolaire <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.anneeScolaire, {
+                            'attr': {
+                                'class': 'form-select'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.anneeScolaire) }}
+
+                    </div>
+
+
+                    {# Section #}
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-medium">
+                            Section <span class="text-danger">*</span>
+                        </label>
+
+                        {{ form_widget(form.section, {
+                            'attr': {
+                                'class': 'form-select'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.section) }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{# ============================================================
+   ACTIONS
+   ============================================================ #}
+
+<div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+
+    <a href="{{ path('app_professeur_index') }}"
+       class="btn btn-light border px-4">
+
+        <i class="ti ti-arrow-left me-1"></i>
+
+        Annuler
+
+    </a>
+
+
+    <button type="submit"
+            class="btn btn-primary px-4">
+
+        <i class="ti ti-device-floppy me-1"></i>
+
+        {{ button_label|default('Enregistrer') }}
+
+    </button>
+
+</div>
+
+
+{{ form_end(form) }}

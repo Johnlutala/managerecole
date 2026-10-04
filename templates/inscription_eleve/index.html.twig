@@ -159,25 +159,15 @@
 
               {# Nouvel élève #}
               <div class="enrollment-type">
-
-                <input
-                  type="radio"
-                  name="inscription_type_choice"
-                  id="type-nouveau"
-                  value="nouveau"
-                >
-
+                <input type="radio" name="inscription_type_choice" id="type-nouveau" value="nouveau">
                 <label for="type-nouveau" class="enrollment-option">
-
                   <div class="enrollment-option-icon">
                     <i class="ti ti-user-plus"></i>
                   </div>
-
                   <div class="enrollment-option-text">
                     <strong>Nouvel élève</strong>
                     <span>Créer une nouvelle fiche</span>
                   </div>
-
                   <div class="enrollment-option-check">
                     <i class="ti ti-check"></i>
                   </div>
@@ -261,22 +251,42 @@
           </div>
           <div class="form-step d-none" data-form-step="4">
             <h6>Affectation scolaire</h6>
+
             <div class="row g-3">
+
+              {# 1. Établissement #}
               <div class="col-md-6">
-                {{ form_row(form.etablissement) }}</div>
-              <div class="col-md-6">{{ form_row(form.anneeScolaire) }}</div>
-              <div class="col-md-4">{{ form_row(form.section) }}</div>
-              <div class="col-md-4">{{ form_row(form.classe) }}</div>
-              <div class="col-md-4">{{ form_row(form.options) }}</div>
+                {{ form_row(form.etablissement) }}
+              </div>
+
+              <div class="col-md-6">
+                {{ form_row(form.anneeScolaire) }}
+              </div>
+              <div class="col-md-4">
+                {{ form_row(form.section) }}
+              </div>
+              <div class="col-md-4">
+                {{ form_row(form.classe) }}
+              </div>
+              <div class="col-md-4">
+                {{ form_row(form.options) }}
+              </div>
+
             </div>
-            <div class="alert alert-info mt-3 mb-0">Après l'enregistrement, utilisez le bouton 
-              <strong>Valider</strong> dans la liste pour créer ou mettre à jour l'élève et enregistrer le parent.</div>
+
+            <div class="alert alert-info mt-3 mb-0">
+              <i class="ti ti-info-circle me-1"></i>
+              Après l'enregistrement, utilisez le bouton
+              <strong>Valider</strong> dans la liste pour créer ou mettre à jour
+              l'élève et enregistrer le parent.
+            </div>
           </div>
-        </div><div class="modal-footer">
+        </div>
+        <div class="modal-footer">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
           <button type="button" class="btn btn-secondary d-none" data-step-prev>Précédent</button>
           <button type="button" class="btn btn-primary" data-step-next>Suivant</button>
-          <button type="submit" class="btn btn-success d-none" data-step-save>Enregistrer la demande</button>
+          <button type="submit" class="btn btn-success d-none" data-step-save>Enregistrer</button>
         </div>{{ form_end(form) }}</div>
     </div>
   </div>
@@ -515,10 +525,10 @@
       const lookupResult = document.querySelector("#lookup-result");
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Gestion des étapes
-                            |--------------------------------------------------------------------------
-                            */
+      |--------------------------------------------------------------------------
+      | Gestion des étapes
+      |--------------------------------------------------------------------------
+      */
 
       const show = (n) => {
         step = n;
@@ -539,10 +549,10 @@
       };
 
       /*
-                            |--------------------------------------------------------------------------
-                            | État initial
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | État initial
+                                        |--------------------------------------------------------------------------
+                                        */
 
       // Au départ, aucun type n'est sélectionné.
       // Donc impossible d'aller au Step 2.
@@ -551,10 +561,10 @@
       show(1);
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Choix : ANCIEN ÉLÈVE
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | Choix : ANCIEN ÉLÈVE
+                                        |--------------------------------------------------------------------------
+                                        */
 
       typeAncien.addEventListener("change", () => {
         typeInscription.value = "ancien";
@@ -571,10 +581,10 @@
       });
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Choix : NOUVEL ÉLÈVE
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | Choix : NOUVEL ÉLÈVE
+                                        |--------------------------------------------------------------------------
+                                        */
 
       typeNouveau.addEventListener("change", () => {
         typeInscription.value = "nouveau";
@@ -589,15 +599,15 @@
       });
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Bouton SUIVANT
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | Bouton SUIVANT
+                                        |--------------------------------------------------------------------------
+                                        */
 
       nextButton.addEventListener("click", () => {
         /*
-                                | Step 1
-                                */
+                                            | Step 1
+                                            */
 
         if (step === 1) {
           // Aucun choix
@@ -606,11 +616,11 @@
           }
 
           /*
-                                    | Ancien élève
-                                    |
-                                    | Le bouton est normalement désactivé tant que
-                                    | la recherche n'a pas réussi.
-                                    */
+                                                | Ancien élève
+                                                |
+                                                | Le bouton est normalement désactivé tant que
+                                                | la recherche n'a pas réussi.
+                                                */
 
           if (typeAncien.checked && nextButton.disabled) {
             return;
@@ -618,8 +628,8 @@
         }
 
         /*
-                                | Validation des autres étapes
-                                */
+                                            | Validation des autres étapes
+                                            */
 
         const currentStep = document.querySelector(`[data-form-step="${step}"]`);
 
@@ -632,25 +642,25 @@
         }
 
         /*
-                                | Passage à l'étape suivante
-                                */
+                                            | Passage à l'étape suivante
+                                            */
 
         show(step + 1);
       });
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Bouton PRÉCÉDENT
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | Bouton PRÉCÉDENT
+                                        |--------------------------------------------------------------------------
+                                        */
 
       prevButton.addEventListener("click", () => {
         show(step - 1);
 
         /*
-                                | Si on revient au Step 1, on conserve l'état
-                                | correspondant au choix effectué.
-                                */
+                                            | Si on revient au Step 1, on conserve l'état
+                                            | correspondant au choix effectué.
+                                            */
 
         if (step === 1) {
           if (typeNouveau.checked) {
@@ -664,17 +674,17 @@
       });
 
       /*
-                            |--------------------------------------------------------------------------
-                            | Recherche de l'ancien élève
-                            |--------------------------------------------------------------------------
-                            */
+                                        |--------------------------------------------------------------------------
+                                        | Recherche de l'ancien élève
+                                        |--------------------------------------------------------------------------
+                                        */
 
       lookupButton.addEventListener("click", async () => {
         const ref = referenceInput.value.trim();
 
         /*
-                                | Vérification du matricule
-                                */
+                                            | Vérification du matricule
+                                            */
 
         if (!ref) {
           lookupResult.innerHTML = `
@@ -692,8 +702,8 @@
         }
 
         /*
-                                | Recherche en cours
-                                */
+                                            | Recherche en cours
+                                            */
 
         lookupButton.disabled = true;
 
@@ -722,10 +732,10 @@
           const data = await response.json();
 
           /*
-                                    |--------------------------------------------------------------------------
-                                    | Aucun élève trouvé
-                                    |--------------------------------------------------------------------------
-                                    */
+                                                |--------------------------------------------------------------------------
+                                                | Aucun élève trouvé
+                                                |--------------------------------------------------------------------------
+                                                */
 
           if (!data.found) {
             lookupResult.innerHTML = `
@@ -741,10 +751,10 @@
           }
 
           /*
-                                    |--------------------------------------------------------------------------
-                                    | Élève trouvé
-                                    |--------------------------------------------------------------------------
-                                    */
+                                                |--------------------------------------------------------------------------
+                                                | Élève trouvé
+                                                |--------------------------------------------------------------------------
+                                                */
 
           Object.entries(data.eleve).forEach(([k, v]) => {
             const el = document.querySelector(`#inscription_eleve_${k}`);
@@ -762,12 +772,7 @@
                     Élève existant trouvé. Ses informations ont été récupérées.
                 </div>
             `;
-
-          /*
-                                    | Maintenant seulement, on autorise
-                                    | le passage au Step 2.
-                                    */
-
+          /* Maintenant seulement, on autorise le passage au Step 2.*/
           nextButton.disabled = false;
         } catch (error) {
           console.error(error);
@@ -783,9 +788,8 @@
           nextButton.disabled = true;
         } finally {
           /*
-                                    | On remet le bouton Recherche dans son état normal.
-                                    */
-
+          | On remet le bouton Recherche dans son état normal.
+          */
           lookupButton.disabled = false;
 
           lookupButton.innerHTML = `
@@ -794,6 +798,232 @@
             `;
         }
       });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const ecoleSelect = document.querySelector(
+        "#inscription_eleve_etablissement",
+      );
+      const anneeSelect = document.querySelector(
+        "#inscription_eleve_anneeScolaire",
+      );
+      const sectionSelect = document.querySelector("#inscription_eleve_section");
+      const classeSelect = document.querySelector("#inscription_eleve_classe");
+      const optionSelect = document.querySelector("#inscription_eleve_options").value;
+
+      if (
+        !ecoleSelect ||
+        !anneeSelect ||
+        !sectionSelect ||
+        !classeSelect ||
+        !optionSelect
+      ) {
+        return;
+      }
+
+      // -------------------------------------------------------
+      // Vider un select
+      // -------------------------------------------------------
+      function resetSelect(select, placeholder) {
+        select.innerHTML = "";
+
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = placeholder;
+
+        select.appendChild(option);
+        select.value = "";
+      }
+
+      // -------------------------------------------------------
+      // Charger les données
+      // -------------------------------------------------------
+      async function loadData(url, select, placeholder, labelField) {
+        resetSelect(select, "Chargement...");
+        select.disabled = true;
+
+        try {
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            throw new Error("Erreur serveur");
+          }
+
+          const data = await response.json();
+
+          resetSelect(select, placeholder);
+
+          data.forEach(function (item) {
+            const option = document.createElement("option");
+
+            option.value = item.id;
+            option.textContent = item[labelField];
+
+            select.appendChild(option);
+          });
+
+          select.disabled = data.length === 0;
+        } catch (error) {
+          console.error(error);
+
+          resetSelect(select, "Erreur de chargement");
+          select.disabled = true;
+        }
+      }
+
+      // =======================================================
+      // ÉCOLE
+      // =======================================================
+
+      ecoleSelect.addEventListener("change", function () {
+        const ecoleId = this.value;
+
+        // On remet tout à zéro
+        resetSelect(anneeSelect, "Sélectionner une année");
+        resetSelect(sectionSelect, "Sélectionner une section");
+        resetSelect(classeSelect, "Sélectionner une classe");
+        resetSelect(optionSelect, "Sélectionner une option");
+
+        anneeSelect.disabled = true;
+        sectionSelect.disabled = true;
+        classeSelect.disabled = true;
+        optionSelect.disabled = true;
+
+        if (!ecoleId) {
+          return;
+        }
+
+        // Années scolaires
+        loadData(
+          "{{ path('app_inscription_eleve_ajax_annees', {'ecole': '__ID__'}) }}".replace(
+            "__ID__",
+            ecoleId,
+          ),
+          anneeSelect,
+          "Sélectionner une année",
+          "libelle",
+        );
+
+        // Sections
+        loadData(
+          "{{ path('app_inscription_eleve_ajax_sections', {'ecole': '__ID__'}) }}".replace(
+            "__ID__",
+            ecoleId,
+          ),
+          sectionSelect,
+          "Sélectionner une section",
+          "nom",
+        );
+      });
+
+      // =======================================================
+      // SECTION
+      // =======================================================
+
+      sectionSelect.addEventListener("change", function () {
+        const sectionId = this.value;
+
+        resetSelect(classeSelect, "Sélectionner une classe");
+        resetSelect(optionSelect, "Sélectionner une option");
+
+        classeSelect.disabled = true;
+        optionSelect.disabled = true;
+
+        if (!sectionId) {
+          return;
+        }
+
+        // Nom de la section
+        const sectionNom = this.options[this.selectedIndex].textContent
+          .trim()
+          .toLowerCase();
+
+        // Primaire et C.O n'ont pas d'option
+        if (
+          sectionNom === "primaire" ||
+          sectionNom === "c.o" ||
+          sectionNom === "co"
+        ) {
+          resetSelect(optionSelect, "Aucune option pour cette section");
+          optionSelect.disabled = true;
+        }
+
+        // Charger les classes
+        loadData(
+          "{{ path('app_inscription_eleve_ajax_classes', {'section': '__ID__'}) }}".replace(
+            "__ID__",
+            sectionId,
+          ),
+          classeSelect,
+          "Sélectionner une classe",
+          "nom",
+        );
+      });
+
+      // =======================================================
+      // CLASSE
+      // =======================================================
+
+            // =======================================================
+      // CLASSE
+      // =======================================================
+
+      classeSelect.addEventListener("change", function () {
+        const classeId = this.value;
+
+        resetSelect(optionSelect, "Sélectionner une option");
+        optionSelect.disabled = true;
+
+        if (!classeId) {
+          return;
+        }
+
+        const sectionNom = sectionSelect.options[
+          sectionSelect.selectedIndex
+        ].textContent
+          .trim()
+          .toLowerCase();
+
+        if (
+          sectionNom === "primaire" ||
+          sectionNom === "c.o" ||
+          sectionNom === "co"
+        ) {
+          resetSelect(optionSelect, "Aucune option pour cette section");
+          optionSelect.disabled = true;
+          return;
+        }
+
+        loadData(
+          "{{ path('app_inscription_eleve_ajax_options', {'classe': '__ID__'}) }}".replace(
+            "__ID__",
+            classeId,
+          ),
+          optionSelect,
+          "Sélectionner une option",
+          "nom",
+        );
+      });
+
+      // =======================================================
+      // AVANT ENVOI DU FORMULAIRE
+      // =======================================================
+
+      const form = document.querySelector("#inscription-form");
+
+      if (form) {
+        form.addEventListener("submit", function () {
+
+           console.log("classe :", classeSelect.value);
+  console.log("section :", sectionSelect.value);
+  console.log("option :", optionSelect.value);
+
+          anneeSelect.disabled = false;
+          sectionSelect.disabled = false;
+          classeSelect.disabled = false;
+          optionSelect.disabled = false;
+        });
+      }
     });
   </script>
 {% endblock %}

@@ -48,8 +48,10 @@
                             {{ user.lastname }}
                         </h3>
 
-                        <a href="{{ path('app_user_index') }}"
-                           class="btn btn-secondary">
+                        <a
+                            href="{{ path('app_user_index') }}"
+                            class="btn btn-secondary"
+                        >
                             <i class="ti ti-arrow-left me-1"></i>
                             Retour
                         </a>
@@ -77,18 +79,22 @@
 
                                 <div class="d-grid gap-2">
 
-                                    <button type="button"
-                                            class="btn btn-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#passwordModal">
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#passwordModal"
+                                    >
 
                                         <i class="ti ti-key me-1"></i>
                                         Mot de passe
 
                                     </button>
 
-                                    <a href="{{ path('app_user_edit', {'id': user.id}) }}"
-                                       class="btn btn-warning">
+                                    <a
+                                        href="{{ path('app_user_edit', {'id': user.id}) }}"
+                                        class="btn btn-warning"
+                                    >
 
                                         <i class="ti ti-edit me-1"></i>
                                         Modifier
@@ -253,11 +259,13 @@
     </div>
 
     {# Modal mot de passe #}
-    <div class="modal fade"
-         id="passwordModal"
-         tabindex="-1"
-         aria-labelledby="passwordModalLabel"
-         aria-hidden="true">
+    <div
+        class="modal fade"
+        id="passwordModal"
+        tabindex="-1"
+        aria-labelledby="passwordModalLabel"
+        aria-hidden="true"
+    >
 
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
 
@@ -274,10 +282,12 @@
 
                     </h4>
 
-                    <button type="button"
-                            class="btn-close btn-close-white"
-                            data-bs-dismiss="modal"
-                            aria-label="Fermer">
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Fermer"
+                    >
                     </button>
 
                 </div>
@@ -299,50 +309,28 @@
                         Utilisez le bouton
                         <strong>« Réinitialiser »</strong>
                         pour remplacer le mot de passe actuel.
-
                     </p>
 
                     <div class="d-flex justify-content-center mt-4">
-
-                        <button type="button"
-                                class="btn btn-warning"
-                                id="btnResetPassword">
-
+                        <button type="button" class="btn btn-warning" id="btnResetPassword">
                             <i class="ti ti-refresh me-2"></i>
                             Réinitialiser
-
                         </button>
-
                     </div>
 
                 </div>
 
                 <div class="modal-footer">
 
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Fermer
-
                     </button>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-{% endblock %}
-
-
-{% block javascripts %}
-
-    {{ parent() }}
-
-    <script>
+     <script>
 
         const userId = {{ user.id }};
 

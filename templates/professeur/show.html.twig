@@ -1,1 +1,503 @@
-{% extends 'base.html.twig' %}{% block title %}Détail Professeur{% endblock %}{% block body %}<div class="container-fluid"><div class="page-title-head d-flex justify-content-between align-items-center"><h4 class="fs-xl fw-bold m-0">Détail Professeur</h4><a href="{{ path('app_professeur_' ~ 'index') }}" class="btn btn-secondary"><i class="ti ti-arrow-left me-1"></i>Retour</a></div><div class="row"><div class="col-lg-3"><div class="card"><div class="card-body d-grid gap-2"><a href="{{ path('app_professeur_' ~ 'edit', {id: professeur.id}) }}" class="btn btn-warning">Modifier</a>{% include 'professeur/_delete_form.html.twig' %}</div></div></div><div class="col-lg-9"><div class="card"><div class="table-responsive"><table class="table table-bordered align-middle mb-0"><tbody><tr><th>Matricule</th><td>{{ professeur.matricule }}</td></tr><tr><th>Nom complet</th><td>{{ professeur.nom }} {{ professeur.postnom }} {{ professeur.prenom }}</td></tr><tr><th>Sexe</th><td>{{ professeur.sexe }}</td></tr><tr><th>Spécialité</th><td>{{ professeur.specialite ?: '—' }}</td></tr><tr><th>Écoles</th><td>{{ professeur.ecoles|map(e => e.nom)|join(', ') ?: '—' }}</td></tr><tr><th>Créé le</th><td>{{ professeur.createdAt ? professeur.createdAt|date('d/m/Y H:i') : '—' }}</td></tr><tr><th>Créé par</th><td>{{ professeur.createdBy ? professeur.createdBy.firstname ~ ' ' ~ professeur.createdBy.lastname : '—' }}</td></tr><tr><th>Mis à jour le</th><td>{{ professeur.updatedAt ? professeur.updatedAt|date('d/m/Y H:i') : '—' }}</td></tr></tbody></table></div></div></div></div></div>{% endblock %}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Professeur{% endblock %}
+
+{% block body %}
+
+    <div class="wrapper">
+
+        <div class="content-page">
+
+            <div class="container-fluid">
+
+                {# ==================== TITRE ==================== #}
+
+                <div class="page-title-head d-flex align-items-center">
+
+                    <div class="flex-grow-1">
+
+                        <h4 class="fs-xl fw-bold m-0">
+                            Détail du professeur
+                        </h4>
+
+                    </div>
+
+                    <div class="text-end">
+
+                        <ol class="breadcrumb m-0 py-0">
+
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">
+                                    ADMIN
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_professeur_index') }}">
+                                    Professeurs
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+
+                        </ol>
+
+                    </div>
+
+                </div>
+
+
+                {# ==================== CONTENU ==================== #}
+
+                <div class="row">
+
+
+                    {# ==================== INFORMATIONS RAPIDES ==================== #}
+
+                    <div class="col-xl-3">
+
+                        <div class="card">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title">
+                                    Professeur N° :
+                                    {{ professeur.id }}
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body text-center">
+
+                                <div class="avatar-xl mx-auto mb-3">
+
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                        <i class="ti ti-user fs-1"></i>
+
+                                    </div>
+
+                                </div>
+
+                                <h4 class="mb-1">
+
+                                    {{ professeur.nom }}
+
+                                    {% if professeur.postnom %}
+                                        {{ professeur.postnom }}
+                                    {% endif %}
+
+                                    {{ professeur.prenom }}
+
+                                </h4>
+
+                                <p class="text-muted mb-2">
+
+                                    Matricule :
+
+                                    <strong>
+                                        {{ professeur.matricule }}
+                                    </strong>
+
+                                </p>
+
+                                <hr>
+
+                                <div class="d-grid gap-2">
+
+                                    <a
+                                        href="{{ path('app_professeur_edit', {'id': professeur.id}) }}"
+                                        class="btn btn-warning"
+                                    >
+
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier
+
+                                    </a>
+
+                                    {% include 'professeur/_delete_form.html.twig' %}
+
+                                    <a
+                                        href="{{ path('app_professeur_index') }}"
+                                        class="btn btn-secondary"
+                                    >
+
+                                        <i class="ti ti-arrow-left me-1"></i>
+                                        Retour
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ==================== INFORMATIONS PROFESSEUR ==================== #}
+
+                    <div class="col-xl-6">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+                                    Informations du professeur
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-bordered align-middle mb-0">
+
+                                        <tbody>
+
+                                            <tr>
+
+                                                <th width="40%">
+                                                    Matricule
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.matricule }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Nom complet
+                                                </th>
+
+                                                <td>
+
+                                                    {{ professeur.nom }}
+
+                                                    {% if professeur.postnom %}
+                                                        {{ professeur.postnom }}
+                                                    {% endif %}
+
+                                                    {{ professeur.prenom }}
+
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Sexe
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.sexe }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Date de naissance
+                                                </th>
+
+                                                <td>
+
+                                                    {{ professeur.dateNaissance
+														? professeur.dateNaissance|date('d/m/Y')
+														: '—'
+													}}
+
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Téléphone
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.phone ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    E-mail
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.email ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Adresse
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.adresse ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Spécialité
+                                                </th>
+
+                                                <td>
+                                                    {{ professeur.specialite ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Grade
+                                                </th>
+
+                                                <td>
+
+                                                    {{ professeur.grade ? : '—'
+													}}
+
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Statut
+                                                </th>
+
+                                                <td>
+
+                                                    {% if professeur.statut == 'Actif' %}
+
+                                                        <span class="badge bg-success">
+                                                            Actif
+                                                        </span>
+
+                                                    {% else %}
+
+                                                        <span class="badge bg-secondary">
+                                                            {{ professeur.statut ?: '—' }}
+                                                        </span>
+
+                                                    {% endif %}
+
+                                                </td>
+
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# ==================== AFFECTATION ==================== #}
+
+                    <div class="col-xl-3 mt-1">
+
+                        <div class="card">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-school me-2"></i>
+                                    Affectation scolaire
+
+                                </h4>
+
+                            </div>
+
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered align-middle mb-0">
+
+                                    <tbody>
+
+                                        <tr>
+
+                                            <th>
+                                                École
+                                            </th>
+
+                                            <td>
+
+                                                {% if professeur.ecole %}
+
+                                                    <a href="{{ path('app_ecole_show', {'id': professeur.ecole.id}) }}">
+
+                                                        {{ professeur.ecole.nom }}
+
+                                                    </a>
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+
+                                            <th>
+                                                Année scolaire
+                                            </th>
+
+                                            <td>
+
+                                                {% if professeur.anneeScolaire %}
+
+                                                    {{ professeur.anneeScolaire.libelle }}
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+
+                                            <th>
+                                                Section
+                                            </th>
+
+                                            <td>
+
+                                                {% if professeur.section %}
+
+                                                    {{ professeur.section.nom }}
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+
+                                            <th>
+                                                Date d'embauche
+                                            </th>
+                                            <td>
+
+                                                {{ professeur.dateEmbauche
+														? professeur.dateEmbauche|date('d/m/Y')
+														: '—'
+													}}
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+
+                                            <th>
+                                                Créé le
+                                            </th>
+
+                                            <td>
+
+                                                {{ professeur.createdAt
+													? professeur.createdAt|date('d/m/Y H:i')
+													: '—'
+												}}
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+
+                                            <th>
+                                                Créé par
+                                            </th>
+
+                                            <td>
+
+                                                {{ professeur.createdBy
+													? professeur.createdBy.firstname ~ ' ' ~ professeur.createdBy.lastname
+													: '—'
+												}}
+
+                                            </td>
+
+                                        </tr>
+
+                                        <tr>
+
+                                            <th>
+                                                Mis à jour le
+                                            </th>
+
+                                            <td>
+
+                                                {{ professeur.updatedAt
+													? professeur.updatedAt|date('d/m/Y H:i')
+													: '—'
+												}}
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}

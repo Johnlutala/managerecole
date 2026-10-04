@@ -6,6 +6,11 @@ use App\Entity\Eleve;
 use App\Entity\InscriptionEleve;
 use App\Entity\Parents;
 use App\Entity\User;
+use App\Entity\Ecole;
+use App\Entity\AnneeScolaire;
+use App\Entity\Section;
+use App\Entity\Classe;
+use App\Entity\Option;
 use App\Form\InscriptionEleveType;
 use App\Repository\EleveRepository;
 use App\Repository\InscriptionEleveRepository;
@@ -20,23 +25,49 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/inscription/eleve', name: 'app_inscription_eleve_')]
 final class InscriptionEleveController extends AbstractController
 {
-    #[Route('', name: 'index', methods: ['GET', 'POST'])]
-    public function index(Request $request, InscriptionEleveRepository $repository, EntityManagerInterface $entityManager): Response
+
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
     {
+        $this->entityManager = $entityManager;
+    }
+
+    #[Route('', name: 'index', methods: ['GET', 'POST'])]
+    public function index(
+        Request $request,
+        InscriptionEleveRepository $repository,
+        EntityManagerInterface $entityManager
+    ): Response {
         $inscription = new InscriptionEleve();
         $form = $this->createForm(InscriptionEleveType::class, $inscription);
+
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $inscription = $form->getData();
+           
             $inscription->setStatut('en_attente');
+
             if ($this->getUser() instanceof User) {
                 $inscription->setCreatedBy($this->getUser());
             }
             $entityManager->persist($inscription);
             $entityManager->flush();
-            $this->addFlash('success', 'La demande d’inscription a été enregistrée et attend validation.');
+            $this->addFlash(
+                'success',
+                'La demande d’inscription a été enregistrée et attend validation.'
+            );
             return $this->redirectToRoute('app_inscription_eleve_index');
         }
-        return $this->render('inscription_eleve/index.html.twig', ['inscription_eleves' => $repository->findBy([], ['id' => 'DESC']), 'form' => $form->createView()]);
+        return $this->render('inscription_eleve/index.html.twig', [
+            'inscription_eleves' => $repository->findBy(
+                [],
+                ['id' => 'DESC']
+            ),
+            'form' => $form->createView()
+        ]);
     }
 
     #[Route('/lookup', name: 'lookup', methods: ['GET'])]
@@ -153,13 +184,106 @@ final class InscriptionEleveController extends AbstractController
         }
         return $this->render('inscription_eleve/edit.html.twig', ['inscription_eleve' => $inscriptionEleve, 'form' => $form]);
     }
+
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, InscriptionEleve $inscriptionEleve, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $inscriptionEleve->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($inscriptionEleve);
+    public function delete(
+        Request $request,
+        InscriptionEleve $inscriptionEleve,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid(
+            'delete' . $inscriptionEleve->getId(),
+            $request->request->get('_token')
+        )) {
+            $entityManager->remove(
+                $inscriptionEleve
+            );
             $entityManager->flush();
         }
         return $this->redirectToRoute('app_inscription_eleve_index');
+    }
+
+    #[Route('/ajax/sections/{ecole}', name: 'ajax_sections', methods: ['GET'])]
+    public function ajaxSections(Ecole $ecole): JsonResponse
+    {
+        $sections = $this->entityManager
+            ->getRepository(Section::class)
+            ->findBy(
+                ['ecole' => $ecole],
+                ['nom' => 'ASC']
+            );
+
+        return $this->json(
+            array_map(
+                fn(Section $section) => [
+                    'id' => $section->getId(),
+                    'nom' => $section->getNom(),
+                ],
+                $sections
+            )
+        );
+    }
+
+    #[Route('/ajax/annees/{ecole}', name: 'ajax_annees', methods: ['GET'])]
+    public function ajaxAnnees(Ecole $ecole): JsonResponse
+    {
+        $annees = $this->entityManager
+            ->getRepository(AnneeScolaire::class)
+            ->findBy(
+                ['ecole' => $ecole],
+                ['libelle' => 'DESC']
+            );
+
+        return $this->json(
+            array_map(
+                fn(AnneeScolaire $annee) => [
+                    'id' => $annee->getId(),
+                    'libelle' => $annee->getLibelle(),
+                ],
+                $annees
+            )
+        );
+    }
+
+    #[Route('/ajax/classes/{section}', name: 'ajax_classes', methods: ['GET'])]
+    public function ajaxClasses(Section $section): JsonResponse
+    {
+        $classes = $this->entityManager
+            ->getRepository(Classe::class)
+            ->findBy(
+                ['section' => $section],
+                ['nom' => 'ASC']
+            );
+
+        return $this->json(
+            array_map(
+                fn(Classe $classe) => [
+                    'id' => $classe->getId(),
+                    'nom' => $classe->getNom(),
+                ],
+                $classes
+            )
+        );
+    }
+
+    #[Route('/ajax/options/{classe}', name: 'ajax_options', methods: ['GET'])]
+    public function ajaxOptions(Classe $classe): JsonResponse
+    {
+        $options = $this->entityManager
+            ->getRepository(Option::class)
+            ->findBy(
+                ['classe' => $classe],
+                ['nom' => 'ASC']
+            );
+
+        return $this->json(
+            array_map(
+                fn(Option $option) => [
+                    'id' => $option->getId(),
+                    'nom' => $option->getNom(),
+                ],
+                $options
+            )
+        );
     }
 }
