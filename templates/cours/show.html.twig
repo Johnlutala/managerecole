@@ -1,1 +1,206 @@
-{% extends 'base.html.twig' %}{% block title %}Détail Cours{% endblock %}{% block body %}<div class="container-fluid"><div class="page-title-head d-flex justify-content-between align-items-center"><h4 class="fs-xl fw-bold m-0">Détail Cours</h4><a href="{{ path('app_cours_' ~ 'index') }}" class="btn btn-secondary"><i class="ti ti-arrow-left me-1"></i>Retour</a></div><div class="row"><div class="col-lg-3"><div class="card"><div class="card-body d-grid gap-2"><a href="{{ path('app_cours_' ~ 'edit', {id: cour.id}) }}" class="btn btn-warning">Modifier</a>{% include 'cours/_delete_form.html.twig' %}</div></div></div><div class="col-lg-9"><div class="card"><div class="table-responsive"><table class="table table-bordered align-middle mb-0"><tbody><tr><th>Code</th><td>{{ cour.code }}</td></tr><tr><th>Nom</th><td>{{ cour.nom }}</td></tr><tr><th>Description</th><td>{{ cour.description ?: '—' }}</td></tr><tr><th>Classe</th><td>{{ cour.classe ? cour.classe.nom : '—' }}</td></tr><tr><th>Professeur</th><td>{{ cour.professeur ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom : '—' }}</td></tr><tr><th>Créé le</th><td>{{ cour.createdAt ? cour.createdAt|date('d/m/Y H:i') : '—' }}</td></tr><tr><th>Créé par</th><td>{{ cour.createdBy ? cour.createdBy.firstname ~ ' ' ~ cour.createdBy.lastname : '—' }}</td></tr><tr><th>Mis à jour le</th><td>{{ cour.updatedAt ? cour.updatedAt|date('d/m/Y H:i') : '—' }}</td></tr></tbody></table></div></div></div></div></div>{% endblock %}
+{% extends 'base.html.twig' %}
+
+{% block title %}Cours de {{ classe.nom }}{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">Classe {{ classe.nom }}</h4>
+                        <div class="text-muted mt-1">
+                            {{ classe.ecole ? classe.ecole.nom : 'École non définie' }}
+                            {% if classe.section %}
+                                · {{ classe.section.nom }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="{{ path('app_cours_index', {ecole: classe.ecole ? classe.ecole.id : null}) }}" class="btn btn-outline-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour aux cours
+                    </a>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'danger' ? 'danger' : 'info') }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="card mb-4">
+                    <div class="card-header border-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Attributions des cours</h5>
+                            <small class="text-muted">Consultez ou modifiez les professeurs attribués à cette classe.</small>
+                        </div>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#editAllAttributionsModal">
+                            <i class="ti ti-edit me-1"></i>
+                            Modifier
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-25">
+                                <tr>
+                                    <th class="ps-3">#</th>
+                                    <th>Nom</th>
+                                    <th>Professeur</th>
+                                    <th class="text-end pe-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cour in cours %}
+                                    <tr>
+                                        <td class="ps-3">{{ loop.index }}</td>
+                                        <td>
+                                            {{ cour.nom }}
+                                            {% if cour.option %}
+                                                <span class="text-muted small">· {{ cour.option.nom }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ cour.professeur ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom : 'Non attribué' }}                                        </td>
+                                        <td class="text-end pe-3">
+                                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editCourseAttribution{{ cour.id }}"
+                                                    aria-label="Modifier le professeur de {{ cour.nom }}"
+                                                    title="Modifier l’attribution"
+                                                >
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                {% if cour.professeur %}
+                                                    <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}" onsubmit="return confirm('Retirer le professeur de ce cours ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+                                                        <input type="hidden" name="cours" value="{{ cour.id }}">
+                                                        <input type="hidden" name="action" value="remove">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Retirer le professeur de {{ cour.nom }}" title="Retirer l’attribution">
+                                                            <i class="ti ti-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">Aucun cours n’est enregistré dans cette classe.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="editAllAttributionsModal" tabindex="-1" aria-labelledby="editAllAttributionsLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editAllAttributionsLabel">Modifier les attributions de {{ classe.nom }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Annuler"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="text-muted">Choisissez le professeur pour chaque cours, puis enregistrez toutes les modifications.</p>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Nom du cours</th>
+                                                    <th>Professeur</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for cour in cours %}
+                                                    <tr>
+                                                        <td>{{ loop.index }}</td>
+                                                        <td>
+                                                            {{ cour.nom }}
+                                                            {% if cour.option %}
+                                                                <span class="text-muted small">· {{ cour.option.nom }}</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <select
+                                                                name="assignments[{{ cour.id }}]"
+                                                                class="form-select"
+                                                                aria-label="Professeur pour {{ cour.nom }}"
+                                                                required
+                                                            >
+                                                                <option value="">Sélectionner un professeur</option>
+                                                                {% for professeur in professeurs %}
+                                                                    <option
+                                                                        value="{{ professeur.id }}"
+                                                                        {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}
+                                                                    >
+                                                                        {{ professeur.nom }} {{ professeur.prenom }}
+                                                                    </option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                {% else %}
+                                                    <tr>
+                                                        <td colspan="3" class="text-center py-4 text-muted">Aucun cours à modifier.</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-primary" {% if professeurs is empty or cours is empty %}disabled{% endif %}>
+                                        <i class="ti ti-device-floppy me-1"></i>
+                                        Enregistrer
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {% for cour in cours %}
+                    <div class="modal fade" id="editCourseAttribution{{ cour.id }}" tabindex="-1" aria-labelledby="editCourseAttributionLabel{{ cour.id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+                                    <input type="hidden" name="cours" value="{{ cour.id }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editCourseAttributionLabel{{ cour.id }}">Modifier l’attribution</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Annuler"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted mb-3">Cours : <strong>{{ cour.nom }}</strong></p>
+                                        <label for="professeur{{ cour.id }}" class="form-label">Professeur</label>
+                                        <select id="professeur{{ cour.id }}" name="professeur" class="form-select" required>
+                                            <option value="">Sélectionner un professeur</option>
+                                            {% for professeur in professeurs %}
+                                                <option value="{{ professeur.id }}" {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}>
+                                                    {{ professeur.nom }} {{ professeur.prenom }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-primary" {% if professeurs is empty %}disabled{% endif %}>Enregistrer</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,140 +1,333 @@
 {% extends 'base.html.twig' %}
-{% block title %}Classes
-{% endblock %}
+
+{% block title %}Classes{% endblock %}
+
 {% block body %}
+
     <div class="wrapper">
         <div class="content-page">
             <div class="container-fluid">
+               
                 <div class="page-title-head d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h4 class="fs-xl fw-bold m-0">Classes</h4>
-                    </div>
-                </div>
 
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Classes
+                        </h4>
+                    </div>
+
+                </div>
                 {% for message in app.flashes('success') %}
+
                     <div class="d-flex justify-content-center">
-                        <div class="alert alert-success alert-dismissible fade show"
+
+                        <div
+                            class="alert alert-success alert-dismissible fade show"
                             role="alert"
-                            style="width: 500px;">
+                            style="width: 500px;"
+                        >
                             {{ message }}
+
                             <button
                                 type="button"
                                 class="btn-close"
                                 data-bs-dismiss="alert"
                                 aria-label="Fermer"
                             ></button>
-                        </div>
-                    </div>
-                {% endfor %}
 
-                <div data-table data-table-rows-per-page="8" class="card">
-                    <div class="card-header border-light d-flex justify-content-between">
-                        <div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
                         </div>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                            <i class="ti ti-plus me-1"></i>Ajouter</button>
+
                     </div>
+
+                {% endfor %}
+                <div data-table data-table-rows-per-page="8" class="card" >
+                    <div class="card-header border-light">
+
+                        <div class="row align-items-center g-2">
+
+                            {# Recherche #}
+
+                            <div class="col-md-4">
+                                <div class="app-search">
+                                    <input data-table-search type="search" class="form-control" placeholder="Rechercher..." >
+                                    <i
+                                        data-lucide="search"
+                                        class="app-search-icon text-muted"
+                                    ></i>
+                                </div>
+
+                            </div>
+
+
+                            {# Sélection école #}
+
+                            <div class="col-md-5">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <label
+                                        for="classe-filter-ecole"
+                                        class="form-label mb-0 text-nowrap"
+                                    >
+                                        École
+                                    </label>
+
+                                    <select
+                                        id="classe-filter-ecole"
+                                        class="form-select"
+                                    >
+
+                                        {% for ecole in ecoles %}
+
+                                            <option
+                                                value="{{ ecole.id }}"
+                                                {% if classe.ecole and classe.ecole.id == ecole.id %}
+                                                selected
+                                                {% endif %}
+                                            >
+                                                {{ ecole.nom }}
+                                            </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            {# Bouton Ajouter #}
+
+                            <div class="col-md-3 text-md-end">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#addModal"
+                                >
+                                    <i class="ti ti-plus me-1"></i>
+                                    Ajouter
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {# --------------------------------------------------------
+                       TABLE
+                    --------------------------------------------------------- #}
+
                     <div class="table-responsive">
-                        <table class="table table-custom table-centered table-hover w-100 mb-0">
+
+                        <table
+                            class="table table-custom table-centered table-hover w-100 mb-0"
+                        >
+
                             <thead class="bg-light bg-opacity-25 thead-sm">
+
                                 <tr class="text-uppercase fs-xxs">
+
                                     <th>Code</th>
+
                                     <th>Nom</th>
-                                    <th>Secion</th>
+
+                                    <th>Section</th>
+
                                     <th>École</th>
+
                                     <th>Capacité</th>
-                                    <th class="text-center">Actions</th>
+
+                                    <th class="text-center">
+                                        Actions
+                                    </th>
+
                                 </tr>
+
                             </thead>
-                            <tbody>
-                                {% for classe in classes %}
-                                    <tr>
-                                        <td>{{ classe.code }}</td>
-                                        <td>{{ classe.nom }}</td>
-                                        <td>{{ classe.section ? classe.section.nom : '—' }}</td>
-                                        <td>{{ classe.ecole ? classe.ecole.nom : '—' }}</td>
-                                        <td>{{ classe.capacite ?: '—' }}</td>
+
+
+                            <tbody id="classes-table-body">
+
+                                {% for classeItem in classes %}
+
+                                    <tr
+                                        data-ecole-id="{{ classeItem.ecole ? classeItem.ecole.id : '' }}"
+                                    >
+
                                         <td>
+                                            {{ classeItem.code }}
+                                        </td>
+
+                                        <td>
+                                            {{ classeItem.nom }}
+                                        </td>
+
+                                        <td>
+                                            {{ classeItem.section
+                                                ? classeItem.section.nom
+                                                : '—'
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            {{ classeItem.ecole
+                                                ? classeItem.ecole.nom
+                                                : '—'
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            {{ classeItem.capacite ?: '—' }}
+                                        </td>
+
+                                        <td>
+
                                             <div class="d-flex justify-content-center gap-1">
-                                                <a href="{{ path('app_classe_show', {id: classe.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+
+                                                <a
+                                                    href="{{ path('app_classe_show', {id: classeItem.id}) }}"
+                                                    class="btn btn-default btn-icon btn-sm rounded-circle"
+                                                >
                                                     <i class="ti ti-eye fs-lg"></i>
                                                 </a>
-                                                <a href="{{ path('app_classe_edit', {id: classe.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+
+                                                <a
+                                                    href="{{ path('app_classe_edit', {id: classeItem.id}) }}"
+                                                    class="btn btn-default btn-icon btn-sm rounded-circle"
+                                                >
                                                     <i class="ti ti-edit fs-lg"></i>
                                                 </a>
+
                                             </div>
+
                                         </td>
+
                                     </tr>
+
                                 {% else %}
-                                    <tr>
-                                        <td colspan="10" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+
+                                    <tr id="no-class-row">
+
+                                        <td
+                                            colspan="6"
+                                            class="text-center py-5 text-muted"
+                                        >
+                                            Aucune classe trouvée.
+                                        </td>
+
                                     </tr>
+
                                 {% endfor %}
+
                             </tbody>
+
                         </table>
+
                     </div>
+
+
+                    {# --------------------------------------------------------
+                       PAGINATION
+                    --------------------------------------------------------- #}
+
                     <div class="card-footer border-0 d-flex justify-content-between">
+
                         <div data-table-pagination-info></div>
+
                         <div data-table-pagination></div>
+
                     </div>
+
                 </div>
+
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="addModal" tabindex="-1">
+
+    {# ================================================================
+       MODAL AJOUT CLASSE
+    ================================================================ #}
+
+    <div
+        class="modal fade"
+        id="addModal"
+        tabindex="-1"
+    >
+
         <div class="modal-dialog modal-xl">
+
             <div class="modal-content">
 
                 {{ form_start(form) }}
 
+
+                {# ------------------------------------------------------------
+                   HEADER
+                ------------------------------------------------------------- #}
+
                 <div class="modal-header">
 
                     <div>
+
                         <h5 class="modal-title">
+
                             <i class="ti ti-school me-2 text-primary"></i>
+
                             Ajouter une classe
+
                         </h5>
 
                         <small class="text-muted">
                             Ajouter une nouvelle classe
                         </small>
+
                     </div>
+
 
                     <button
                         type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
                         aria-label="Fermer"
-                    >
-                    </button>
+                    ></button>
 
                 </div>
 
 
+                {# ------------------------------------------------------------
+                   BODY
+                ------------------------------------------------------------- #}
+
                 <div class="modal-body">
 
-                    <div class="row">
+                    <div class="row g-3">
 
 
-                        {# ================================================== #}
-                        {# FORMULAIRE                                         #}
-                        {# ================================================== #}
+                        {# ====================================================
+                           FORMULAIRE
+                        ==================================================== #}
 
                         <div class="col-lg-8">
 
                             <div class="row g-3">
+
 
                                 {# École #}
 
                                 <div class="col-md-6">
 
                                     {{ form_row(form.ecole, {
-                                    label: 'École',
-                                    attr: {
-                                        class: 'form-select'
-                                    }
-                                }) }}
+                                        label: 'École',
+                                        attr: {
+                                            class: 'form-select'
+                                        }
+                                    }) }}
 
                                 </div>
 
@@ -144,26 +337,26 @@
                                 <div class="col-md-6">
 
                                     {{ form_row(form.section, {
-                                    label: 'Section',
-                                    attr: {
-                                        class: 'form-select'
-                                    }
-                                }) }}
+                                        label: 'Section',
+                                        attr: {
+                                            class: 'form-select'
+                                        }
+                                    }) }}
 
                                 </div>
 
 
-                                {# Nom de la classe #}
+                                {# Nom #}
 
                                 <div class="col-md-6">
 
                                     {{ form_row(form.nom, {
-                                    label: 'Nom de la classe',
-                                    attr: {
-                                        class: 'form-control',
-                                        placeholder: 'Ex. 4e Primaire'
-                                    }
-                                }) }}
+                                        label: 'Nom de la classe',
+                                        attr: {
+                                            class: 'form-control',
+                                            placeholder: 'Ex. 4e Primaire'
+                                        }
+                                    }) }}
 
                                 </div>
 
@@ -173,12 +366,12 @@
                                 <div class="col-md-6">
 
                                     {{ form_row(form.capacite, {
-                                    label: 'Capacité',
-                                    attr: {
-                                        class: 'form-control',
-                                        placeholder: 'Ex. 40'
-                                    }
-                                }) }}
+                                        label: 'Capacité',
+                                        attr: {
+                                            class: 'form-control',
+                                            placeholder: 'Ex. 40'
+                                        }
+                                    }) }}
 
                                 </div>
 
@@ -186,9 +379,12 @@
 
                         </div>
 
-                        <div class="col-lg-4">
 
-                            {# Carte des classes #}
+                        {# ====================================================
+                           CLASSES EXISTANTES
+                        ==================================================== #}
+
+                        <div class="col-lg-4">
 
                             <div
                                 id="classesCard"
@@ -223,8 +419,7 @@
                                         <div
                                             class="spinner-border spinner-border-sm text-primary"
                                             role="status"
-                                        >
-                                        </div>
+                                        ></div>
 
                                         <span class="ms-2 text-muted">
                                             Chargement...
@@ -253,13 +448,12 @@
                                     </div>
 
 
-                                    {# Liste des classes #}
+                                    {# Liste #}
 
-                                    <div id="classesList">
-                                    </div>
+                                    <div id="classesList"></div>
 
 
-                                    {# Message doublon #}
+                                    {# Doublon #}
 
                                     <div
                                         id="classeDuplicateMessage"
@@ -279,9 +473,7 @@
                             </div>
 
 
-                            {# ==================================================
-                           MESSAGE AVANT SELECTION
-                        ================================================== #}
+                            {# Message initial #}
 
                             <div
                                 id="selectSectionMessage"
@@ -306,9 +498,9 @@
                 </div>
 
 
-                {# ==========================================================
-               FOOTER
-            ========================================================== #}
+                {# ------------------------------------------------------------
+                   FOOTER
+                ------------------------------------------------------------- #}
 
                 <div class="modal-footer">
 
@@ -317,9 +509,7 @@
                         class="btn btn-light"
                         data-bs-dismiss="modal"
                     >
-
                         Annuler
-
                     </button>
 
 
@@ -337,44 +527,50 @@
 
                 </div>
 
+
                 {{ form_end(form) }}
 
             </div>
+
         </div>
+
     </div>
 
 
     {# ================================================================
-   DONNEES DES CLASSES
-================================================================ #}
+       DONNEES DES CLASSES POUR JAVASCRIPT
+    ================================================================ #}
 
-    <script type="application/json" id="classes-data">
-
-[
-    {% for classe in classes %}
-
-        {
-            "id": {{ classe.id }},
-            "nom": {{ classe.nom|json_encode|raw }},
-            "ecole": {{ classe.ecole ? classe.ecole.id : 'null' }},
-            "section": {{ classe.section ? classe.section.id : 'null' }}
-        }
-
-        {% if not loop.last %},{% endif %}
-
-    {% endfor %}
-]
-
-</script>
+    <script
+        type="application/json"
+        id="classes-data"
+    >
+        [
+            {% for classeItem in classes %}
+                {
+                    "id": {{ classeItem.id }},
+                    "nom": {{ classeItem.nom|json_encode|raw }},
+                    "ecole": {{ classeItem.ecole ? classeItem.ecole.id : 'null' }},
+                    "section": {{ classeItem.section ? classeItem.section.id : 'null' }}
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
 
 
     {# ================================================================
-   JAVASCRIPT
-================================================================ #}
+       JAVASCRIPT
+    ================================================================ #}
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const ecoleSelect = document.querySelector("#classe_ecole");
+            /* ============================================================
+                       ELEMENTS
+                    ============================================================ */
+
+            const ecoleFilter = document.querySelector("#classe-filter-ecole");
+
+            const ecoleForm = document.querySelector("#classe_ecole");
 
             const sectionSelect = document.querySelector("#classe_section");
 
@@ -396,77 +592,178 @@
 
             const classesDataElement = document.querySelector("#classes-data");
 
-            if (!ecoleSelect || !sectionSelect || !nomInput || !classesDataElement) {
+            if (!classesDataElement) {
                 return;
             }
 
             const classesData = JSON.parse(classesDataElement.textContent);
 
-            /* ================================================================
-               SECTION DESACTIVEE AU DEPART
-            ================================================================ */
+            /* ============================================================
+                       ECOLE DU FORMULAIRE
+                    ============================================================ */
 
-            sectionSelect.disabled = true;
+            if (ecoleForm) {
+                /*
+                 * Le select du formulaire doit toujours commencer
+                 * avec la même école que le select du haut.
+                 */
 
-            /* ================================================================
-               CHANGEMENT ECOLE
-            ================================================================ */
+                if (ecoleFilter && ecoleFilter.value) {
+                    ecoleForm.value = ecoleFilter.value;
+                }
+            }
 
-            ecoleSelect.addEventListener("change", function () {
-                const ecoleId = this.value;
+            /* ============================================================
+                       FILTRER LE TABLEAU PAR ECOLE
+                    ============================================================ */
 
-                // Réinitialiser section
-                sectionSelect.value = "";
-
-                // Désactiver si aucune école
-                if (!ecoleId) {
-                    sectionSelect.disabled = true;
-
-                    cacherClasses();
-
+            function filtrerTableau() {
+                if (!ecoleFilter) {
                     return;
                 }
 
-                // Activer section
-                sectionSelect.disabled = false;
+                const ecoleId = ecoleFilter.value;
 
-                // Filtrer les sections
-                Array.from(sectionSelect.options).forEach(function (option) {
-                    if (option.value === "") {
-                        option.hidden = false;
+                const rows = document.querySelectorAll(
+                    "#classes-table-body tr[data-ecole-id]",
+                );
+
+                let nombreVisible = 0;
+
+                rows.forEach(function (row) {
+                    const rowEcoleId = row.dataset.ecoleId;
+
+                    if (!ecoleId || String(rowEcoleId) === String(ecoleId)) {
+                        row.style.display = "";
+
+                        nombreVisible++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+
+                /*
+                 * On laisse le système data-table gérer sa pagination.
+                 * Ici on masque simplement les classes des autres écoles.
+                 */
+            }
+
+            /* ============================================================
+                       CHANGEMENT ECOLE DU HAUT
+                    ============================================================ */
+
+            if (ecoleFilter) {
+                ecoleFilter.addEventListener("change", function () {
+                    const ecoleId = this.value;
+
+                    /* Synchroniser le formulaire */
+
+                    if (ecoleForm) {
+                        ecoleForm.value = ecoleId;
+
+                        ecoleForm.dispatchEvent(new Event("change"));
+                    }
+
+                    /* Filtrer le tableau */
+
+                    filtrerTableau();
+                });
+            }
+
+            /* ============================================================
+                       SECTION DESACTIVEE AU DEPART
+                    ============================================================ */
+
+            if (sectionSelect) {
+                sectionSelect.disabled = true;
+            }
+
+            /* ============================================================
+                       CHANGEMENT ECOLE DANS LE FORMULAIRE
+                    ============================================================ */
+
+            if (ecoleForm) {
+                ecoleForm.addEventListener("change", function () {
+                    const ecoleId = this.value;
+
+                    /*
+                     * Réinitialiser la section
+                     */
+
+                    if (sectionSelect) {
+                        sectionSelect.value = "";
+                    }
+
+                    /*
+                     * Aucune école
+                     */
+
+                    if (!ecoleId) {
+                        if (sectionSelect) {
+                            sectionSelect.disabled = true;
+                        }
+
+                        cacherClasses();
 
                         return;
                     }
 
-                    option.hidden = option.dataset.ecole !== ecoleId;
+                    /*
+                     * Activer la section
+                     */
+
+                    if (sectionSelect) {
+                        sectionSelect.disabled = false;
+
+                        /*
+                         * Filtrer les sections
+                         */
+
+                        Array.from(sectionSelect.options).forEach(function (option) {
+                            if (option.value === "") {
+                                option.hidden = false;
+
+                                return;
+                            }
+
+                            option.hidden = option.dataset.ecole !== ecoleId;
+                        });
+                    }
+
+                    cacherClasses();
                 });
+            }
 
-                // Cacher les classes
-                cacherClasses();
-            });
+            /* ============================================================
+                       CHANGEMENT SECTION
+                    ============================================================ */
 
-            /* ================================================================
-               CHANGEMENT SECTION
-            ================================================================ */
+            if (sectionSelect) {
+                sectionSelect.addEventListener("change", function () {
+                    afficherClasses();
+                });
+            }
 
-            sectionSelect.addEventListener("change", function () {
-                afficherClasses();
-            });
+            /* ============================================================
+                       SAISIE NOM
+                    ============================================================ */
 
-            /* ================================================================
-               SAISIE NOM CLASSE
-            ================================================================ */
+            if (nomInput) {
+                nomInput.addEventListener("input", function () {
+                    verifierDoublon();
+                });
+            }
 
-            nomInput.addEventListener("input", function () {
-                verifierDoublon();
-            });
-
-            /* ================================================================
-               AFFICHER LES CLASSES
-            ================================================================ */
+            /* ============================================================
+                       AFFICHER LES CLASSES
+                    ============================================================ */
 
             function afficherClasses() {
-                const ecoleId = ecoleSelect.value;
+                if (!ecoleForm || !sectionSelect) {
+                    return;
+                }
+
+                const ecoleId = ecoleForm.value;
 
                 const sectionId = sectionSelect.value;
 
@@ -480,13 +777,10 @@
                     return;
                 }
 
-                // Cacher le message initial
                 selectSectionMessage.style.display = "none";
 
-                // Afficher la carte
                 classesCard.style.display = "block";
 
-                // Filtrer les classes
                 const classesFiltrees = classesData.filter(function (classe) {
                     return (
                         String(classe.ecole) === String(ecoleId) &&
@@ -494,7 +788,6 @@
                     );
                 });
 
-                // Aucune classe
                 if (classesFiltrees.length === 0) {
                     noClasses.style.display = "block";
 
@@ -503,7 +796,6 @@
 
                 noClasses.style.display = "none";
 
-                // Afficher les classes
                 classesFiltrees.forEach(function (classe) {
                     const item = document.createElement("div");
 
@@ -512,21 +804,21 @@
 
                     item.innerHTML = `
 
-                <div>
+                            <div>
 
-                    <i class="ti ti-school me-1 text-primary"></i>
+                                <i class="ti ti-school me-1 text-primary"></i>
 
-                    ${classe.nom}
+                                ${classe.nom}
 
-                </div>
+                            </div>
 
-                <span class="badge bg-light text-dark">
+                            <span class="badge bg-light text-dark">
 
-                    Existe
+                                Existe
 
-                </span>
+                            </span>
 
-            `;
+                        `;
 
                     classesList.appendChild(item);
                 });
@@ -534,32 +826,46 @@
                 verifierDoublon();
             }
 
-            /* ================================================================
-               CACHER LES CLASSES
-            ================================================================ */
+            /* ============================================================
+                       CACHER LES CLASSES
+                    ============================================================ */
 
             function cacherClasses() {
-                classesCard.style.display = "none";
+                if (classesCard) {
+                    classesCard.style.display = "none";
+                }
 
-                selectSectionMessage.style.display = "block";
+                if (selectSectionMessage) {
+                    selectSectionMessage.style.display = "block";
+                }
 
-                classesList.innerHTML = "";
+                if (classesList) {
+                    classesList.innerHTML = "";
+                }
 
-                noClasses.style.display = "none";
+                if (noClasses) {
+                    noClasses.style.display = "none";
+                }
 
-                duplicateMessage.style.display = "none";
+                if (duplicateMessage) {
+                    duplicateMessage.style.display = "none";
+                }
 
                 if (saveButton) {
                     saveButton.disabled = false;
                 }
             }
 
-            /* ================================================================
-               VERIFIER DOUBLON
-            ================================================================ */
+            /* ============================================================
+                       VERIFIER DOUBLON
+                    ============================================================ */
 
             function verifierDoublon() {
-                const ecoleId = ecoleSelect.value;
+                if (!ecoleForm || !sectionSelect || !nomInput) {
+                    return;
+                }
+
+                const ecoleId = ecoleForm.value;
 
                 const sectionId = sectionSelect.value;
 
@@ -597,6 +903,34 @@
                     }
                 }
             }
+
+            /* ============================================================
+                       INITIALISATION AUTOMATIQUE
+                    ============================================================ */
+
+            /*
+             * Le contrôleur sélectionne déjà la première école
+             * dans $classe->setEcole($ecoles[0]).
+             *
+             * On récupère cette valeur et on synchronise les deux selects.
+             */
+
+            if (ecoleFilter && ecoleFilter.value && ecoleForm) {
+                ecoleForm.value = ecoleFilter.value;
+
+                /*
+                 * Déclencher le filtrage des sections
+                 */
+
+                ecoleForm.dispatchEvent(new Event("change"));
+            }
+
+            /*
+             * Filtrer le tableau dès le chargement.
+             */
+
+            filtrerTableau();
         });
     </script>
+
 {% endblock %}

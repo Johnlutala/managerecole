@@ -52,11 +52,8 @@
                 {# ==================== CONTENU ==================== #}
 
                 <div class="row">
-
-
                     {# ==================== INFORMATIONS RAPIDES ==================== #}
-
-                    <div class="col-xl-3">
+                    <div class="col-xl-2">
 
                         <div class="card">
 
@@ -117,6 +114,18 @@
 
                                     </a>
 
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#accountModal-professeur-{{ professeur.id }}"
+                                        >
+                                            <i class="ti ti-key me-1"></i>
+                                            Gérer les identifiants
+                                        </button>
+                                    {% endif %}
+
                                     {% include 'professeur/_delete_form.html.twig' %}
 
                                     <a
@@ -136,11 +145,8 @@
                         </div>
 
                     </div>
-
-
                     {# ==================== INFORMATIONS PROFESSEUR ==================== #}
-
-                    <div class="col-xl-6">
+                    <div class="col-xl-5">
 
                         <div class="card h-100">
 
@@ -321,12 +327,9 @@
                         </div>
 
                     </div>
-
-
                     {# ==================== AFFECTATION ==================== #}
-
-                    <div class="col-xl-3 mt-1">
-
+                    <div class="col-xl-5 mt-1">
+                        {# ==================== AFFECTATION SCOLAIRE ==================== #}
                         <div class="card">
 
                             <div class="card-header">
@@ -334,6 +337,7 @@
                                 <h4 class="card-title mb-0">
 
                                     <i class="ti ti-school me-2"></i>
+
                                     Affectation scolaire
 
                                 </h4>
@@ -347,10 +351,7 @@
                                     <tbody>
 
                                         <tr>
-
-                                            <th>
-                                                École
-                                            </th>
+                                            <th>École</th>
 
                                             <td>
 
@@ -369,118 +370,166 @@
                                                 {% endif %}
 
                                             </td>
-
                                         </tr>
 
                                         <tr>
-
-                                            <th>
-                                                Année scolaire
-                                            </th>
+                                            <th>Année scolaire</th>
 
                                             <td>
 
                                                 {% if professeur.anneeScolaire %}
-
                                                     {{ professeur.anneeScolaire.libelle }}
-
                                                 {% else %}
-
                                                     —
-
                                                 {% endif %}
 
                                             </td>
-
                                         </tr>
 
                                         <tr>
-
-                                            <th>
-                                                Section
-                                            </th>
+                                            <th>Section</th>
 
                                             <td>
 
                                                 {% if professeur.section %}
-
                                                     {{ professeur.section.nom }}
-
                                                 {% else %}
-
                                                     —
-
                                                 {% endif %}
 
                                             </td>
-
                                         </tr>
+
                                         <tr>
+                                            <th>Date d'embauche</th>
 
-                                            <th>
-                                                Date d'embauche
-                                            </th>
                                             <td>
-
                                                 {{ professeur.dateEmbauche
-														? professeur.dateEmbauche|date('d/m/Y')
-														: '—'
-													}}
-
+                                ? professeur.dateEmbauche|date('d/m/Y')
+                                : '—'
+                            }}
                                             </td>
-
                                         </tr>
 
                                         <tr>
-
-                                            <th>
-                                                Créé le
-                                            </th>
+                                            <th>Créé le</th>
 
                                             <td>
-
                                                 {{ professeur.createdAt
-													? professeur.createdAt|date('d/m/Y H:i')
-													: '—'
-												}}
-
+                                ? professeur.createdAt|date('d/m/Y H:i')
+                                : '—'
+                            }}
                                             </td>
-
                                         </tr>
 
                                         <tr>
-
-                                            <th>
-                                                Créé par
-                                            </th>
+                                            <th>Créé par</th>
 
                                             <td>
-
                                                 {{ professeur.createdBy
-													? professeur.createdBy.firstname ~ ' ' ~ professeur.createdBy.lastname
-													: '—'
-												}}
-
+                                ? professeur.createdBy.firstname ~ ' ' ~ professeur.createdBy.lastname
+                                : '—'
+                            }}
                                             </td>
-
                                         </tr>
 
                                         <tr>
-
-                                            <th>
-                                                Mis à jour le
-                                            </th>
+                                            <th>Mis à jour le</th>
 
                                             <td>
-
                                                 {{ professeur.updatedAt
-													? professeur.updatedAt|date('d/m/Y H:i')
-													: '—'
-												}}
-
+                                ? professeur.updatedAt|date('d/m/Y H:i')
+                                : '—'
+                            }}
                                             </td>
-
                                         </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+                        {# ==================== COURS ATTRIBUÉS ==================== #}
+
+                        <div class="card mt-3">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-book me-2"></i>
+
+                                    Cours attribués
+
+                                </h4>
+
+                            </div>
+
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered table-hover align-middle mb-0">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">#</th>
+                                            <th>Cours</th>
+                                            <th>Classe</th>
+                                            <th>École</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        {% if cours is not empty %}
+
+                                            {% for cour in cours %}
+
+                                                <tr>
+
+                                                    <td>
+                                                        {{ loop.index }}
+                                                    </td>
+
+                                                    <td>
+                                                        <strong>
+                                                            {{ cour.nom }}
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        {% if cour.classe %}
+                                                            {{ cour.classe.nom }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if cour.classe and cour.classe.ecole %}
+                                                            {{ cour.classe.ecole.nom }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+
+                                            {% endfor %}
+
+                                        {% else %}
+
+                                            <tr>
+
+                                                <td colspan="4" class="text-center text-muted py-4">
+
+                                                    <i class="ti ti-book-off fs-3 d-block mb-2"></i>
+
+                                                    Aucun cours attribué.
+
+                                                </td>
+
+                                            </tr>
+
+                                        {% endif %}
 
                                     </tbody>
 
@@ -499,5 +548,19 @@
         </div>
 
     </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {% include 'account/_manage_modal.html.twig' with {
+            accountType: 'professeur',
+            accountId: professeur.id,
+            accountLabel: 'Professeur',
+            displayName: professeur.prenom ~ ' ' ~ professeur.nom,
+            username: professeur.matricule,
+            email: professeur.email,
+            accountUser: professeur.user,
+            routePrefix: 'app_professeur',
+            returnTo: 'show'
+        } %}
+    {% endif %}
 
 {% endblock %}

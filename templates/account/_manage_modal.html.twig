@@ -1,0 +1,64 @@
+<div class="modal fade" id="accountModal-{{ accountType }}-{{ accountId }}" tabindex="-1" aria-labelledby="accountModalLabel-{{ accountType }}-{{ accountId }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accountModalLabel-{{ accountType }}-{{ accountId }}">
+                    <i class="ti ti-key me-2"></i>
+                    Gestion des identifiants
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                    {{ accountLabel }} : <strong>{{ displayName }}</strong><br>
+                    Identifiant : <strong>{{ accountUser ? accountUser.username : username }}</strong><br>
+                    E-mail : <strong>{{ email ?: 'Non renseigné' }}</strong>
+                </p>
+
+                {% if accountUser %}
+                    <div class="alert {{ accountUser.enabled ? 'alert-success' : 'alert-secondary' }} mb-0">
+                        {{ accountUser.enabled ? 'Compte actif' : 'Compte fermé' }}
+                    </div>
+                {% elseif not email %}
+                    <div class="alert alert-warning mb-0">Ajoutez une adresse e-mail avant de créer le compte.</div>
+                {% endif %}
+            </div>
+
+            <div class="modal-footer">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <form method="post" action="{{ path(routePrefix ~ '_create_account', {id: accountId}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('create-account-' ~ accountType ~ accountId) }}">
+                        <input type="hidden" name="_return_to" value="{{ returnTo|default('show') }}">
+                        <button type="submit" class="btn btn-primary" {% if accountUser or not email %}disabled{% endif %}>
+                            <i class="ti ti-user-plus me-1"></i>
+                            Création
+                        </button>
+                    </form>
+
+                    <form method="post" action="{{ path(routePrefix ~ '_reset_account', {id: accountId}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('reset-account-' ~ accountType ~ accountId) }}">
+                        <input type="hidden" name="_return_to" value="{{ returnTo|default('show') }}">
+                        <button type="submit" class="btn btn-warning" {% if not accountUser or not email %}disabled{% endif %}>
+                            <i class="ti ti-refresh me-1"></i>
+                            {{ accountUser and not accountUser.enabled ? 'Réinitialiser et réactiver' : 'Réinitialiser' }}
+                        </button>
+                    </form>
+
+                    {% if accountUser and accountUser.enabled %}
+                        <form method="post" action="{{ path(routePrefix ~ '_close_account', {id: accountId}) }}" onsubmit="return confirm('Fermer ce compte ? La personne ne pourra plus se connecter.');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('close-account-' ~ accountType ~ accountId) }}">
+                            <input type="hidden" name="_return_to" value="{{ returnTo|default('show') }}">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="ti ti-lock me-1"></i>
+                                Fermer le compte
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>

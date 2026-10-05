@@ -44,7 +44,6 @@ final class CoursType extends AbstractType
 
             ->add('option', EntityType::class, [
                 'class' => Option::class,
-                'mapped' => false,
                 'required' => false,
                 'label' => 'Option',
                 'placeholder' => 'Sélectionner une option',

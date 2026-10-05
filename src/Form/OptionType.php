@@ -90,7 +90,8 @@ final class OptionType extends AbstractType
 
                 $form = $event->getForm();
 
-                $form->add('classe', EntityType::class, [
+                $form
+                ->add('classe', EntityType::class, [
                     'class' => Classe::class,
                     'choice_label' => 'nom',
                     'placeholder' => 'Sélectionner une classe',

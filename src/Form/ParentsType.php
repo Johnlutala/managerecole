@@ -6,6 +6,7 @@ use App\Entity\Eleve;
 use App\Entity\Parents;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,14 +19,14 @@ class ParentsType extends AbstractType
             ->add('postnom')
             ->add('prenom')
             ->add('telephone')
+            ->add('email', EmailType::class, [
+                'label' => 'Adresse e-mail',
+                'required' => false,
+            ])
             ->add('adresse')
             ->add('profession')
             ->add('type')
-            ->add('eleve', EntityType::class, [
-                'class' => Eleve::class,
-                'choice_label' => 'id',
-                'multiple' => true,
-            ])
+            
         ;
     }
 

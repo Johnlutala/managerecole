@@ -31,6 +31,9 @@ class Parents
     #[ORM\Column(length: 50)]
     private ?string $telephone = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $email = null;
+
     #[ORM\Column(length: 255)]
     private ?string $adresse = null;
 
@@ -45,6 +48,10 @@ class Parents
      */
     #[ORM\ManyToMany(targetEntity: Eleve::class, inversedBy: 'parents')]
     private Collection $eleve;
+
+    #[ORM\OneToOne(inversedBy: 'parent')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -105,6 +112,18 @@ class Parents
         return $this;
     }
 
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
     public function getAdresse(): ?string
     {
         return $this->adresse;
@@ -161,6 +180,18 @@ class Parents
     public function removeEleve(Eleve $eleve): static
     {
         $this->eleve->removeElement($eleve);
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

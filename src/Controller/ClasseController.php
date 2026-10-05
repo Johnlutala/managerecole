@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Classe;
+use App\Entity\Ecole;
 use App\Entity\User;
 use App\Form\ClasseType;
 use App\Repository\ClasseRepository;
@@ -23,9 +24,14 @@ final class ClasseController extends AbstractController
     ): Response {
 
         $classe = new Classe();
+        $ecoles = $entityManager
+            ->getRepository(Ecole::class)
+            ->findBy([], ['id' => 'ASC']);
 
+        if ($classe->getEcole() === null && !empty($ecoles)) {
+            $classe->setEcole($ecoles[0]);
+        }
         $form = $this->createForm(ClasseType::class, $classe);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -66,7 +72,8 @@ final class ClasseController extends AbstractController
 
         return $this->render('classe/index.html.twig', [
             'classe' => $classe,
-            'classes' => $repository->findAll(),
+            'classes' => $repository->findOrdered(),
+            'ecoles' => $ecoles,
             'form' => $form->createView(),
         ]);
     }
@@ -86,7 +93,10 @@ final class ClasseController extends AbstractController
             $this->addFlash('success', 'Classe créé(e) avec succès.');
             return $this->redirectToRoute('app_classe_index');
         }
-        return $this->render('classe/new.html.twig', ['classe' => $classe, 'form' => $form]);
+        return $this->render('classe/new.html.twig', [
+            'classe' => $classe,
+            'form' => $form
+        ]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]

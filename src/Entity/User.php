@@ -49,6 +49,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(name: 'eleve_id', referencedColumnName: 'id', unique: true, nullable: true, onDelete: 'SET NULL')]
     private ?Eleve $eleve = null;
 
+    #[ORM\OneToOne(mappedBy: 'user')]
+    private ?Parents $parent = null;
+
+    #[ORM\OneToOne(mappedBy: 'user')]
+    private ?Professeur $professeur = null;
+
     /**
      * @var Collection<int, InscriptionEleve>
      */
@@ -165,6 +171,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEleve(?Eleve $eleve): static
     {
         $this->eleve = $eleve;
+
+        return $this;
+    }
+
+    public function getParent(): ?Parents
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?Parents $parent): static
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    public function getProfesseur(): ?Professeur
+    {
+        return $this->professeur;
+    }
+
+    public function setProfesseur(?Professeur $professeur): static
+    {
+        $this->professeur = $professeur;
 
         return $this;
     }

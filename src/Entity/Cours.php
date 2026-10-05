@@ -26,6 +26,10 @@ class Cours
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Classe $classe = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Option $option = null;
+
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Professeur $professeur = null;
 
@@ -71,6 +75,18 @@ class Cours
     public function setClasse(?Classe $classe): static
     {
         $this->classe = $classe;
+
+        return $this;
+    }
+
+    public function getOption(): ?Option
+    {
+        return $this->option;
+    }
+
+    public function setOption(?Option $option): static
+    {
+        $this->option = $option;
 
         return $this;
     }

@@ -87,6 +87,10 @@ class Professeur
     #[ORM\Column(length: 50)]
     private ?string $grade = null;
 
+    #[ORM\OneToOne(inversedBy: 'professeur')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?User $user = null;
+
     public function __construct()
     {
 
@@ -319,6 +323,18 @@ class Professeur
     public function setSection(?Section $section): static
     {
         $this->section = $section;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

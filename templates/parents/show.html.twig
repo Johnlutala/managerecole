@@ -1,50 +1,412 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Parents{% endblock %}
+{% block title %}Détail Parent{% endblock %}
 
 {% block body %}
-    <h1>Parents</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ parent.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ parent.nom }}</td>
-            </tr>
-            <tr>
-                <th>Postnom</th>
-                <td>{{ parent.postnom }}</td>
-            </tr>
-            <tr>
-                <th>Prenom</th>
-                <td>{{ parent.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Telephone</th>
-                <td>{{ parent.telephone }}</td>
-            </tr>
-            <tr>
-                <th>Adresse</th>
-                <td>{{ parent.adresse }}</td>
-            </tr>
-            <tr>
-                <th>Profession</th>
-                <td>{{ parent.profession }}</td>
-            </tr>
-            <tr>
-                <th>Type</th>
-                <td>{{ parent.type }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="wrapper">
 
-    <a href="{{ path('app_parents_index') }}">back to list</a>
+        <div class="content-page">
 
-    <a href="{{ path('app_parents_edit', {'id': parent.id}) }}">edit</a>
+            <div class="container-fluid">
 
-    {{ include('parents/_delete_form.html.twig') }}
+                {# ==================== TITRE ==================== #}
+
+                <div class="page-title-head d-flex align-items-center">
+
+                    <div class="flex-grow-1">
+
+                        <h4 class="fs-xl fw-bold m-0">
+                            Détail du parent
+                        </h4>
+
+                    </div>
+
+                    <div class="text-end">
+
+                        <ol class="breadcrumb m-0 py-0">
+
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">
+                                    ADMIN
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_parents_index') }}">
+                                    Parents
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+
+                        </ol>
+
+                    </div>
+
+                </div>
+
+
+                {# ==================== CONTENU ==================== #}
+
+                <div class="row">
+
+                    {# ==================== INFORMATIONS RAPIDES ==================== #}
+
+                    <div class="col-xl-2">
+
+                        <div class="card">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title">
+                                    Parent N° :
+                                    {{ parent.id }}
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body text-center">
+
+                                <div class="avatar-xl mx-auto mb-3">
+
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                        <i class="ti ti-user fs-1"></i>
+
+                                    </div>
+
+                                </div>
+
+                                <h4 class="mb-1">
+
+                                    {{ parent.nom }}
+
+                                    {% if parent.postnom %}
+                                        {{ parent.postnom }}
+                                    {% endif %}
+
+                                    {{ parent.prenom }}
+
+                                </h4>
+
+                                {% if parent.type %}
+
+                                    <p class="text-muted mb-2">
+                                        {{ parent.type }}
+                                    </p>
+
+                                {% endif %}
+
+                                <hr>
+
+                                <div class="d-grid gap-2">
+
+                                    <a
+                                        href="{{ path('app_parents_edit', {'id': parent.id}) }}"
+                                        class="btn btn-warning"
+                                    >
+
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier
+
+                                    </a>
+
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#accountModal-parent-{{ parent.id }}"
+                                        >
+                                            <i class="ti ti-key me-1"></i>
+                                            Gérer les identifiants
+                                        </button>
+                                    {% endif %}
+
+                                    {% include 'parents/_delete_form.html.twig' %}
+
+                                    <a
+                                        href="{{ path('app_parents_index') }}"
+                                        class="btn btn-secondary"
+                                    >
+
+                                        <i class="ti ti-arrow-left me-1"></i>
+                                        Retour
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {# ==================== INFORMATIONS DU PARENT ==================== #}
+                    <div class="col-xl-5">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+                                    Informations du parent
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-bordered align-middle mb-0">
+
+                                        <tbody>
+
+                                            <tr>
+
+                                                <th width="40%">
+                                                    Noms
+                                                </th>
+
+                                                <td>
+
+                                                    {{ parent.nom }}
+
+                                                    {% if parent.postnom %}
+                                                        {{ parent.postnom }}
+                                                    {% endif %}
+
+                                                    {{ parent.prenom }}
+
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Téléphone
+                                                </th>
+
+                                                <td>
+                                                    {{ parent.telephone ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+                                                <th>E-mail</th>
+                                                <td>{{ parent.email ?: '—' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Compte utilisateur</th>
+                                                <td>
+                                                    {% if parent.user %}
+                                                        <span class="badge {{ parent.user.enabled ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                                                            {{ parent.user.enabled ? 'Actif' : 'Fermé' }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning-subtle text-warning">Aucun compte</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Adresse
+                                                </th>
+
+                                                <td>
+                                                    {{ parent.adresse ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Profession
+                                                </th>
+
+                                                <td>
+                                                    {{ parent.profession ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                            <tr>
+
+                                                <th>
+                                                    Type
+                                                </th>
+
+                                                <td>
+                                                    {{ parent.type ?: '—' }}
+                                                </td>
+
+                                            </tr>
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {# ==================== ÉLÈVES LIÉS ==================== #}
+
+                    <div class="col-xl-5">
+
+                        <div class="card h-100">
+
+                            <div class="card-header">
+
+                                <h4 class="card-title mb-0">
+
+                                    <i class="ti ti-school me-2"></i>
+
+                                    Élèves liés
+
+                                </h4>
+
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">#</th>
+                                            <th>Élève</th>
+                                            <th>Classe</th>
+                                            <th>Section</th>
+                                            <th>École</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        {% if parent.eleve is not empty %}
+
+                                            {% for eleve in parent.eleve %}
+
+                                                <tr>
+
+                                                    <td>
+                                                        {{ loop.index }}
+                                                    </td>
+
+                                                    {# Élève #}
+                                                    <td>
+                                                        <strong>
+                                                            {% if eleve.nom is defined %}
+                                                                {{ eleve.nom }}
+                                                            {% endif %}
+
+                                                            {% if eleve.postnom is defined %}
+                                                                {{ eleve.postnom }}
+                                                            {% endif %}
+
+                                                            {% if eleve.prenom is defined %}
+                                                                {{ eleve.prenom }}
+                                                            {% endif %}
+                                                        </strong>
+                                                    </td>
+
+                                                    {# Classe #}
+                                                    <td>
+                                                        {% if eleve.classe is defined and eleve.classe %}
+                                                            {{ eleve.classe.nom }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+
+                                                    {# Section #}
+                                                    <td>
+                                                        {% if eleve.classe is defined
+                                                            and eleve.classe
+                                                            and eleve.classe.section is defined
+                                                            and eleve.classe.section
+                                                        %}
+                                                            {{ eleve.classe.section.nom }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+
+                                                    {# École #}
+                                                    <td>
+                                                        {% if eleve.classe is defined
+                                                            and eleve.classe
+                                                            and eleve.classe.ecole is defined
+                                                            and eleve.classe.ecole
+                                                        %}
+                                                            {{ eleve.classe.ecole.nom }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+
+                                                </tr>
+
+                                            {% endfor %}
+
+                                        {% else %}
+
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted py-4">
+
+                                                    <i class="ti ti-users-off fs-3 d-block mb-2"></i>
+
+                                                    Aucun élève lié à ce parent.
+
+                                                </td>
+                                            </tr>
+
+                                        {% endif %}
+
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {% include 'account/_manage_modal.html.twig' with {
+            accountType: 'parent',
+            accountId: parent.id,
+            accountLabel: 'Parent',
+            displayName: parent.prenom ~ ' ' ~ parent.nom,
+            username: 'PAR' ~ parent.id,
+            email: parent.email,
+            accountUser: parent.user,
+            routePrefix: 'app_parents',
+            returnTo: 'show'
+        } %}
+    {% endif %}
+
 {% endblock %}

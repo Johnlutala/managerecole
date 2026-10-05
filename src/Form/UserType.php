@@ -55,6 +55,7 @@ class UserType extends AbstractType
                     'Utilisateur' => 'ROLE_USER',
                     'Administrateur' => 'ROLE_ADMIN',
                     'Élève' => 'ROLE_ELEVE',
+                    'Parent' => 'ROLE_PARENT',
                     'Professeur' => 'ROLE_PROFESSEUR',
                     'Agent' => 'ROLE_AGENT',
                 ],

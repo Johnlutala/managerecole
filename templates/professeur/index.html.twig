@@ -7,68 +7,51 @@
     <div class="wrapper">
         <div class="content-page">
             <div class="container-fluid">
-
-                {# =========================================================
-               TITRE
-               ========================================================= #}
-
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type in ['success', 'danger', 'warning'] ? type : 'info' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
                 <div class="page-title-head d-flex align-items-center mb-3">
                     <div class="flex-grow-1">
                         <h4 class="fs-xl fw-bold m-0">
-                            Professeurs
+                            Tous professeurs
                         </h4>
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_professeur_index') }}">
+                                    Professeurs
+                                </a>
+                            </li>
+                        </ol>
                     </div>
                 </div>
 
-
-                {# =========================================================
-               TABLEAU
-               ========================================================= #}
-
-                <div
-                    data-table
-                    data-table-rows-per-page="8"
-                    class="card"
-                >
-
+                <div data-table data-table-rows-per-page="8" class="card">
                     <div class="card-header border-light d-flex justify-content-between">
-
                         <div class="app-search">
 
-                            <input
-                                data-table-search
-                                type="search"
-                                class="form-control"
-                                placeholder="Rechercher..."
-                            >
-
-                            <i
-                                data-lucide="search"
-                                class="app-search-icon text-muted"
-                            >
+                            <input data-table-search type="search" class="form-control" placeholder="Rechercher...">
+                            <i data-lucide="search" class="app-search-icon text-muted">
                             </i>
 
                         </div>
 
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#addModal"
-                        >
-
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
                             <i class="ti ti-plus me-1"></i>
-
                             Nouveau
-
                         </button>
 
                     </div>
-
-
-                    {# =====================================================
-                   TABLE
-                   ===================================================== #}
 
                     <div class="table-responsive">
 
@@ -78,12 +61,14 @@
 
                                 <tr class="text-uppercase fs-xxs">
 
-                                    <th>Nom complet</th>
-
-                                    <th>Spécialité</th>
-
-                                    <th>Statut</th>
-
+                                    <th>#</th>
+                                    <th>Nom </th>
+                                    <th>Post Nom</th>
+                                    <th>Prénom</th>
+                                    <th>grade</th>
+                                    <th>Domaine</th>
+                                    <th>Ecole</th>
+                                    <th>Compte</th>
                                     <th class="text-center">
                                         Actions
                                     </th>
@@ -93,57 +78,69 @@
                             </thead>
 
                             <tbody>
-
                                 {% for professeur in professeurs %}
-
                                     <tr>
-
+                                        <td>
+                                            {{loop.index }}
+                                        </td>
                                         <td>
                                             {{ professeur.nom }}
+                                        </td>
+                                        <td>
                                             {{ professeur.postnom }}
+                                        </td>
+                                        <td>
                                             {{ professeur.prenom }}
                                         </td>
-
+                                        <td>
+                                            {{ professeur.grade ?: '—' }}
+                                        </td>  
                                         <td>
                                             {{ professeur.specialite ?: '—' }}
+                                        </td> 
+                                        <td>
+                                            {{ professeur.ecole ? professeur.ecole.nom : '—' }}
+                                        </td>
+                                        <td>
+                                            {% if professeur.user %}
+                                                <span class="badge {{ professeur.user.enabled ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                                                    {{ professeur.user.enabled ? 'Actif' : 'Fermé' }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning-subtle text-warning">Aucun compte</span>
+                                            {% endif %}
                                         </td>
 
                                         <td>
-                                            {{ professeur.statut ?: '—' }}
-                                        </td>
-
-                                        <td>
-
                                             <div class="d-flex justify-content-center gap-1">
-
                                                 <a
-                                                    href="{{ path('app_professeur_show', {
-                                                id: professeur.id
-                                            }) }}"
+                                                    href="{{ path('app_professeur_show', { id: professeur.id }) }}"
                                                     class="btn btn-default btn-icon btn-sm rounded-circle"
                                                     title="Voir"
                                                 >
-
                                                     <i class="ti ti-eye fs-lg"></i>
-
                                                 </a>
-
                                                 <a
-                                                    href="{{ path('app_professeur_edit', {
-                                                id: professeur.id
-                                            }) }}"
+                                                    href="{{ path('app_professeur_edit', { id: professeur.id }) }}"
                                                     class="btn btn-default btn-icon btn-sm rounded-circle"
                                                     title="Modifier"
                                                 >
-
                                                     <i class="ti ti-edit fs-lg"></i>
-
                                                 </a>
-
+                                                {% if is_granted('ROLE_ADMIN') %}
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-default btn-icon btn-sm rounded-circle"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#accountModal-professeur-{{ professeur.id }}"
+                                                        title="Gérer les identifiants"
+                                                        aria-label="Gérer les identifiants de {{ professeur.nom }}"
+                                                    >
+                                                        <i class="ti ti-key fs-lg"></i>
+                                                    </button>
+                                                {% endif %}
                                             </div>
-
                                         </td>
-
                                     </tr>
 
                                 {% else %}
@@ -151,7 +148,7 @@
                                     <tr>
 
                                         <td
-                                            colspan="4"
+                                            colspan="9"
                                             class="text-center py-5 text-muted"
                                         >
 
@@ -186,12 +183,28 @@
         </div>
     </div>
 
+    {% if is_granted('ROLE_ADMIN') %}
+        {% for professeur in professeurs %}
+            {% include 'account/_manage_modal.html.twig' with {
+                accountType: 'professeur',
+                accountId: professeur.id,
+                accountLabel: 'Professeur',
+                displayName: professeur.prenom ~ ' ' ~ professeur.nom,
+                username: professeur.matricule,
+                email: professeur.email,
+                accountUser: professeur.user,
+                routePrefix: 'app_professeur',
+                returnTo: 'index'
+            } %}
+        {% endfor %}
+    {% endif %}
+
 
     {# ================================================================
    MODAL AJOUT PROFESSEUR
    ================================================================ #}
 
-    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel"  aria-hidden="true">
+    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
 
             <div class="modal-content">
@@ -400,7 +413,7 @@
                                 {{ form_row(form.section) }}
                             </div>
 
-                             {# ANNÉE ACADÉMIQUE #}
+                            {# ANNÉE ACADÉMIQUE #}
                             <div class="col-md-4">
                                 {{ form_row(form.anneeScolaire) }}
                             </div>
@@ -495,7 +508,7 @@
                     </button>
 
                 </div>
-               {{ form_end(form) }}
+                {{ form_end(form) }}
             </div>
 
         </div>
@@ -508,352 +521,271 @@
    ================================================================ #}
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
+            /* ==========================================================
+             * WIZARD
+             * ========================================================== */
 
-    /* ==========================================================
-     * WIZARD
-     * ========================================================== */
+            const step1 = document.getElementById("step1");
+            const step2 = document.getElementById("step2");
 
-    const step1 = document.getElementById("step1");
-    const step2 = document.getElementById("step2");
+            const btnNext = document.getElementById("btnNext");
+            const btnPrevious = document.getElementById("btnPrevious");
+            const btnSubmit = document.getElementById("btnSubmit");
 
-    const btnNext = document.getElementById("btnNext");
-    const btnPrevious = document.getElementById("btnPrevious");
-    const btnSubmit = document.getElementById("btnSubmit");
+            const progress = document.getElementById("stepProgress");
 
-    const progress = document.getElementById("stepProgress");
+            const stepTitle = document.getElementById("stepTitle");
 
-    const stepTitle = document.getElementById("stepTitle");
+            const stepCircle1 = document.getElementById("stepCircle1");
+            const stepCircle2 = document.getElementById("stepCircle2");
 
-    const stepCircle1 = document.getElementById("stepCircle1");
-    const stepCircle2 = document.getElementById("stepCircle2");
+            const stepLabel1 = document.getElementById("stepLabel1");
+            const stepLabel2 = document.getElementById("stepLabel2");
 
-    const stepLabel1 = document.getElementById("stepLabel1");
-    const stepLabel2 = document.getElementById("stepLabel2");
+            const modal = document.getElementById("addModal");
 
-    const modal = document.getElementById("addModal");
+            /* ==========================================================
+             * CHAMPS FORMULAIRE
+             * ========================================================== */
 
-
-    /* ==========================================================
-     * CHAMPS FORMULAIRE
-     * ========================================================== */
-
-    const ecoleSelect = document.getElementById("{{ form.ecole.vars.id }}");
-    const anneeSelect = document.getElementById("{{ form.anneeScolaire.vars.id }}");
-    const sectionSelect = document.getElementById("{{ form.section.vars.id }}");
-
-
-    /* ==========================================================
-     * ÉTAPE 1
-     * ========================================================== */
-
-    function showStep1() {
-
-        step1.classList.remove("d-none");
-        step2.classList.add("d-none");
-
-        btnNext.classList.remove("d-none");
-        btnPrevious.classList.add("d-none");
-        btnSubmit.classList.add("d-none");
-
-        progress.style.width = "50%";
-
-        stepTitle.textContent = "Informations personnelles";
-
-
-        stepCircle1.classList.remove(
-            "bg-success",
-            "bg-light",
-            "text-muted"
-        );
-
-        stepCircle1.classList.add(
-            "bg-primary",
-            "text-white"
-        );
-
-
-        stepCircle2.classList.remove(
-            "bg-primary",
-            "text-white"
-        );
-
-        stepCircle2.classList.add(
-            "bg-light",
-            "text-muted"
-        );
-
-
-        stepLabel1.classList.remove(
-            "text-muted",
-            "text-success"
-        );
-
-        stepLabel1.classList.add("text-dark");
-
-
-        stepLabel2.classList.remove("text-dark");
-
-        stepLabel2.classList.add("text-muted");
-    }
-
-
-    /* ==========================================================
-     * ÉTAPE 2
-     * ========================================================== */
-
-    function showStep2() {
-
-        step1.classList.add("d-none");
-        step2.classList.remove("d-none");
-
-        btnNext.classList.add("d-none");
-        btnPrevious.classList.remove("d-none");
-        btnSubmit.classList.remove("d-none");
-
-        progress.style.width = "100%";
-
-        stepTitle.textContent = "Informations établissement";
-
-
-        stepCircle1.classList.remove(
-            "bg-primary",
-            "bg-light",
-            "text-muted"
-        );
-
-        stepCircle1.classList.add(
-            "bg-success",
-            "text-white"
-        );
-
-
-        stepCircle2.classList.remove(
-            "bg-light",
-            "text-muted"
-        );
-
-        stepCircle2.classList.add(
-            "bg-primary",
-            "text-white"
-        );
-
-
-        stepLabel1.classList.remove(
-            "text-muted",
-            "text-dark"
-        );
-
-        stepLabel1.classList.add("text-success");
-
-
-        stepLabel2.classList.remove("text-muted");
-
-        stepLabel2.classList.add("text-dark");
-    }
-
-
-    /* ==========================================================
-     * SUIVANT
-     * ========================================================== */
-
-    btnNext.addEventListener("click", function () {
-        showStep2();
-    });
-
-
-    /* ==========================================================
-     * RETOUR
-     * ========================================================== */
-
-    btnPrevious.addEventListener("click", function () {
-        showStep1();
-    });
-
-
-    /* ==========================================================
-     * OUVERTURE DU MODAL
-     * ========================================================== */
-
-    modal.addEventListener("show.bs.modal", function () {
-
-        showStep1();
-
-        /*
-         * Réinitialisation des dépendances
-         */
-
-        anneeSelect.innerHTML =
-            '<option value="">Sélectionner une année scolaire</option>';
-
-        sectionSelect.innerHTML =
-            '<option value="">Sélectionner une section</option>';
-
-        anneeSelect.disabled = true;
-        sectionSelect.disabled = true;
-
-    });
-
-
-    /* ==========================================================
-     * ÉTAT INITIAL
-     * ========================================================== */
-
-    anneeSelect.disabled = true;
-    sectionSelect.disabled = true;
-
-
-    /* ==========================================================
-     * CHANGEMENT D'ÉCOLE
-     * ========================================================== */
-
-    ecoleSelect.addEventListener("change", function () {
-
-        const ecoleId = this.value;
-
-
-        /*
-         * Aucune école sélectionnée
-         */
-
-        if (!ecoleId) {
-
-            anneeSelect.innerHTML =
-                '<option value="">Sélectionner une année scolaire</option>';
-
-            sectionSelect.innerHTML =
-                '<option value="">Sélectionner une section</option>';
-
-            anneeSelect.disabled = true;
-            sectionSelect.disabled = true;
-
-            return;
-        }
-
-
-        /*
-         * Chargement
-         */
-
-        anneeSelect.disabled = true;
-        sectionSelect.disabled = true;
-
-        anneeSelect.innerHTML =
-            '<option value="">Chargement...</option>';
-
-        sectionSelect.innerHTML =
-            '<option value="">Chargement...</option>';
-
-
-        /* ======================================================
-         * AJAX
-         * ====================================================== */
-
-        const url =
-            "{{ path('app_professeur_dependances', {id: 0}) }}"
-            .replace("/0", "/" + ecoleId);
-
-
-        fetch(url, {
-            method: "GET",
-
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "Accept": "application/json"
-            }
-        })
-
-        .then(function (response) {
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Erreur HTTP " + response.status
-                );
-            }
-
-            return response.json();
-        })
-
-        .then(function (data) {
-
-            if (!data.success) {
-
-                throw new Error(
-                    data.message || "Erreur inconnue."
-                );
-            }
-
-
-            /* ==================================================
-             * ANNÉES SCOLAIRES
-             * ================================================== */
-
-            anneeSelect.innerHTML =
-                '<option value="">Sélectionner une année scolaire</option>';
-
-            data.annees.forEach(function (annee) {
-
-                const option =
-                    document.createElement("option");
-
-                option.value = annee.id;
-
-                option.textContent = annee.label;
-
-                anneeSelect.appendChild(option);
-            });
-
-
-            /* ==================================================
-             * SECTIONS
-             * ================================================== */
-
-            sectionSelect.innerHTML =
-                '<option value="">Sélectionner une section</option>';
-
-            data.sections.forEach(function (section) {
-
-                const option =
-                    document.createElement("option");
-
-                option.value = section.id;
-
-                option.textContent = section.label;
-
-                sectionSelect.appendChild(option);
-            });
-
-
-            /* ==================================================
-             * ACTIVATION
-             * ================================================== */
-
-            anneeSelect.disabled = false;
-            sectionSelect.disabled = false;
-
-        })
-
-        .catch(function (error) {
-
-            console.error(
-                "Erreur dépendances professeur :",
-                error
+            const ecoleSelect = document.getElementById("{{ form.ecole.vars.id }}");
+            const anneeSelect = document.getElementById(
+                "{{ form.anneeScolaire.vars.id }}",
             );
+            const sectionSelect = document.getElementById("{{ form.section.vars.id }}");
 
-            anneeSelect.innerHTML =
-                '<option value="">Erreur de chargement</option>';
+            /* ==========================================================
+             * ÉTAPE 1
+             * ========================================================== */
 
-            sectionSelect.innerHTML =
-                '<option value="">Erreur de chargement</option>';
+            function showStep1() {
+                step1.classList.remove("d-none");
+                step2.classList.add("d-none");
+
+                btnNext.classList.remove("d-none");
+                btnPrevious.classList.add("d-none");
+                btnSubmit.classList.add("d-none");
+
+                progress.style.width = "50%";
+
+                stepTitle.textContent = "Informations personnelles";
+
+                stepCircle1.classList.remove("bg-success", "bg-light", "text-muted");
+
+                stepCircle1.classList.add("bg-primary", "text-white");
+
+                stepCircle2.classList.remove("bg-primary", "text-white");
+
+                stepCircle2.classList.add("bg-light", "text-muted");
+
+                stepLabel1.classList.remove("text-muted", "text-success");
+
+                stepLabel1.classList.add("text-dark");
+
+                stepLabel2.classList.remove("text-dark");
+
+                stepLabel2.classList.add("text-muted");
+            }
+
+            /* ==========================================================
+             * ÉTAPE 2
+             * ========================================================== */
+
+            function showStep2() {
+                step1.classList.add("d-none");
+                step2.classList.remove("d-none");
+
+                btnNext.classList.add("d-none");
+                btnPrevious.classList.remove("d-none");
+                btnSubmit.classList.remove("d-none");
+
+                progress.style.width = "100%";
+
+                stepTitle.textContent = "Informations établissement";
+
+                stepCircle1.classList.remove("bg-primary", "bg-light", "text-muted");
+
+                stepCircle1.classList.add("bg-success", "text-white");
+
+                stepCircle2.classList.remove("bg-light", "text-muted");
+
+                stepCircle2.classList.add("bg-primary", "text-white");
+
+                stepLabel1.classList.remove("text-muted", "text-dark");
+
+                stepLabel1.classList.add("text-success");
+
+                stepLabel2.classList.remove("text-muted");
+
+                stepLabel2.classList.add("text-dark");
+            }
+
+            /* ==========================================================
+             * SUIVANT
+             * ========================================================== */
+
+            btnNext.addEventListener("click", function () {
+                showStep2();
+            });
+
+            /* ==========================================================
+             * RETOUR
+             * ========================================================== */
+
+            btnPrevious.addEventListener("click", function () {
+                showStep1();
+            });
+
+            /* ==========================================================
+             * OUVERTURE DU MODAL
+             * ========================================================== */
+
+            modal.addEventListener("show.bs.modal", function () {
+                showStep1();
+
+                /*
+                 * Réinitialisation des dépendances
+                 */
+
+                anneeSelect.innerHTML =
+                    '<option value="">Sélectionner une année scolaire</option>';
+
+                sectionSelect.innerHTML =
+                    '<option value="">Sélectionner une section</option>';
+
+                anneeSelect.disabled = true;
+                sectionSelect.disabled = true;
+            });
+
+            /* ==========================================================
+             * ÉTAT INITIAL
+             * ========================================================== */
 
             anneeSelect.disabled = true;
             sectionSelect.disabled = true;
+
+            /* ==========================================================
+             * CHANGEMENT D'ÉCOLE
+             * ========================================================== */
+
+            ecoleSelect.addEventListener("change", function () {
+                const ecoleId = this.value;
+
+                /*
+                 * Aucune école sélectionnée
+                 */
+
+                if (!ecoleId) {
+                    anneeSelect.innerHTML =
+                        '<option value="">Sélectionner une année scolaire</option>';
+
+                    sectionSelect.innerHTML =
+                        '<option value="">Sélectionner une section</option>';
+
+                    anneeSelect.disabled = true;
+                    sectionSelect.disabled = true;
+
+                    return;
+                }
+
+                /*
+                 * Chargement
+                 */
+
+                anneeSelect.disabled = true;
+                sectionSelect.disabled = true;
+
+                anneeSelect.innerHTML = '<option value="">Chargement...</option>';
+
+                sectionSelect.innerHTML = '<option value="">Chargement...</option>';
+
+                /* ======================================================
+                 * AJAX
+                 * ====================================================== */
+
+                const url = "{{ path('app_professeur_dependances', {id: 0}) }}".replace(
+                    "/0",
+                    "/" + ecoleId,
+                );
+
+                fetch(url, {
+                    method: "GET",
+
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                    },
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Erreur HTTP " + response.status);
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(function (data) {
+                        if (!data.success) {
+                            throw new Error(data.message || "Erreur inconnue.");
+                        }
+
+                        /* ==================================================
+                         * ANNÉES SCOLAIRES
+                         * ================================================== */
+
+                        anneeSelect.innerHTML =
+                            '<option value="">Sélectionner une année scolaire</option>';
+
+                        data.annees.forEach(function (annee) {
+                            const option = document.createElement("option");
+
+                            option.value = annee.id;
+
+                            option.textContent = annee.label;
+
+                            anneeSelect.appendChild(option);
+                        });
+
+                        /* ==================================================
+                         * SECTIONS
+                         * ================================================== */
+
+                        sectionSelect.innerHTML =
+                            '<option value="">Sélectionner une section</option>';
+
+                        data.sections.forEach(function (section) {
+                            const option = document.createElement("option");
+
+                            option.value = section.id;
+
+                            option.textContent = section.label;
+
+                            sectionSelect.appendChild(option);
+                        });
+
+                        /* ==================================================
+                         * ACTIVATION
+                         * ================================================== */
+
+                        anneeSelect.disabled = false;
+                        sectionSelect.disabled = false;
+                    })
+
+                    .catch(function (error) {
+                        console.error("Erreur dépendances professeur :", error);
+
+                        anneeSelect.innerHTML =
+                            '<option value="">Erreur de chargement</option>';
+
+                        sectionSelect.innerHTML =
+                            '<option value="">Erreur de chargement</option>';
+
+                        anneeSelect.disabled = true;
+                        sectionSelect.disabled = true;
+                    });
+            });
         });
-
-    });
-
-});
-</script>
+    </script>
 
 {% endblock %}
