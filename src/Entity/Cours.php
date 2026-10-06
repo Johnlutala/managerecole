@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Entity\Traits\EntityTrait;
 
 use App\Repository\CoursRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
@@ -32,6 +34,17 @@ class Cours
 
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Professeur $professeur = null;
+
+    /**
+     * @var Collection<int, CreneauHoraire>
+     */
+    #[ORM\OneToMany(targetEntity: CreneauHoraire::class, mappedBy: 'cours')]
+    private Collection $horaires;
+
+    public function __construct()
+    {
+        $this->horaires = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -99,6 +112,36 @@ class Cours
     public function setProfesseur(?Professeur $professeur): static
     {
         $this->professeur = $professeur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CreneauHoraire>
+     */
+    public function getHoraires(): Collection
+    {
+        return $this->horaires;
+    }
+
+    public function addHoraire(CreneauHoraire $horaire): static
+    {
+        if (!$this->horaires->contains($horaire)) {
+            $this->horaires->add($horaire);
+            $horaire->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoraire(CreneauHoraire $horaire): static
+    {
+        if ($this->horaires->removeElement($horaire)) {
+            // set the owning side to null (unless already changed)
+            if ($horaire->getCours() === $this) {
+                $horaire->setCours(null);
+            }
+        }
 
         return $this;
     }

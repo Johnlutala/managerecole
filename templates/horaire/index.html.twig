@@ -1,0 +1,608 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Horaires{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center mb-3">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Horaires
+                        </h4>
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_horaire_index') }}">
+                                    Horaire
+                                </a>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'success' ? 'success' : 'info') }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="card">
+                    <div class="card-header border-light">
+                        <form id="horaire-filters" action="{{ path('app_horaire_index') }}" method="get" class="row align-items-end g-2">
+
+                            <div class="filter-column col-md-3">
+                                <label for="filter-ecole" class="form-label mb-1">École</label>
+                                <select id="filter-ecole" name="ecole" class="form-select">
+                                    {% for ecole in ecoles %}
+                                        <option value="{{ ecole.id }}" {{ selectedEcole and selectedEcole.id == ecole.id ? 'selected' : '' }}>
+                                            {{ ecole.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="filter-column col-md-3">
+                                <label for="filter-section" class="form-label mb-1">Section</label>
+                                <select id="filter-section" name="section" class="form-select">
+                                    {% for section in sections %}
+                                        <option
+                                            value="{{ section.id }}"
+                                            data-ecole="{{ section.ecole ? section.ecole.id : '' }}"
+                                            {{ selectedSection and selectedSection.id == section.id ? 'selected' : '' }}
+                                        >
+                                            {{ section.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="filter-column col-md-3">
+                                <label for="filter-classe" class="form-label mb-1">Classe</label>
+                                <select id="filter-classe" name="classe" class="form-select">
+                                    {% for classe in classes %}
+                                        <option
+                                            value="{{ classe.id }}"
+                                            data-section="{{ classe.section ? classe.section.id : '' }}"
+                                            data-ecole="{{ classe.ecole ? classe.ecole.id : '' }}"
+                                            data-humanites="{{ classe.nom matches '/^[1-4]e\\b.*humanit[ée]/iu' ? '1' : '0' }}"
+                                            {{ selectedClasse and selectedClasse.id == classe.id ? 'selected' : '' }}
+                                        >
+                                            {{ classe.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div
+                                id="filter-option-container"
+                                class="filter-column col-md-2 {{ supportsOptionFilter ? '' : 'd-none' }}"
+                            >
+
+                                <label for="filter-option" class="form-label mb-1">Option</label>
+
+                                <select id="filter-option" name="option" class="form-select">
+                                    <option value="">Horaire général</option>
+
+                                    {% for option in options %}
+                                        <option
+                                            value="{{ option.id }}"
+                                            data-classe="{{ option.classe ? option.classe.id : '' }}"
+                                            {{ selectedOption and selectedOption.id == option.id ? 'selected' : '' }}
+                                        >
+                                            {{ option.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {# <div id="filter-submit-container" class="col-md-1">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ti ti-filter"></i> Filtrer
+                                </button>
+                            </div> #}
+                            <div id="filter-submit-container" class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ti ti-filter me-1"></i>
+                                    Filtrer
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h4 class="card-title mb-1">
+                                <i class="ti ti-calendar-week me-2 text-primary"></i>
+                                Programmation hebdomadaire
+                            </h4>
+                            <p class="text-muted mb-0">
+                                {% if selectedClasse %}
+                                    {{ selectedClasse.nom }}
+                                    {% if selectedOption %} — {{ selectedOption.nom }}{% else %} — Horaire général{% endif %}
+                                    {% if selectedEcole %} — {{ selectedEcole.nom }}{% endif %}
+                                {% else %}
+                                    Sélectionnez une école, une section et une classe.
+                                {% endif %}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addModal"
+                            {{ selectedClasse ? '' : 'disabled' }}
+                        >
+                            <i class="ti ti-plus me-1"></i>
+                            Ajouter / modifier l’horaire
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-25">
+                                <tr class="text-uppercase fs-xxs">
+                                    <th class="text-center" style="min-width: 160px;">Heure</th>
+                                    {% for jour in jours %}
+                                        <th class="text-center" style="min-width: 180px;">{{ jour.nom }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for heure in heures %}
+                                    <tr>
+                                        <th class="text-center fw-normal">
+                                            <div class="fw-semibold">{{ heure.nom }}</div>
+                                            <small class="text-muted">
+                                                {{ heure.heureDebut|date('H:i') }} – {{ heure.heureFin|date('H:i') }}
+                                            </small>
+                                        </th>
+                                        {% for jour in jours %}
+                                            {% set cellule = planning[heure.id][jour.id] ?? null %}
+                                            <td class="text-center">
+                                                {% if cellule and cellule.cours %}
+                                                    <div class="fw-semibold">{{ cellule.cours.nom }}</div>
+                                                    {% if cellule.professeur %}
+                                                        <small class="text-primary d-block">
+                                                            Prof. {{ cellule.professeur.nom }} {{ cellule.professeur.prenom }}
+                                                        </small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">—</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="{{ jours|length + 1 }}" class="text-center py-4 text-muted">
+                                            Aucun créneau horaire n’est configuré.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-xl-down modal-xl">
+            <div class="modal-content">
+                <form method="post">
+                    <div class="modal-header">
+                        <div>
+                            <h5 class="modal-title">
+                                <i class="ti ti-calendar-plus me-2 text-primary"></i>
+                                Programmation hebdomadaire
+                            </h5>
+                            <small class="text-muted">Choisissez les cours de la classe pour chaque jour et chaque heure.</small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label for="horaire_ecole" class="form-label">École</label>
+                                <select id="horaire_ecole" name="horaire_ecole" class="form-select" required>
+                                    {% for ecole in ecoles %}
+                                        <option value="{{ ecole.id }}" {{ selectedEcole and selectedEcole.id == ecole.id ? 'selected' : '' }}>
+                                            {{ ecole.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="horaire_section" class="form-label">Section</label>
+                                <select id="horaire_section" name="horaire_section" class="form-select" required>
+                                    {% for section in sections %}
+                                        <option
+                                            value="{{ section.id }}"
+                                            data-ecole="{{ section.ecole ? section.ecole.id : '' }}"
+                                            {{ selectedSection and selectedSection.id == section.id ? 'selected' : '' }}
+                                        >
+                                            {{ section.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="horaire_classe" class="form-label">Classe</label>
+                                <select id="horaire_classe" name="horaire_classe" class="form-select" required>
+                                    {% for classe in classes %}
+                                        <option
+                                            value="{{ classe.id }}"
+                                            data-section="{{ classe.section ? classe.section.id : '' }}"
+                                            data-ecole="{{ classe.ecole ? classe.ecole.id : '' }}"
+                                            {{ selectedClasse and selectedClasse.id == classe.id ? 'selected' : '' }}
+                                        >
+                                            {{ classe.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="horaire_option" class="form-label">Option</label>
+                                <select id="horaire_option" name="horaire_option" class="form-select">
+                                    <option value="">Horaire général (sans option)</option>
+                                    {% for option in options %}
+                                        <option
+                                            value="{{ option.id }}"
+                                            data-classe="{{ option.classe ? option.classe.id : '' }}"
+                                            {{ selectedOption and selectedOption.id == option.id ? 'selected' : '' }}
+                                        >
+                                            {{ option.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" style="min-width: 150px;">Heure</th>
+                                        {% for jour in jours %}
+                                            <th class="text-center" style="min-width: 180px;">{{ jour.nom }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for heure in heures %}
+                                        <tr>
+                                            <th class="text-center fw-normal">
+                                                <div class="fw-semibold">{{ heure.nom }}</div>
+                                                <small class="text-muted">
+                                                    {{ heure.heureDebut|date('H:i') }} – {{ heure.heureFin|date('H:i') }}
+                                                </small>
+                                            </th>
+                                            {% for jour in jours %}
+                                                {% set cellule = planning[heure.id][jour.id] ?? null %}
+                                                <td>
+                                                    <select
+                                                        name="planning[{{ heure.id }}][{{ jour.id }}]"
+                                                        class="form-select horaire-cours"
+                                                        data-selected="{{ cellule and cellule.cours ? cellule.cours.id : '' }}"
+                                                    >
+                                                        <option value="">— Aucun cours —</option>
+                                                        {% for cours in tousLesCours %}
+                                                            <option
+                                                                value="{{ cours.id }}"
+                                                                data-classe="{{ cours.classe ? cours.classe.id : '' }}"
+                                                                data-option="{{ cours.option ? cours.option.id : '' }}"
+                                                                {{ cellule and cellule.cours and cellule.cours.id == cours.id ? 'selected' : '' }}
+                                                            >
+                                                                {{ cours.nom }}{% if cours.professeur %} — {{ cours.professeur.nom }} {{ cours.professeur.prenom }}{% endif %}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="{{ jours|length + 1 }}" class="text-center text-muted">Aucun créneau configuré.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ti ti-device-floppy me-1"></i>
+                            Enregistrer l’horaire
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const filters = {
+                ecole: document.getElementById("filter-ecole"),
+                section: document.getElementById("filter-section"),
+                classe: document.getElementById("filter-classe"),
+                option: document.getElementById("filter-option"),
+            };
+            const optionContainer = document.getElementById("filter-option-container");
+
+            if (filters.ecole && filters.section && filters.classe && filters.option) {
+                const sections = Array.from(filters.section.options).map((option) => ({
+                    value: option.value,
+                    label: option.textContent,
+                    ecole: option.dataset.ecole,
+                }));
+                const classes = Array.from(filters.classe.options).map((option) => ({
+                    value: option.value,
+                    label: option.textContent,
+                    section: option.dataset.section,
+                    humanites: option.dataset.humanites,
+                    ecole: option.dataset.ecole,
+                }));
+                const options = Array.from(filters.option.options).map((option) => ({
+                    value: option.value,
+                    label: option.textContent,
+                    classe: option.dataset.classe,
+                }));
+
+                function fillFilter(
+                    select,
+                    entries,
+                    placeholder,
+                    matches,
+                    selectedValue,
+                    selectFirstMatch = false,
+                ) {
+                    select.innerHTML = "";
+                    const blank = document.createElement("option");
+                    blank.value = "";
+                    blank.textContent = placeholder;
+                    select.appendChild(blank);
+                    entries.filter(matches).forEach((entry) => {
+                        const option = document.createElement("option");
+                        option.value = entry.value;
+                        option.textContent = entry.label.trim();
+                        if (entry.ecole !== undefined)
+                            option.dataset.ecole = entry.ecole;
+                        if (entry.section !== undefined)
+                            option.dataset.section = entry.section;
+                        if (entry.classe !== undefined)
+                            option.dataset.classe = entry.classe;
+                        if (entry.humanites !== undefined)
+                            option.dataset.humanites = entry.humanites;
+                        select.appendChild(option);
+                    });
+                    if (
+                        Array.from(select.options).some(
+                            (option) => option.value === selectedValue,
+                        )
+                    ) {
+                        select.value = selectedValue;
+                    } else if (selectFirstMatch && select.options.length > 1) {
+                        select.selectedIndex = 1;
+                    }
+                }
+
+                function refreshFilterOptions() {
+                    const sectionValue = filters.section.value;
+                    const classeValue = filters.classe.value;
+                    const optionValue = filters.option.value;
+                    fillFilter(
+                        filters.section,
+                        sections,
+                        "Sélectionner une section",
+                        (section) => section.ecole === filters.ecole.value,
+                        sectionValue,
+                        true,
+                    );
+                    fillFilter(
+                        filters.classe,
+                        classes,
+                        "Sélectionner une classe",
+                        (classe) =>
+                            classe.section === filters.section.value &&
+                            classe.ecole === filters.ecole.value,
+                        classeValue,
+                        true,
+                    );
+                    fillFilter(
+                        filters.option,
+                        options,
+                        "Horaire général (sans option)",
+                        (option) => option.classe === filters.classe.value,
+                        optionValue,
+                    );
+
+                    const selectedClass = filters.classe.selectedOptions[0];
+                    const showOptionFilter = selectedClass?.dataset.humanites === "1";
+                    optionContainer.classList.toggle("d-none", !showOptionFilter);
+                    document
+                        .querySelectorAll("#horaire-filters .filter-column")
+                        .forEach((column) => {
+                            column.classList.toggle("col-md-2", showOptionFilter);
+                            column.classList.toggle("col-md-3", !showOptionFilter);
+                        });
+                    if (!showOptionFilter) {
+                        filters.option.value = "";
+                    }
+                }
+
+                filters.ecole.addEventListener("change", function () {
+                    refreshFilterOptions();
+                });
+
+                filters.section.addEventListener("change", function () {
+                    refreshFilterOptions();
+                });
+
+                filters.classe.addEventListener("change", function () {
+                    refreshFilterOptions();
+                });
+                refreshFilterOptions();
+            }
+
+            const modalEcole = document.getElementById("horaire_ecole");
+            const modalSection = document.getElementById("horaire_section");
+            const modalClasse = document.getElementById("horaire_classe");
+            const modalOption = document.getElementById("horaire_option");
+            const courseSelects = Array.from(
+                document.querySelectorAll(".horaire-cours"),
+            );
+
+            if (!modalEcole || !modalSection || !modalClasse || !modalOption) {
+                return;
+            }
+
+            const initialSections = Array.from(modalSection.options).map((option) => ({
+                value: option.value,
+                label: option.textContent,
+                ecole: option.dataset.ecole,
+            }));
+            const initialClasses = Array.from(modalClasse.options).map((option) => ({
+                value: option.value,
+                label: option.textContent,
+                section: option.dataset.section,
+                ecole: option.dataset.ecole,
+            }));
+            const initialOptions = Array.from(modalOption.options).map((option) => ({
+                value: option.value,
+                label: option.textContent,
+                classe: option.dataset.classe,
+            }));
+            const initialCourses = courseSelects.map((select) => ({
+                select,
+                selected: select.dataset.selected || "",
+                courses: Array.from(select.options)
+                    .filter((option) => option.value !== "")
+                    .map((option) => ({
+                        value: option.value,
+                        label: option.textContent,
+                        classe: option.dataset.classe,
+                        option: option.dataset.option,
+                    })),
+            }));
+
+            function populateSelect(select, entries, placeholder, selectedValue) {
+                select.innerHTML = "";
+                const blank = document.createElement("option");
+                blank.value = "";
+                blank.textContent = placeholder;
+                select.appendChild(blank);
+                entries.forEach((entry) => {
+                    const option = document.createElement("option");
+                    option.value = entry.value;
+                    option.textContent = entry.label.trim();
+                    if (entry.ecole !== undefined) option.dataset.ecole = entry.ecole;
+                    if (entry.section !== undefined)
+                        option.dataset.section = entry.section;
+                    if (entry.classe !== undefined)
+                        option.dataset.classe = entry.classe;
+                    select.appendChild(option);
+                });
+                if (entries.some((entry) => entry.value === selectedValue)) {
+                    select.value = selectedValue;
+                }
+            }
+
+            function refreshModalCourses() {
+                initialCourses.forEach((item) => {
+                    const matchingCourses = item.courses.filter(
+                        (course) =>
+                            course.classe === modalClasse.value &&
+                            course.option === modalOption.value,
+                    );
+                    const selectedValue = matchingCourses.some(
+                        (course) => course.value === item.select.value,
+                    )
+                        ? item.select.value
+                        : matchingCourses.some(
+                                (course) => course.value === item.selected,
+                            )
+                          ? item.selected
+                          : "";
+                    item.select.innerHTML = "";
+                    const blank = document.createElement("option");
+                    blank.value = "";
+                    blank.textContent = "— Aucun cours —";
+                    item.select.appendChild(blank);
+                    matchingCourses.forEach((course) => {
+                        const option = document.createElement("option");
+                        option.value = course.value;
+                        option.textContent = course.label.trim();
+                        item.select.appendChild(option);
+                    });
+                    item.select.value = selectedValue;
+                });
+            }
+
+            function refreshModalSections() {
+                const previousSection = modalSection.value;
+                const matchingSections = initialSections.filter(
+                    (section) => section.ecole === modalEcole.value,
+                );
+                populateSelect(
+                    modalSection,
+                    matchingSections,
+                    "Sélectionner une section",
+                    previousSection,
+                );
+                refreshModalClasses();
+            }
+
+            function refreshModalClasses() {
+                const previousClass = modalClasse.value;
+                const matchingClasses = initialClasses.filter(
+                    (classe) =>
+                        classe.section === modalSection.value &&
+                        classe.ecole === modalEcole.value,
+                );
+                populateSelect(
+                    modalClasse,
+                    matchingClasses,
+                    "Sélectionner une classe",
+                    previousClass,
+                );
+                refreshModalOptions();
+            }
+
+            function refreshModalOptions() {
+                const previousOption = modalOption.value;
+                const matchingOptions = initialOptions.filter(
+                    (option) => option.classe === modalClasse.value,
+                );
+                populateSelect(
+                    modalOption,
+                    matchingOptions,
+                    "Horaire général (sans option)",
+                    previousOption,
+                );
+                refreshModalCourses();
+            }
+
+            modalEcole.addEventListener("change", refreshModalSections);
+            modalSection.addEventListener("change", refreshModalClasses);
+            modalClasse.addEventListener("change", refreshModalOptions);
+            modalOption.addEventListener("change", refreshModalCourses);
+            refreshModalSections();
+        });
+    </script>
+{% endblock %}

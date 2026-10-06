@@ -7,6 +7,7 @@ use App\Entity\Ecole;
 use App\Entity\Option;
 use App\Entity\User;
 use App\Form\OptionType;
+use App\Repository\EcoleRepository;
 use App\Repository\OptionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,8 +20,24 @@ use Symfony\Component\Routing\Attribute\Route;
 final class OptionController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET', 'POST'])]
-    public function index(Request $request, OptionRepository $repository, EntityManagerInterface $entityManager): Response
-    {
+    public function index(
+        Request $request,
+        OptionRepository $repository,
+        EcoleRepository $ecoleRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+
+        $ecoles = $ecoleRepository->findBy([], ['id' => 'ASC']);
+        $selectedEcole = null;
+        $requestedEcoleId = $request->query->get('ecole');
+
+        if ($requestedEcoleId !== null && $requestedEcoleId !== '') {
+            $selectedEcole = $ecoleRepository->find($requestedEcoleId);
+        }
+        if ($selectedEcole === null) {
+            $selectedEcole = $ecoles[0] ?? null;
+        }
+
         $option = new Option();
         $form = $this->createForm(OptionType::class, $option);
         $form->handleRequest($request);
@@ -34,7 +51,17 @@ final class OptionController extends AbstractController
             $this->addFlash('success', 'Option créé(e) avec succès.');
             return $this->redirectToRoute('app_option_index');
         }
-        return $this->render('option/index.html.twig', ['option' => $option, 'options' => $repository->findAll(), 'form' => $form->createView()]);
+
+        $options = $selectedEcole
+            ? $repository->findForEcole($selectedEcole)
+            : [];
+        return $this->render('option/index.html.twig', [
+            'option' => $option,
+            'options' => $options,
+            'form' => $form->createView(),
+            'ecoles' => $ecoles,
+            'selectedEcole' => $selectedEcole,
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]

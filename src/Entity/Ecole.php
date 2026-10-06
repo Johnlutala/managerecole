@@ -38,9 +38,15 @@ class Ecole
     private Collection $classes;
 
     /**
+     * @var Collection<int, Horaire>
+     */
+    #[ORM\OneToMany(targetEntity: Horaire::class, mappedBy: 'ecole')]
+    private Collection $horaires;
+
+    /**
      * @var Collection<int, Professeur>
      */
-    #[ORM\ManyToMany(targetEntity: Professeur::class, mappedBy: 'ecoles')]
+    #[ORM\OneToMany(targetEntity: Professeur::class, mappedBy: 'ecole')]
     private Collection $professeurs;
 
     /**
@@ -70,6 +76,7 @@ class Ecole
     public function __construct()
     {
         $this->classes = new ArrayCollection();
+        $this->horaires = new ArrayCollection();
         $this->professeurs = new ArrayCollection();
         $this->eleves = new ArrayCollection();
         $this->sections = new ArrayCollection();
@@ -142,6 +149,14 @@ class Ecole
         return $this->classes;
     }
 
+    /**
+     * @return Collection<int, Horaire>
+     */
+    public function getHoraires(): Collection
+    {
+        return $this->horaires;
+    }
+
     public function addClasse(Classe $classe): static
     {
         if (!$this->classes->contains($classe)) {
@@ -174,7 +189,7 @@ class Ecole
     {
         if (!$this->professeurs->contains($professeur)) {
             $this->professeurs->add($professeur);
-            $professeur->addEcole($this);
+            $professeur->setEcole($this);
         }
 
         return $this;
@@ -183,7 +198,9 @@ class Ecole
     public function removeProfesseur(Professeur $professeur): static
     {
         if ($this->professeurs->removeElement($professeur)) {
-            $professeur->removeEcole($this);
+            if ($professeur->getEcole() === $this) {
+                $professeur->setEcole(null);
+            }
         }
 
         return $this;

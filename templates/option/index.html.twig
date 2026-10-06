@@ -5,25 +5,73 @@
     <div class="wrapper">
         <div class="content-page">
             <div class="container-fluid">
-                <div class="page-title-head d-flex align-items-center">
+                <div class="page-title-head d-flex align-items-center mb-3">
                     <div class="flex-grow-1">
-                        <h4 class="fs-xl fw-bold m-0">Options</h4>
+                        <h4 class="fs-xl fw-bold m-0">
+                            Toutes | Options
+                        </h4>
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_option_index') }}">
+                                    option
+                                </a>
+                            </li>
+                        </ol>
                     </div>
                 </div>
                 <div data-table data-table-rows-per-page="8" class="card">
-                    <div class="card-header border-light d-flex justify-content-between">
-                        <div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
+                    <div class="card-header border-light d-flex justify-content-between align-items-center">
+                        {# Recherche à gauche #}
+                        <div class="app-search">
+                            <input data-table-search type="search" class="form-control"placeholder="Rechercher...">
+                            <i data-lucide="search" class="app-search-icon text-muted"></i>
                         </div>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                            <i class="ti ti-plus me-1"></i>Ajouter</button>
+
+                        {# Filtres + bouton à droite #}
+                        <div class="d-flex align-items-center gap-2">
+                            <form id="cours-filters" method="get" class="d-flex align-items-center gap-2">
+                                <label for="cours-filter-ecole" class="form-label mb-0">
+                                    École
+                                </label>
+                                <select id="option-filter-ecole" name="ecole" class="form-select" onchange="this.form.submit()">
+                                    {% for ecole in ecoles %}
+                                        <option
+                                            value="{{ ecole.id }}"
+                                            {% if selectedEcole and selectedEcole.id == ecole.id %}selected{% endif %}
+                                        >
+                                            {{ ecole.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <noscript>
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        Filtrer
+                                    </button>
+                                </noscript>
+                            </form>
+
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="ti ti-plus me-1"></i>
+                                Ajouter
+                            </button>
+
+                        </div>
                     </div>
+				
                     <div class="table-responsive">
                         <table class="table table-custom table-centered table-hover w-100 mb-0">
                             <thead class="bg-light bg-opacity-25 thead-sm">
                                 <tr class="text-uppercase fs-xxs">
-                                    <th>Code</th>
-                                    <th>Nom</th>
-                                    <th>Classe</th>
+                                    <th>#</th>
+                                    <th>Libellé</th>
+                                    <th>Classes</th>
                                     <th>Ecole</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
@@ -34,7 +82,7 @@
                                         <td>{{ option.code }}</td>
                                         <td>{{ option.nom }}</td>
                                         <td>{{ option.classe ? option.classe.nom : '—' }}</td>
-                                        <td>{{ option.classe and option.classe.ecole ? option.classe.ecole.nom: '—'}}</td>
+                                        <td>{{ option.classe and option.classe.ecole ? option.classe.ecole.nom : '—' }}</td>
                                         <td>
                                             <div class="d-flex justify-content-center gap-1">
                                                 <a href="{{ path('app_option_show', {id: option.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
@@ -48,7 +96,7 @@
                                     </tr>
                                 {% else %}
                                     <tr>
-                                        <td colspan="10" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
+                                        <td colspan="5" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -230,10 +278,10 @@
             const selectClasseMessage = document.getElementById("selectClasseMessage");
 
             /*
-            |--------------------------------------------------------------------------
-            | ÉCOLE → CLASSES
-            |--------------------------------------------------------------------------
-            */
+                                |--------------------------------------------------------------------------
+                                | ÉCOLE → CLASSES
+                                |--------------------------------------------------------------------------
+                                */
 
             if (ecoleSelect && classeSelect) {
                 ecoleSelect.addEventListener("change", function () {
@@ -266,10 +314,10 @@
                     classeSelect.appendChild(loadingOption);
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | AJAX : récupérer les classes de l'école
-                    |--------------------------------------------------------------------------
-                    */
+                                        |--------------------------------------------------------------------------
+                                        | AJAX : récupérer les classes de l'école
+                                        |--------------------------------------------------------------------------
+                                        */
 
                     fetch("/option/classes/" + ecoleId)
                         .then((response) => {
@@ -320,10 +368,10 @@
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | CLASSE → OPTIONS EXISTANTES
-            |--------------------------------------------------------------------------
-            */
+                                |--------------------------------------------------------------------------
+                                | CLASSE → OPTIONS EXISTANTES
+                                |--------------------------------------------------------------------------
+                                */
 
             if (classeSelect) {
                 classeSelect.addEventListener("change", function () {
@@ -335,10 +383,10 @@
                     noOptions.style.display = "none";
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | Aucune classe sélectionnée
-                    |--------------------------------------------------------------------------
-                    */
+                                        |--------------------------------------------------------------------------
+                                        | Aucune classe sélectionnée
+                                        |--------------------------------------------------------------------------
+                                        */
 
                     if (!classeId) {
                         resetOptionsCard();
@@ -347,10 +395,10 @@
                     }
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | Afficher le card
-                    |--------------------------------------------------------------------------
-                    */
+                                        |--------------------------------------------------------------------------
+                                        | Afficher le card
+                                        |--------------------------------------------------------------------------
+                                        */
 
                     selectClasseMessage.style.display = "none";
 
@@ -359,10 +407,10 @@
                     optionsLoading.style.display = "block";
 
                     /*
-                    |--------------------------------------------------------------------------
-                    | AJAX : récupérer les options
-                    |--------------------------------------------------------------------------
-                    */
+                                        |--------------------------------------------------------------------------
+                                        | AJAX : récupérer les options
+                                        |--------------------------------------------------------------------------
+                                        */
 
                     fetch("/option/options-by-classe/" + classeId)
                         .then((response) => {
@@ -381,10 +429,10 @@
                             optionsList.innerHTML = "";
 
                             /*
-                            |--------------------------------------------------------------------------
-                            | Aucune option
-                            |--------------------------------------------------------------------------
-                            */
+                                                |--------------------------------------------------------------------------
+                                                | Aucune option
+                                                |--------------------------------------------------------------------------
+                                                */
 
                             if (options.length === 0) {
                                 noOptions.style.display = "block";
@@ -393,10 +441,10 @@
                             }
 
                             /*
-                            |--------------------------------------------------------------------------
-                            | Afficher les options
-                            |--------------------------------------------------------------------------
-                            */
+                                                |--------------------------------------------------------------------------
+                                                | Afficher les options
+                                                |--------------------------------------------------------------------------
+                                                */
 
                             options.forEach((option, index) => {
                                 const div = document.createElement("div");
@@ -440,10 +488,10 @@
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | RESET DU CARD
-            |--------------------------------------------------------------------------
-            */
+                                |--------------------------------------------------------------------------
+                                | RESET DU CARD
+                                |--------------------------------------------------------------------------
+                                */
 
             function resetOptionsCard() {
                 optionsCard.style.display = "none";
@@ -458,10 +506,10 @@
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | Sécurité affichage HTML
-            |--------------------------------------------------------------------------
-            */
+                                |--------------------------------------------------------------------------
+                                | Sécurité affichage HTML
+                                |--------------------------------------------------------------------------
+                                */
 
             function escapeHtml(value) {
                 const div = document.createElement("div");

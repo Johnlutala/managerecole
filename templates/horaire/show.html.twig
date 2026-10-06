@@ -1,0 +1,658 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Horaire{% endblock %}
+
+{% block body %}
+
+	<div class="wrapper">
+
+		<div class="content-page">
+
+			<div class="container-fluid">
+
+				{# ==================== TITRE ==================== #}
+
+				<div class="page-title-head d-flex align-items-center">
+
+					<div class="flex-grow-1">
+
+						<h4 class="fs-xl fw-bold m-0">
+							Détail de l'horaire
+						</h4>
+
+					</div>
+
+					<div class="text-end">
+
+						<ol class="breadcrumb m-0 py-0">
+
+							<li class="breadcrumb-item">
+								<a href="javascript:void(0);">
+									ADMIN
+								</a>
+							</li>
+
+							<li class="breadcrumb-item">
+								<a href="{{ path('app_horaire_index') }}">
+									Horaires
+								</a>
+							</li>
+
+							<li class="breadcrumb-item active">
+								Détail
+							</li>
+
+						</ol>
+
+					</div>
+
+				</div>
+
+
+				{# ==================== CONTENU ==================== #}
+
+				<div class="row">
+
+
+					{# ==================== INFORMATIONS RAPIDES ==================== #}
+
+					<div class="col-xl-3">
+
+						<div class="card">
+
+							<div class="card-header">
+
+								<h4 class="card-title">
+									Horaire N° :
+									{{ horaire.id }}
+								</h4>
+
+							</div>
+
+							<div class="card-body text-center">
+
+								<div class="avatar-xl mx-auto mb-3">
+
+									<div class="avatar-title bg-primary-subtle text-primary rounded">
+
+										<i class="ti ti-calendar-event fs-1"></i>
+
+									</div>
+
+								</div>
+
+
+								{# Jour #}
+
+								<h4 class="mb-1">
+									{{ horaire.jour }}
+								</h4>
+
+
+								{# Créneau #}
+
+								{% if horaire.creneau %}
+
+									<p class="text-muted mb-2">
+
+										{{ horaire.creneau.nom }}
+
+										<br>
+
+										<strong>
+											{{ horaire.creneau.heureDebut
+												? horaire.creneau.heureDebut|date('H:i')
+												: '—'
+											}}
+
+											-
+
+											{{ horaire.creneau.heureFin
+												? horaire.creneau.heureFin|date('H:i')
+												: '—'
+											}}
+										</strong>
+
+									</p>
+
+								{% else %}
+
+									<p class="text-muted mb-2">
+										Aucun créneau
+									</p>
+
+								{% endif %}
+
+
+								{# Statut #}
+
+								{% if horaire.statut == 'PREVU' %}
+
+									<span class="badge bg-primary-subtle text-primary mb-3">
+										<i class="ti ti-calendar-check me-1"></i>
+										Prévu
+									</span>
+
+								{% elseif horaire.statut %}
+
+									<span class="badge bg-secondary-subtle text-secondary mb-3">
+										{{ horaire.statut }}
+									</span>
+
+								{% else %}
+
+									<span class="badge bg-light text-muted mb-3">
+										Non défini
+									</span>
+
+								{% endif %}
+
+
+								<hr>
+
+
+								<div class="d-grid gap-2">
+
+									<a
+										href="{{ path('app_horaire_edit', {'id': horaire.id}) }}"
+										class="btn btn-warning"
+									>
+
+										<i class="ti ti-edit me-1"></i>
+										Modifier
+
+									</a>
+
+
+									{% include 'horaire/_delete_form.html.twig' %}
+
+
+									<a
+										href="{{ path('app_horaire_index') }}"
+										class="btn btn-secondary"
+									>
+
+										<i class="ti ti-arrow-left me-1"></i>
+										Retour
+
+									</a>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+
+					{# ==================== INFORMATIONS HORAIRE ==================== #}
+
+					<div class="col-xl-6">
+
+						<div class="card h-100">
+
+							<div class="card-header">
+
+								<h4 class="card-title mb-0">
+									Informations de l'horaire
+								</h4>
+
+							</div>
+
+							<div class="card-body">
+
+								<div class="table-responsive">
+
+									<table class="table table-bordered align-middle mb-0">
+
+										<tbody>
+
+
+											{# JOUR #}
+
+											<tr>
+
+												<th width="40%">
+													Jour
+												</th>
+
+												<td>
+
+													<span class="fw-semibold">
+														{{ horaire.jour }}
+													</span>
+
+												</td>
+
+											</tr>
+
+
+											{# CRÉNEAU #}
+
+											<tr>
+
+												<th>
+													Créneau horaire
+												</th>
+
+												<td>
+
+													{% if horaire.creneau %}
+
+														<strong>
+															{{ horaire.creneau.nom }}
+														</strong>
+
+														<br>
+
+														<small class="text-muted">
+
+															{{ horaire.creneau.heureDebut
+																? horaire.creneau.heureDebut|date('H:i')
+																: '—'
+															}}
+
+															-
+
+															{{ horaire.creneau.heureFin
+																? horaire.creneau.heureFin|date('H:i')
+																: '—'
+															}}
+
+														</small>
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# COURS #}
+
+											<tr>
+
+												<th>
+													Cours
+												</th>
+
+												<td>
+
+													{% if horaire.cours %}
+
+														<a
+															href="{{ path('app_cours_show', {'id': horaire.cours.id}) }}"
+														>
+
+															{{ horaire.cours.nom }}
+
+														</a>
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# ENSEIGNANT #}
+
+											<tr>
+
+												<th>
+													Enseignant
+												</th>
+
+												<td>
+
+													{% if horaire.cours and horaire.cours.professeur %}
+
+														{{ horaire.cours.professeur.nom }}
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# CLASSE #}
+
+											<tr>
+
+												<th>
+													Classe
+												</th>
+
+												<td>
+
+													{% if horaire.classe %}
+
+														<a
+															href="{{ path('app_classe_show', {'id': horaire.classe.id}) }}"
+														>
+
+															{{ horaire.classe.nom }}
+
+														</a>
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# SECTION #}
+
+											<tr>
+
+												<th>
+													Section
+												</th>
+
+												<td>
+
+													{% if horaire.classe and horaire.classe.section %}
+
+														{{ horaire.classe.section.nom }}
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# STATUT #}
+
+											<tr>
+
+												<th>
+													Statut
+												</th>
+
+												<td>
+
+													{% if horaire.statut == 'PREVU' %}
+
+														<span class="badge bg-primary-subtle text-primary">
+
+															<i class="ti ti-calendar-check me-1"></i>
+															Prévu
+
+														</span>
+
+													{% elseif horaire.statut %}
+
+														<span class="badge bg-secondary-subtle text-secondary">
+
+															{{ horaire.statut }}
+
+														</span>
+
+													{% else %}
+
+														—
+
+													{% endif %}
+
+												</td>
+
+											</tr>
+
+
+											{# HEURE RÉELLE DE DÉBUT #}
+
+											<tr>
+
+												<th>
+													Heure réelle de début
+												</th>
+
+												<td>
+
+													{{ horaire.heureDebutReelle
+														? horaire.heureDebutReelle|date('H:i:s')
+														: '—'
+													}}
+
+												</td>
+
+											</tr>
+
+
+											{# HEURE RÉELLE DE FIN #}
+
+											<tr>
+
+												<th>
+													Heure réelle de fin
+												</th>
+
+												<td>
+
+													{{ horaire.heureFinReelle
+														? horaire.heureFinReelle|date('H:i:s')
+														: '—'
+													}}
+
+												</td>
+
+											</tr>
+
+
+											{# OBSERVATION #}
+
+											<tr>
+
+												<th>
+													Observation
+												</th>
+
+												<td>
+
+													{{ horaire.observation
+														? horaire.observation|nl2br
+														: '—'
+													}}
+
+												</td>
+
+											</tr>
+
+
+										</tbody>
+
+									</table>
+
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+
+					{# ==================== CLASSE ==================== #}
+
+					<div class="col-xl-3 mt-1">
+
+						<div class="card">
+
+							<div class="card-header">
+
+								<h4 class="card-title mb-0">
+
+									<i class="ti ti-school me-2"></i>
+									Classe
+
+								</h4>
+
+							</div>
+
+							<div class="card-body text-center">
+
+								{% if horaire.classe %}
+
+									<div class="avatar-lg mx-auto mb-3">
+
+										<div class="avatar-title bg-primary-subtle text-primary rounded">
+
+											<i class="ti ti-school fs-2"></i>
+
+										</div>
+
+									</div>
+
+
+									<h4 class="mb-1">
+										{{ horaire.classe.nom }}
+									</h4>
+
+
+									{% if horaire.classe.section %}
+
+										<p class="text-muted mb-2">
+
+											Section :
+											<strong>
+												{{ horaire.classe.section.nom }}
+											</strong>
+
+										</p>
+
+									{% endif %}
+
+
+									{% if horaire.classe.ecole %}
+
+										<p class="text-muted mb-3">
+
+											Ecole :
+											<strong>
+												{{ horaire.classe.ecole.nom }}
+											</strong>
+
+										</p>
+
+									{% endif %}
+
+
+									<a
+										href="{{ path('app_classe_show', {'id': horaire.classe.id}) }}"
+										class="btn btn-primary w-100"
+									>
+
+										<i class="ti ti-eye me-1"></i>
+										Voir la classe
+
+									</a>
+
+								{% else %}
+
+									<div class="text-center py-4 text-muted">
+
+										<i class="ti ti-school-off fs-1 d-block mb-2"></i>
+
+										<p class="mb-0">
+											Aucune classe associée à cet horaire.
+										</p>
+
+									</div>
+
+								{% endif %}
+
+							</div>
+
+						</div>
+
+
+						{# ==================== COURS ==================== #}
+
+						{% if horaire.cours %}
+
+							<div class="card mt-3">
+
+								<div class="card-header">
+
+									<h4 class="card-title mb-0">
+
+										<i class="ti ti-book me-2"></i>
+										Cours
+
+									</h4>
+
+								</div>
+
+								<div class="card-body text-center">
+
+									<div class="avatar-lg mx-auto mb-3">
+
+										<div class="avatar-title bg-success-subtle text-success rounded">
+
+											<i class="ti ti-book fs-2"></i>
+
+										</div>
+
+									</div>
+
+
+									<h5 class="mb-1">
+										{{ horaire.cours.nom }}
+									</h5>
+
+
+									{% if horaire.cours.professeur %}
+
+										<p class="text-muted mb-3">
+
+											Enseignant :
+											<strong>
+												{{ horaire.cours.professeur.nom }}
+											</strong>
+
+										</p>
+
+									{% endif %}
+
+								</div>
+
+							</div>
+
+						{% endif %}
+
+					</div>
+
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+{% endblock %}

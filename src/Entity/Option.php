@@ -35,9 +35,16 @@ class Option
     #[ORM\OneToMany(targetEntity: InscriptionEleve::class, mappedBy: 'options')]
     private Collection $inscriptionEleves;
 
+    /**
+     * @var Collection<int, Horaire>
+     */
+    #[ORM\OneToMany(targetEntity: Horaire::class, mappedBy: 'option')]
+    private Collection $horaires;
+
     public function __construct()
     {
         $this->inscriptionEleves = new ArrayCollection();
+        $this->horaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,6 +99,14 @@ class Option
     public function getInscriptionEleves(): Collection
     {
         return $this->inscriptionEleves;
+    }
+
+    /**
+     * @return Collection<int, Horaire>
+     */
+    public function getHoraires(): Collection
+    {
+        return $this->horaires;
     }
 
     public function addInscriptionElefe(InscriptionEleve $inscriptionElefe): static

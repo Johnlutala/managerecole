@@ -60,6 +60,12 @@ class Classe
 
     #[ORM\ManyToOne(inversedBy: 'classes')]
     private ?Section $section = null;
+
+    /**
+     * @var Collection<int, Horaire>
+     */
+    #[ORM\OneToMany(targetEntity: Horaire::class, mappedBy: 'classe')]
+    private Collection $horaires;
   
 
     public function __construct()
@@ -69,6 +75,7 @@ class Classe
         $this->eleves = new ArrayCollection();
         $this->presences = new ArrayCollection();
         $this->inscriptionEleves = new ArrayCollection();
+        $this->horaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -276,6 +283,36 @@ class Classe
     public function setSection(?Section $section): static
     {
         $this->section = $section;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Horaire>
+     */
+    public function getHoraires(): Collection
+    {
+        return $this->horaires;
+    }
+
+    public function addHoraire(Horaire $horaire): static
+    {
+        if (!$this->horaires->contains($horaire)) {
+            $this->horaires->add($horaire);
+            $horaire->setClasse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHoraire(Horaire $horaire): static
+    {
+        if ($this->horaires->removeElement($horaire)) {
+            // set the owning side to null (unless already changed)
+            if ($horaire->getClasse() === $this) {
+                $horaire->setClasse(null);
+            }
+        }
 
         return $this;
     }

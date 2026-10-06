@@ -32,7 +32,7 @@
                 <div class="page-title-head d-flex align-items-center justify-content-between">
                     <div class="flex-grow-1">
                         <h4 id="cours-title" class="fs-xl fw-bold m-0">
-                            Ecole: {{ selectedEcole ? selectedEcole.nom : 'Toutes les écoles' }} | Classe: {{ selectedClasse ? selectedClasse.nom : 'Toutes les classes' }} | Professeur: {{ selectedProfesseur ? selectedProfesseur.nom ~ ' ' ~ selectedProfesseur.prenom : 'Tous les professeurs' }}
+                            {# Ecole: {{ selectedEcole ? selectedEcole.nom : 'Toutes les écoles' }} | Classe: {{ selectedClasse ? selectedClasse.nom : 'Toutes les classes' }} | Professeur: {{ selectedProfesseur ? selectedProfesseur.nom ~ ' ' ~ selectedProfesseur.prenom : 'Tous les professeurs' }} #}
                         </h4>
                     </div>
                     <div class="d-flex gap-2">
@@ -61,7 +61,7 @@
                             <i data-lucide="search" class="app-search-icon text-muted"></i>
                         </div>
                         <form id="cours-filters" method="get" class="d-flex align-items-center gap-2">
-                             <label for="cours-filter-ecole" class="form-label mb-0">École</label>
+                            <label for="cours-filter-ecole" class="form-label mb-0">École</label>
                             <select id="cours-filter-ecole" name="ecole" class="form-select">
                                 <option value="">Toutes les écoles</option>
                                 {% for ecole in ecoles %}
@@ -99,8 +99,8 @@
                             <thead class="bg-light bg-opacity-25 thead-sm">
                                 <tr class="text-uppercase fs-xxs">
                                     <th>#</th>
-                                    <th>Classe</th>
                                     <th>Cours</th>
+                                    <th>Classe</th>
                                     <th>Ecole</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
@@ -109,7 +109,6 @@
                                 {% for groupe in coursParClasse %}
                                     <tr class="cours-table-row">
                                         <td>{{ loop.index }}</td>
-                                        <td>{{ groupe.classe.nom }}</td>
                                         <td>
                                             {% for cour in groupe.cours %}
                                                 <a href="{{ path('app_cours_edit', {id: cour.id}) }}" class="text-reset">
@@ -117,9 +116,10 @@
                                                 </a>{% if not loop.last %}, {% endif %}
                                             {% endfor %}
                                         </td>
+                                         <td>{{ groupe.classe.nom }}</td>
                                         <td>{{ groupe.classe.ecole.nom }}</td>
                                         <td class="text-center">
-                                            <a href="{{ path('app_cours_classe_show', {id: groupe.classe.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle" aria-label="Voir les cours de {{ groupe.classe.nom }}" title="Voir les détails de la classe" >
+                                            <a href="{{ path('app_cours_classe_show', {id: groupe.classe.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle" aria-label="Voir les cours de {{ groupe.classe.nom }}" title="Voir les détails de la classe">
                                                 <i class="ti ti-eye fs-lg"></i>
                                             </a>
                                         </td>
