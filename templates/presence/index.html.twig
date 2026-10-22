@@ -1,77 +1,363 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Présences
-{% endblock %}
-
+{% block title %}Présences élèves{% endblock %}
 {% block body %}
-	<div class="wrapper">
-		<div class="content-page">
-			<div class="container-fluid">
-				<div class="page-title-head d-flex align-items-center">
-					<div class="flex-grow-1">
-						<h4 class="fs-xl fw-bold m-0">Présences</h4>
-					</div>
-				</div>
-				<div class="card">
-					<div class="card-header border-light d-flex justify-content-between">
-						<div class="app-search"><input data-table-search type="search" class="form-control" placeholder="Rechercher..."><i data-lucide="search" class="app-search-icon text-muted"></i>
-						</div>
-						<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-							<i class="ti ti-plus me-1"></i>Ajouter</button>
-					</div>
-					<div class="table-responsive">
-						<table class="table table-custom table-centered table-hover w-100 mb-0">
-							<thead class="bg-light bg-opacity-25 thead-sm">
-								<tr class="text-uppercase fs-xxs">
-									<th>Date</th>
-									<th>Statut</th>
-									<th>Arrivée</th>
-									<th>Départ</th>
-									<th class="text-center">Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{% for presence in presences %}
-									<tr>
-										<td>{{ presence.date ? presence.date|date('Y-m-d') : '—' }}</td>
-										<td>{{ presence.statut }}</td>
-										<td>{{ presence.heureArrivee ? presence.heureArrivee|date('H:i:s') : '—' }}</td>
-										<td>{{ presence.heureDepart ? presence.heureDepart|date('H:i:s') : '—' }}</td>
-										<td>
-											<div class="d-flex justify-content-center gap-1">
-												<a href="{{ path('app_presence_show', {id: presence.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-													<i class="ti ti-eye fs-lg"></i>
-												</a>
-												<a href="{{ path('app_presence_edit', {id: presence.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-													<i class="ti ti-edit fs-lg"></i>
-												</a>
-											</div>
-										</td>
-									</tr>
-								{% else %}
-									<tr>
-										<td colspan="5" class="text-center py-5 text-muted">Aucun enregistrement trouvé.</td>
-									</tr>
-								{% endfor %}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade" id="addModal" tabindex="-1">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">{{ form_start(form) }}<div class="modal-header">
-					<h5 class="modal-title">Nouvelle présence</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<div class="modal-body">{% include 'crud/_form_fields.html.twig' with {form: form} %}</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-					<button class="btn btn-primary">Enregistrer</button>
-				</div>
-				{{ form_end(form) }}</div>
-		</div>
-	</div>
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                
+                {% for type, messages in app.flashes %}{% for message in messages %}
+                        <div class="alert alert-{{ type == 'warning' ? 'warning' : (type == 'danger' ? 'danger' : 'success') }}">{{ message }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="page-title-head d-flex align-items-center mb-3">
+                    <div class="flex-grow-1">
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_presence_index') }}">
+                                    Présences
+                                </a>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="page-title-head d-flex align-items-center justify-content-between">
+                    <div class="flex-grow-1">
+                        <h4 id="cours-title" class="fs-xl fw-bold m-0">
+                            Espace des présences
+                        </h4>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <a  class="btn btn-outline-primary" href="{{ path('app_presence_personnel') }}" >
+                            <i class="ti ti-users me-1"></i>
+                            Personnel
+                        </a>
+
+                        <a class="btn btn-outline-primary" href="{{ path('app_presence_control', {
+                            classe: classe ? classe.id : '', date: date|date('Y-m-d')}) }}">
+                            <i class="ti ti-clipboard-check me-1"></i>
+                            Contrôler
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form method="get" class="row g-3 align-items-end" id="filterForm">
+
+                            {# École #}
+                            <div class="col-md-2">
+                                <label for="filter-ecole" class="form-label">École</label>
+                                <select name="ecole" id="filter-ecole" class="form-select">
+                                    <option value="">Toutes les écoles</option>
+                                    {% for item in ecoles %}
+                                        <option
+                                            value="{{ item.id }}"
+                                            {{ ecole and item.id == ecole.id ? 'selected' : '' }} >
+                                            {{ item.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {# Section #}
+                            <div class="col-md-2">
+                                <label for="filter-section" class="form-label">Section</label>
+                                <select name="section" id="filter-section" class="form-select">
+                                    <option value="">Toutes les sections</option>
+                                    {% for item in sections %}
+                                        <option
+                                            value="{{ item.id }}"
+                                            data-ecole="{{ item.ecole ? item.ecole.id : '' }}"
+                                            {{ section and item.id == section.id ? 'selected' : '' }}
+                                        >
+                                            {{ item.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {# Classe #}
+                            <div class="col-md-2">
+                                <label for="filter-classe" class="form-label">Classe</label>
+                                <select name="classe" id="filter-classe" class="form-select">
+                                    <option value="">Sélectionner une classe</option>
+                                    {% for item in classes %}
+                                        <option
+                                            value="{{ item.id }}"
+                                            data-ecole="{{ item.ecole ? item.ecole.id : '' }}"
+                                            data-section="{{ item.section ? item.section.id : '' }}"
+                                            {{ classe and item.id == classe.id ? 'selected' : '' }}
+                                        >
+                                            {{ item.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {# Option #}
+                            <div class="col-md-2">
+                                <label for="filter-option" class="form-label">Option</label>
+                                <select name="option" id="filter-option" class="form-select">
+                                    <option value="">Toutes les options</option>
+                                    {% for item in options %}
+                                        <option
+                                            value="{{ item.id }}"
+                                            data-classe="{{ item.classe ? item.classe.id : '' }}"
+                                            {{ option and item.id == option.id ? 'selected' : '' }}
+                                        >
+                                            {{ item.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {# Date #}
+                            <div class="col-md-2">
+                                <label for="filter-date" class="form-label">Date de présence</label>
+                                <input
+                                    type="date"
+                                    name="date"
+                                    id="filter-date"
+                                    class="form-control"
+                                    value="{{ date|date('Y-m-d') }}"
+                                >
+                            </div>
+
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="ti ti-filter me-1"></i>
+                                    Ouvrir
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                                                
+                {% if classe and presenceAlreadyRecorded %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Présence de la classe {{ classe.nom }} effectuée par {{ presenceAuthor ?: 'Utilisateur inconnu' }}</h5>
+                            <small class="text-muted">{{ date|date('d/m/Y') }}</small>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-custom table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Postnom</th>
+                                        <th>Prénom</th>
+                                        <th>État</th>
+                                        <th>Arrivée</th>
+                                        <th>Départ</th>
+                                        <th>Motif</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                        {% set record = byStudent[student.id] ?? null %}
+                                        <tr>
+                                            <td>{{ student.nom }}</td>
+                                            <td>{{ student.postnom ?: '---' }}</td>
+                                            <td>{{ student.prenom }}</td>
+                                            <td>
+                                                {% if record %}
+                                                    {{ {
+                                                        present: 'Présent',
+                                                        absent: 'Absent',
+                                                        retard: 'Retard',
+                                                        autre: 'Autre',
+                                                        autorise: 'Absence autorisée',
+                                                        depart_anticipe: 'Départ anticipé'
+                                                    }[record.statut] ?? record.statut }}
+                                                {% else %}
+                                                    ---
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ record and record.heureArrivee ? record.heureArrivee|date('H:i') : '---' }}</td>
+                                            <td>{{ record and record.heureDepart ? record.heureDepart|date('H:i') : '---' }}</td>
+                                            <td>{{ record and record.observation ? record.observation : '---' }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="7" class="text-center py-4">Aucun élève actif dans cette classe.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer text-end">
+                            <a class="btn btn-primary" href="{{ path('app_presence_control', {
+                                ecole: ecole ? ecole.id : '',
+                                section: section ? section.id : '',
+                                classe: classe.id,
+                                option: option ? option.id : '',
+                                date: date|date('Y-m-d')
+                            }) }}">Modifier au contrôle</a>
+                        </div>
+                    </div>
+                {% elseif classe %}
+                    <form method="post" action="{{ path('app_presence_index', {
+                        ecole: ecole ? ecole.id : '',
+                        section: section ? section.id : '',
+                        classe: classe.id,
+                        option: option ? option.id : '',
+                        date: date|date('Y-m-d')
+                    }) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('attendance_students') }}">
+                        <div class="card"><div class="card-header">
+                                <strong>{{ classe.nom }}</strong>
+                                <span class="text-muted ms-2">{{ students|length }} élève(s)</span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-custom table-centered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Postnom</th>
+                                            <th>Prénom</th>
+                                            <th>État</th>
+                                            <th>Arrivée</th>
+                                            <th>Départ</th>
+                                            <th>Motif</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in students %}
+                                            {% set record = byStudent[student.id] ?? null %}
+                                            <tr>
+                                                <td>
+                                                    {{ student.nom }}
+                                                </td>
+                                                <td>{{ student.postnom ?: '---' }}</td>
+                                                <td>{{ student.prenom }}</td>
+                                                <td>
+                                                    {% for code, label in {present: 'Présent', absent: 'Absent', retard: 'Retard', autre: 'Autre'} %}
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input attendance-status" type="radio"
+                                                                id="attendance-{{ student.id }}-{{ code }}"
+                                                                name="attendance[{{ student.id }}][statut]"
+                                                                value="{{ code }}"
+                                                                required
+                                                                {{ (record and record.statut == code) or (not record and code == 'present') ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="attendance-{{ student.id }}-{{ code }}">{{ label }}</label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </td>
+                                                <td><input class="form-control" type="time" name="attendance[{{ student.id }}][arrivee]" value="{{ record and record.heureArrivee ? record.heureArrivee|date('H:i') : '07:30' }}"></td>
+                                                <td><input class="form-control" type="time" name="attendance[{{ student.id }}][depart]" value="{{ record and record.heureDepart ? record.heureDepart|date('H:i') : '12:30' }}"></td>
+                                                <td>
+                                                    <input class="form-control attendance-reason" type="text"
+                                                        name="attendance[{{ student.id }}][motif]"
+                                                        value="{{ record ? record.observation }}"
+                                                        placeholder="Motif"
+                                                        {{ record and record.statut == 'autre' ? 'required' : 'hidden' }}>
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">Aucun élève actif dans cette classe.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer text-end">
+                                <button class="btn btn-primary">Enregistrer les présences
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}                                                            
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const ecole = document.getElementById("filter-ecole");
+            const section = document.getElementById("filter-section");
+            const classe = document.getElementById("filter-classe");
+            const option = document.getElementById("filter-option");
+            const date = document.getElementById("filter-date");
+            const filterForm = document.getElementById("filterForm");
+
+            const filterOptions = (
+                select,
+                parentSelect,
+                attribute,
+                requireParent = false,
+            ) => {
+                Array.from(select.options).forEach((item) => {
+                    if (!item.value) {
+                        item.hidden = false;
+                        return;
+                    }
+
+                    item.hidden =
+                        (requireParent && !parentSelect.value) ||
+                        (Boolean(parentSelect.value) &&
+                            item.dataset[attribute] !== parentSelect.value);
+                    if (item.hidden && item.selected) {
+                        select.value = "";
+                    }
+                });
+            };
+
+            const updateFilters = () => {
+                filterOptions(section, ecole, "ecole");
+                filterOptions(classe, ecole, "ecole");
+
+                Array.from(classe.options).forEach((item) => {
+                    if (!item.value) {
+                        return;
+                    }
+
+                    const visibleForSection =
+                        !section.value || item.dataset.section === section.value;
+                    item.hidden = item.hidden || !visibleForSection;
+                    if (item.hidden && item.selected) {
+                        classe.value = "";
+                    }
+                });
+
+                filterOptions(option, classe, "classe", true);
+            };
+
+            ecole.addEventListener("change", updateFilters);
+            section.addEventListener("change", updateFilters);
+            classe.addEventListener("change", updateFilters);
+            updateFilters();
+            date.addEventListener("change", () => filterForm.requestSubmit());
+
+            const updateMotifVisibility = (row) => {
+                const selectedStatus = row.querySelector(".attendance-status:checked");
+                const reason = row.querySelector(".attendance-reason");
+                if (!reason) {
+                    return;
+                }
+                const needsReason = selectedStatus?.value === "autre";
+                reason.hidden = !needsReason;
+                reason.required = needsReason;
+            };
+
+            document.querySelectorAll(".attendance-status").forEach((input) => {
+                input.addEventListener("change", () => updateMotifVisibility(input.closest("tr")));
+            });
+            document.querySelectorAll(".attendance-status").forEach((input) => {
+                if (input.checked) {
+                    updateMotifVisibility(input.closest("tr"));
+                }
+            });
+        })();
+    </script>
 {% endblock %}

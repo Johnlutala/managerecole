@@ -150,12 +150,21 @@ final class InscriptionEleveController extends AbstractController
             $this->addFlash('info', 'Cette inscription est déjà validée.');
             return $this->redirectToRoute('app_inscription_eleve_index');
         }
+        if (
+            $inscription->getOptions() !== null
+            && $inscription->getOptions()->getClasse()?->getId() !== $inscription->getClasse()?->getId()
+        ) {
+            $this->addFlash('danger', 'L’option sélectionnée ne correspond pas à la classe.');
+            return $this->redirectToRoute('app_inscription_eleve_index');
+        }
         $eleve = $inscription->getReference() ? $eleves->findOneBy(['matricule' => $inscription->getReference()]) : null;
         if (!$eleve) {
             $eleve = (new Eleve())->setNom($inscription->getNom())->setPostnom($inscription->getPostnom())->setPrenom($inscription->getPrenom() ?? $inscription->getNom())->setSexe($inscription->getSexe())->setDateNaissance($inscription->getDateNaissance())->setLieuNaissance($inscription->getLieuNaissance())->setAdresse($inscription->getAdresse())->setPhone($inscription->getTelephone())->setDateInscription(new \DateTime())->setStatut(true);
             $entityManager->persist($eleve);
         }
-        $eleve->setEcole($inscription->getEtablissement())->setClasse($inscription->getClasse());
+        $eleve->setEcole($inscription->getEtablissement())
+            ->setClasse($inscription->getClasse())
+            ->setOption($inscription->getOptions());
         $parent = $inscription->getTelephoneParent() ? $parents->findOneBy(['telephone' => $inscription->getTelephoneParent()]) : null;
         if (!$parent) {
             $parent = (new Parents())->setNom($inscription->getNomParent())->setPostnom($inscription->getPostnomParent())->setPrenom($inscription->getPrenomParent())->setTelephone($inscription->getTelephoneParent() ?? 'Non renseigné')->setAdresse($inscription->getAdresseParent() ?? 'Non renseignée')->setProfession($inscription->getProfessionParent())->setType($inscription->getLienParental());

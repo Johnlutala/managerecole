@@ -1,0 +1,236 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des jours{% endblock %}
+
+{% block body %}
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="container-fluid">
+
+            {# =========================
+               TITRE
+            ========================= #}
+            <div class="page-title-head d-flex align-items-center">
+
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">
+                        Gestion des jours
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Gestion des jours utilisés dans la programmation hebdomadaire.
+                    </p>
+                </div>
+
+            </div>
+
+            {# =========================
+               TABLEAU
+            ========================= #}
+            <div
+                data-table
+                data-table-rows-per-page="8"
+                class="card"
+            >
+
+                {# HEADER #}
+                <div class="card-header border-light d-flex justify-content-between">
+
+                    <div class="app-search">
+                        <input
+                            data-table-search
+                            type="search"
+                            class="form-control"
+                            placeholder="Rechercher un jour..."
+                        >
+
+                        <i
+                            data-lucide="search"
+                            class="app-search-icon text-muted"
+                        ></i>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addModal"
+                    >
+                        <i class="ti ti-plus me-1"></i>
+                        Ajouter
+                    </button>
+
+                </div>
+
+                {# TABLE #}
+                <div class="table-responsive">
+
+                    <table class="table table-custom table-centered table-hover w-100 mb-0">
+
+                        <thead class="bg-light bg-opacity-25 thead-sm">
+                            <tr class="text-uppercase fs-xxs">
+                                <th>Nom du jour</th>
+                                <th>Ordre</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                        {% for jour in jours %}
+                            <tr>
+
+                                <td>
+                                    <span class="fw-semibold">
+                                        {{ jour.nom }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-soft-primary">
+                                        {{ jour.ordre }}
+                                    </span>
+                                </td>
+
+                                {# ACTIONS #}
+                                <td>
+                                    <div class="d-flex justify-content-center gap-1">
+
+                                        <a
+                                            href="{{ path('app_jour_show', {'id': jour.id}) }}"
+                                            class="btn btn-default btn-icon btn-sm rounded-circle"
+                                            title="Consulter"
+                                        >
+                                            <i class="ti ti-eye fs-lg"></i>
+                                        </a>
+
+                                        <a
+                                            href="{{ path('app_jour_edit', {'id': jour.id}) }}"
+                                            class="btn btn-default btn-icon btn-sm rounded-circle"
+                                            title="Modifier"
+                                        >
+                                            <i class="ti ti-edit fs-lg"></i>
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-muted">
+                                    <i class="ti ti-calendar-off fs-1 d-block mb-2"></i>
+                                    Aucun jour enregistré.
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {# PAGINATION #}
+                <div class="card-footer border-0 d-flex justify-content-between">
+                    <div data-table-pagination-info></div>
+                    <div data-table-pagination></div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# =========================
+   MODAL AJOUT D'UN JOUR
+========================= #}
+<div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            {{ form_start(form) }}
+
+                {# HEADER #}
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">
+                            Nouveau jour
+                        </h5>
+
+                        <small class="text-muted">
+                            Ajouter un jour à la programmation hebdomadaire.
+                        </small>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Fermer"
+                    ></button>
+                </div>
+
+                {# BODY #}
+                <div class="modal-body">
+
+                    <div class="row gx-3 gy-3">
+
+                        <div class="col-md-6">
+                            {{ form_row(form.nom, {
+                                label: 'Nom du jour',
+                                attr: {
+                                    placeholder: 'Ex. : Lundi',
+                                    class: 'form-control'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ form_row(form.ordre, {
+                                label: 'Ordre',
+                                attr: {
+                                    placeholder: 'Ex. : 1',
+                                    class: 'form-control',
+                                    min: 1
+                                }
+                            }) }}
+                        </div>
+
+                    </div>
+
+                    {{ form_rest(form) }}
+
+                </div>
+
+                {# FOOTER #}
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Annuler
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+                        Enregistrer
+                    </button>
+
+                </div>
+
+            {{ form_end(form, {render_rest: false}) }}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

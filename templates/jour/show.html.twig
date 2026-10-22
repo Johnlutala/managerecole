@@ -1,0 +1,171 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du jour{% endblock %}
+
+{% block body %}
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="container-fluid">
+
+            <div class="page-title-head d-flex align-items-center mb-4">
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">
+                        Détail du jour
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Informations sur le jour de la semaine.
+                    </p>
+                </div>
+
+                <div class="text-end">
+                    <ol class="breadcrumb m-0 py-0">
+                        <li class="breadcrumb-item">
+                            <a href="javascript:void(0);">ADMIN</a>
+                        </li>
+
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_jour_index') }}">
+                                Jours
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active">
+                            Détail
+                        </li>
+                    </ol>
+                </div>
+
+            </div>
+
+            {# ==================== CONTENU ==================== #}
+            <div class="row">
+
+                {# INFORMATIONS RAPIDES #}
+                <div class="col-xl-3 col-lg-4">
+
+                    <div class="card">
+
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                Jour N° : {{ jour.id }}
+                            </h4>
+                        </div>
+
+                        <div class="card-body text-center">
+
+                            <div class="avatar-xl mx-auto mb-3">
+                                <div class="avatar-title bg-primary-subtle text-primary rounded">
+                                    <i class="ti ti-calendar fs-1"></i>
+                                </div>
+                            </div>
+
+                            <h4 class="mb-1">
+                                {{ jour.nom }}
+                            </h4>
+
+                            <p class="text-muted mb-2">
+                                Ordre :
+                                <strong>{{ jour.ordre }}</strong>
+                            </p>
+
+                            <hr>
+
+                            <div class="d-grid gap-2">
+
+                                <a
+                                    href="{{ path('app_jour_edit', {'id': jour.id}) }}"
+                                    class="btn btn-warning"
+                                >
+                                    <i class="ti ti-edit me-1"></i>
+                                    Modifier
+                                </a>
+
+                                {{ include('jour/_delete_form.html.twig') }}
+
+                                <a
+                                    href="{{ path('app_jour_index') }}"
+                                    class="btn btn-secondary"
+                                >
+                                    <i class="ti ti-arrow-left me-1"></i>
+                                    Retour à la liste
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {# INFORMATIONS DÉTAILLÉES #}
+                <div class="col-xl-9 col-lg-8">
+
+                    <div class="card h-100">
+
+                        <div class="card-header">
+                            <h4 class="card-title mb-0">
+                                <i class="ti ti-calendar me-2"></i>
+                                Informations du jour
+                            </h4>
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered align-middle mb-0">
+
+                                    <tbody>
+
+                                        {# IDENTIFIANT #}
+                                        <tr>
+                                            <th style="width: 35%;">
+                                                Identifiant
+                                            </th>
+                                            <td>
+                                                {{ jour.id }}
+                                            </td>
+                                        </tr>
+
+                                        {# NOM #}
+                                        <tr>
+                                            <th>Nom du jour</th>
+                                            <td>
+                                                <strong>{{ jour.nom }}</strong>
+                                            </td>
+                                        </tr>
+
+                                        {# ORDRE #}
+                                        <tr>
+                                            <th>Ordre dans la semaine</th>
+                                            <td>
+                                                <span class="badge bg-primary">
+                                                    {{ jour.ordre }}
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

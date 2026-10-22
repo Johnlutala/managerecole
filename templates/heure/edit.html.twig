@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une heure{% endblock %}
+
+{% block body %}
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="container-fluid">
+
+        {# Titre de la page #}
+        <div class="page-title-head d-flex align-items-center mb-3">
+
+            <div class="flex-grow-1">
+                <h4 class="fs-xl fw-bold m-0">
+                    Modifier une heure
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Modifier les informations de cette plage horaire.
+                </p>
+            </div>
+
+        </div>
+
+
+        {# Formulaire #}
+        <div class="row">
+
+            <div class="col-lg-8" style="margin-left : 100px">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            Informations de l'heure
+                        </h5>
+                    </div>
+
+                    <div class="card-body">
+
+                        {{ include('heure/_form.html.twig', {
+                            'button_label': 'Enregistrer'
+                        }) }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+</div>
+
+{% endblock %}

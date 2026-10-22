@@ -1,0 +1,326 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail de l'heure{% endblock %}
+
+{% block body %}
+
+<div class="wrapper">
+<div class="content-page">
+    <div class="container-fluid">
+
+        {# ==================== TITRE ==================== #}
+        <div class="page-title-head d-flex align-items-center">
+            <div class="flex-grow-1">
+                <h4 class="fs-xl fw-bold m-0">
+                    Détail de l'heure
+                </h4>
+                <p class="text-muted mb-0">
+                    Informations sur la plage horaire.
+                </p>
+            </div>
+            <div class="text-end">
+                <ol class="breadcrumb m-0 py-0">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);">
+                            ADMIN
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('app_heure_index') }}">
+                            Heures
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item active">
+                        Détail
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </div>
+
+
+        {# ==================== CONTENU ==================== #}
+
+        <div class="row">
+
+
+            {# ==================== INFORMATIONS RAPIDES ==================== #}
+
+            <div class="col-xl-3">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h4 class="card-title">
+                            Heure N° :
+                            {{ heure.id }}
+                        </h4>
+
+                    </div>
+
+                    <div class="card-body text-center">
+
+                        <div class="avatar-xl mx-auto mb-3">
+
+                            <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                <i class="ti ti-clock fs-1"></i>
+
+                            </div>
+
+                        </div>
+
+
+                        <h4 class="mb-1">
+                            {{ heure.nom }}
+                        </h4>
+
+
+                        <p class="text-muted mb-2">
+
+                            Ordre :
+
+                            <strong>
+                                {{ heure.ordre }}
+                            </strong>
+
+                        </p>
+
+
+                        <hr>
+
+
+                        <div class="d-grid gap-2">
+
+                            <a
+                                href="{{ path('app_heure_edit', {'id': heure.id}) }}"
+                                class="btn btn-warning"
+                            >
+
+                                <i class="ti ti-edit me-1"></i>
+                                Modifier
+
+                            </a>
+
+
+                            {{ include('heure/_delete_form.html.twig') }}
+
+
+                            <a
+                                href="{{ path('app_heure_index') }}"
+                                class="btn btn-secondary"
+                            >
+
+                                <i class="ti ti-arrow-left me-1"></i>
+                                Retour
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {# ==================== INFORMATIONS DE L'HEURE ==================== #}
+
+            <div class="col-xl-9">
+
+                <div class="card h-100">
+
+                    <div class="card-header">
+
+                        <h4 class="card-title mb-0">
+
+                            <i class="ti ti-clock me-2"></i>
+                            Informations de l'heure
+
+                        </h4>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-bordered align-middle mb-0">
+
+                                <tbody>
+
+                                    {# ID #}
+
+                                    <tr>
+
+                                        <th width="35%">
+                                            Identifiant
+                                        </th>
+
+                                        <td>
+                                            {{ heure.id }}
+                                        </td>
+
+                                    </tr>
+
+
+                                    {# NOM #}
+
+                                    <tr>
+
+                                        <th>
+                                            Nom
+                                        </th>
+
+                                        <td>
+
+                                            <strong>
+                                                {{ heure.nom }}
+                                            </strong>
+
+                                        </td>
+
+                                    </tr>
+
+
+                                    {# HEURE DEBUT #}
+
+                                    <tr>
+
+                                        <th>
+                                            Heure de début
+                                        </th>
+
+                                        <td>
+
+                                            {% if heure.heureDebut %}
+
+                                                <span class="badge badge-soft-primary">
+
+                                                    <i class="ti ti-clock me-1"></i>
+
+                                                    {{ heure.heureDebut|date('H:i') }}
+
+                                                </span>
+
+                                            {% else %}
+
+                                                —
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+
+                                    {# HEURE FIN #}
+
+                                    <tr>
+
+                                        <th>
+                                            Heure de fin
+                                        </th>
+
+                                        <td>
+
+                                            {% if heure.heureFin %}
+
+                                                <span class="badge badge-soft-primary">
+
+                                                    <i class="ti ti-clock me-1"></i>
+
+                                                    {{ heure.heureFin|date('H:i') }}
+
+                                                </span>
+
+                                            {% else %}
+
+                                                —
+
+                                            {% endif %}
+
+                                        </td>
+
+                                    </tr>
+
+
+                                    {# ORDRE #}
+
+                                    <tr>
+
+                                        <th>
+                                            Ordre
+                                        </th>
+
+                                        <td>
+
+                                            <span class="badge bg-primary">
+
+                                                {{ heure.ordre }}
+
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+
+
+                                    {# DUREE #}
+
+                                    {% if heure.heureDebut and heure.heureFin %}
+
+                                        <tr>
+
+                                            <th>
+                                                Plage horaire
+                                            </th>
+
+                                            <td>
+
+                                                <span class="text-muted">
+
+                                                    {{ heure.heureDebut|date('H:i') }}
+
+                                                    <i class="ti ti-arrow-right mx-2"></i>
+
+                                                    {{ heure.heureFin|date('H:i') }}
+
+                                                </span>
+
+                                            </td>
+
+                                        </tr>
+
+                                    {% endif %}
+
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,11 +1,5 @@
-<div
-	class="wrapper"
->
-
-	<div
-		class="sidenav-menu"
-	>
-		<!-- Brand Logo -->
+<div class="wrapper"> 
+	<div class="sidenav-menu" Brand Logo>
 		<a href="index-2.html" class="logo">
 			<span class="logo logo-light">
 				<span class="logo-lg"><img src="assets/images/enabel.png"></span>
@@ -84,235 +78,203 @@
 					</div>
 				</li>
 
+				<li class="side-nav-item">
+					<a data-bs-toggle="collapse" href="#sidebarEtablissement" aria-expanded="false" aria-controls="sidebarEtablissement" class="side-nav-link">
+						<span class="menu-icon">
+							<i data-lucide="school"></i>
+						</span>
 
-				{# ==================== ETABLISSEMENT ==================== #}
-				{% if is_granted('ROLE_ADMIN') %}
+						<span class="menu-text">
+							Établissement
+						</span>
+					</a>
 
-					<li class="side-nav-item">
+					<div class="collapse" id="sidebarEtablissement">
+						<ul class="sub-menu">
+							{# École #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_ecole_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="school"></i>
+									</span>
 
-						<a
-							data-bs-toggle="collapse"
-							href="#sidebarEtablissement"
-							aria-expanded="false"
-							aria-controls="sidebarEtablissement"
-							class="side-nav-link"
-						>
+									<span class="menu-text">
+										École
+									</span>
+								</a>
+							</li>
 
-							<span class="menu-icon">
-								<i data-lucide="school"></i>
-							</span>
-
-							<span class="menu-text">
-								Établissement
-							</span>
-
-						</a>
-
-						<div class="collapse" id="sidebarEtablissement">
-
-							<ul class="sub-menu">
-
-								{# École #}
-								<li class="side-nav-item">
-									<a
-										href="{{ path('app_ecole_index') }}"
-										class="side-nav-link"
-									>
-
-										<span class="menu-icon">
-											<i data-lucide="school"></i>
-										</span>
-
-										<span class="menu-text">
-											École
-										</span>
-
-									</a>
-								</li>
-
-								{# Section #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_section_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="panels-top-left"></i>
-										</span>
-										<span class="menu-text">
-											Section
-										</span>
-									</a>
-								</li>
+							{# Section #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_section_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="panels-top-left"></i>
+									</span>
+									<span class="menu-text">
+										Section
+									</span>
+								</a>
+							</li>
 
 
-								{# Classes #}
-								<li class="side-nav-item">
-									<a
-										href="{{ path('app_classe_index') }}"
-										class="side-nav-link"
-									>
+							{# Classes #}
+							<li class="side-nav-item">
+								<a
+									href="{{ path('app_classe_index') }}"
+									class="side-nav-link"
+								>
 
-										<span class="menu-icon">
-											<i data-lucide="book-open"></i>
-										</span>
+									<span class="menu-icon">
+										<i data-lucide="book-open"></i>
+									</span>
 
-										<span class="menu-text">
-											Classes
-										</span>
+									<span class="menu-text">
+										Classes
+									</span>
 
-									</a>
-								</li>
+								</a>
+							</li>
 
 
-								{# Options #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_option_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Options
-										</span>
-									</a>
-								</li>
-								{# Cours #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_cours_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Cours
-										</span>
-									</a>
-								</li>
-								{# Professeurs #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_professeur_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Professeurs
-										</span>
-									</a>
-								</li>
-								{# Parents #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_parents_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Parents
-										</span>
-									</a>
-								</li>
-								{# Parents #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_horaire_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Horaires
-										</span>
-									</a>
-								</li>
+							{# Options #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_option_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Options
+									</span>
+								</a>
+							</li>
+							{# Cours #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_cours_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Cours
+									</span>
+								</a>
+							</li>
+							{# Professeurs #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_professeur_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Professeurs
+									</span>
+								</a>
+							</li>
+							{# Parents #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_parents_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Parents
+									</span>
+								</a>
+							</li>
+							{# Présence #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_presence_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Présence
+									</span>
+								</a>
+							</li>
+							{# Parents #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_horaire_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Horaires
+									</span>
+								</a>
+							</li>
 								
-								{# Année Scolaire #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link" >
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Année Scolaire
-										</span>
-									</a>
-								</li>
+							{# Jour Scolaire #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_jour_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Jour
+									</span>
+								</a>
+							</li>
+								
+							{# Heure #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_heure_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Heure
+									</span>
+								</a>
+							</li>
 
-							</ul>
+							{# Année Scolaire #}
+							<li class="side-nav-item">
+								<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link">
+									<span class="menu-icon">
+										<i data-lucide="layers-3"></i>
+									</span>
+									<span class="menu-text">
+										Année Scolaire
+									</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
 
-						</div>
-
-					</li>
-
-				{% endif %}
-
-
-				{# ==================== PERSONNELS ==================== #}
 				<li class="side-nav-title">
 					PERSONNELS
 				</li>
 
-
 				{# Élèves #}
 				<li class="side-nav-item">
-					<a
-						href="{{ path('app_eleve_index') }}"
-						class="side-nav-link"
-					>
-
+					<a href="{{ path('app_eleve_index') }}" class="side-nav-link">
 						<span class="menu-icon">
 							<i data-lucide="users-round"></i>
 						</span>
-
 						<span class="menu-text">
 							Élèves
 						</span>
-
 					</a>
 				</li>
 
 
 				{# Administrateurs #}
-				<li class="side-nav-item">
-					<a
-						href="#"
-						class="side-nav-link"
-					>
-
-						<span class="menu-icon">
-							<i data-lucide="user-cog"></i>
-						</span>
-
-						<span class="menu-text">
-							Admin
-						</span>
-
-					</a>
-				</li>
-
-
-				{# ==================== FINANCE ==================== #}
-				<li class="side-nav-title">
-					FINANCE
-				</li>
-
-
-				{# ==================== UTILISATEURS ==================== #}
-				<li class="side-nav-title">
-					UTILISATEURS
-				</li>
-
 				{% if is_granted('ROLE_ADMIN') %}
 
+					<li class="side-nav-title">
+						UTILISATEURS
+					</li>
+
 					<li class="side-nav-item">
-
-						<a
-							href="{{ path('app_user_index') }}"
-							class="side-nav-link"
-						>
-
+						<a href="{{ path('app_user_index') }}" class="side-nav-link">
 							<span class="menu-icon">
 								<i data-lucide="users"></i>
 							</span>
-
 							<span class="menu-text">
 								Utilisateurs
 							</span>
-
 						</a>
-
 					</li>
 
 				{% endif %}
@@ -320,7 +282,6 @@
 			</ul>
 		</div>
 	</div>
-
 	<!-- Sidenav Menu End -->
 
 	<!-- Topbar Start -->

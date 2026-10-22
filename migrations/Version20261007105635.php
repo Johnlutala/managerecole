@@ -16,6 +16,43 @@ final class Version20261007105635 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $expectedTables = [
+            'annee_scolaire',
+            'classe',
+            'cours',
+            'creneau_horaire',
+            'ecole',
+            'eleve',
+            'heure',
+            'horaire',
+            'inscription_eleve',
+            'jour',
+            'note',
+            'option',
+            'parents',
+            'parents_eleve',
+            'presence',
+            'professeur',
+            'section',
+            'user',
+            'messenger_messages',
+        ];
+        $existingTables = $this->connection->createSchemaManager()->listTableNames();
+        $existingProjectTables = array_intersect($expectedTables, $existingTables);
+
+        if ($existingProjectTables !== []) {
+            $missingTables = array_diff($expectedTables, $existingTables);
+            if ($missingTables !== []) {
+                throw new \RuntimeException(sprintf(
+                    'La migration initiale a trouvé un schéma partiel. Tables manquantes : %s. '
+                    . 'Aucune table n’a été créée ; préparez une migration de mise à niveau adaptée.',
+                    implode(', ', $missingTables)
+                ));
+            }
+
+            return;
+        }
+
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE annee_scolaire (id INT AUTO_INCREMENT NOT NULL, ecole_id INT DEFAULT NULL, libelle VARCHAR(50) NOT NULL, date_debut DATE NOT NULL, date_fin DATE NOT NULL, INDEX IDX_97150C2B77EF1B1E (ecole_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE classe (id INT AUTO_INCREMENT NOT NULL, ecole_id INT DEFAULT NULL, section_id INT DEFAULT NULL, created_by INT DEFAULT NULL, nom VARCHAR(255) NOT NULL, capacite INT DEFAULT NULL, code VARCHAR(50) DEFAULT NULL, enabled TINYINT(1) DEFAULT NULL, deleted TINYINT(1) DEFAULT NULL, created_at DATETIME DEFAULT NULL, updated_at DATETIME DEFAULT NULL, UNIQUE INDEX UNIQ_8F87BF9677153098 (code), INDEX IDX_8F87BF9677EF1B1E (ecole_id), INDEX IDX_8F87BF96D823E37A (section_id), INDEX IDX_8F87BF96DE12AB56 (created_by), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');

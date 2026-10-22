@@ -1,0 +1,152 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Présences du personnel{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">Présences du personnel</h4>
+                        <p class="text-muted mb-0">Professeurs et personnel administratif.</p>
+                    </div>
+                    <a class="btn btn-outline-primary" href="{{ path('app_presence_index') }}">Présences élèves</a>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'warning' ? 'warning' : (type == 'danger' ? 'danger' : 'success') }}">{{ message }}</div>
+                    {% endfor %}
+                {% endfor %}
+
+                <form method="get" class="card card-body mb-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label" for="staff-date">Date</label>
+                            <input class="form-control" id="staff-date" type="date" name="date" value="{{ date|date('Y-m-d') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100">Afficher</button>
+                        </div>
+                    </div>
+                </form>
+
+                {% if presenceAlreadyRecorded %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Présences du personnel effectuées par {{ presenceAuthor ?: 'Utilisateur inconnu' }}</h5>
+                            <small class="text-muted">{{ date|date('d/m/Y') }}</small>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-custom table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Personnel</th>
+                                        <th>Fonction</th>
+                                        <th>État</th>
+                                        <th>Arrivée</th>
+                                        <th>Départ</th>
+                                        <th>Motif</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key, item in staff %}
+                                        {% set record = existing[key] ?? null %}
+                                        <tr>
+                                            <td>{{ item.label }}</td>
+                                            <td>{{ item.role }}</td>
+                                            <td>
+                                                {% if record %}
+                                                    {{ {present: 'Présent', absent: 'Absent', retard: 'Retard', autre: 'Autre', autorise: 'Absence autorisée', depart_anticipe: 'Départ anticipé'}[record.statut] ?? record.statut }}
+                                                {% else %}
+                                                    ---
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ record and record.heureArrivee ? record.heureArrivee|date('H:i') : '---' }}</td>
+                                            <td>{{ record and record.heureDepart ? record.heureDepart|date('H:i') : '---' }}</td>
+                                            <td>{{ record and record.observation ? record.observation : '---' }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="6" class="text-center py-4">Aucun personnel disponible.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer text-end">
+                            <a class="btn btn-primary" href="{{ path('app_presence_personnel_control', {date: date|date('Y-m-d')}) }}">Modifier au contrôle</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <form method="post" action="{{ path('app_presence_personnel', {date: date|date('Y-m-d')}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('attendance_staff') }}">
+                        <div class="card">
+                            <div class="table-responsive">
+                                <table class="table table-custom table-centered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Personnel</th>
+                                            <th>Fonction</th>
+                                            <th>État</th>
+                                            <th>Arrivée</th>
+                                            <th>Départ</th>
+                                            <th>Motif</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for key, item in staff %}
+                                            {% set record = existing[key] ?? null %}
+                                            <tr>
+                                                <td>{{ item.label }}</td>
+                                                <td>{{ item.role }}</td>
+                                                <td>
+                                                    {% for code, label in {present: 'Présent', absent: 'Absent', retard: 'Retard', autre: 'Autre'} %}
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input attendance-status" type="radio"
+                                                                id="staff-{{ key }}-{{ code }}"
+                                                                name="attendance[{{ key }}][statut]"
+                                                                value="{{ code }}"
+                                                                required
+                                                                {{ (record and record.statut == code) or (not record and code == 'present') ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="staff-{{ key }}-{{ code }}">{{ label }}</label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </td>
+                                                <td><input class="form-control" type="time" name="attendance[{{ key }}][arrivee]" value="{{ record and record.heureArrivee ? record.heureArrivee|date('H:i') : '07:30' }}"></td>
+                                                <td><input class="form-control" type="time" name="attendance[{{ key }}][depart]" value="{{ record and record.heureDepart ? record.heureDepart|date('H:i') : '12:30' }}"></td>
+                                                <td>
+                                                    <input class="form-control attendance-reason" type="text"
+                                                        name="attendance[{{ key }}][motif]"
+                                                        value="{{ record ? record.observation }}"
+                                                        placeholder="Motif"
+                                                        {{ record and record.statut == 'autre' ? 'required' : 'hidden' }}>
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr><td colspan="6" class="text-center py-4">Aucun personnel disponible.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="card-footer text-end">
+                                <button class="btn btn-primary">Enregistrer les présences</button>
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll(".attendance-status").forEach((input) => {
+            input.addEventListener("change", () => {
+                const row = input.closest("tr");
+                const reason = row.querySelector(".attendance-reason");
+                const needsReason = row.querySelector(".attendance-status:checked")?.value === "autre";
+                reason.hidden = !needsReason;
+                reason.required = needsReason;
+            });
+        });
+    </script>
+{% endblock %}
