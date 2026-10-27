@@ -1,21 +1,15 @@
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Modifier | Élève{% endblock %}
 
 {% block body %}
-
     <div class="container-fluid">
-
         <div class="row justify-content-center">
-
             <div class="col-xl-8">
 
                 <div class="page-title-head d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <h4 class="fs-xl fw-bold m-0">
-                            Mise à jour de l'élève
-                        </h4>
+                        <h4 class="fs-xl fw-bold m-0">Mise à jour de l'élève</h4>
                     </div>
 
                     <div class="text-end">
@@ -23,14 +17,10 @@
                             <li class="breadcrumb-item">
                                 <a href="javascript:void(0);">ADMIN</a>
                             </li>
-
                             <li class="breadcrumb-item">
                                 <a href="{{ path('app_eleve_index') }}">Élèves</a>
                             </li>
-
-                            <li class="breadcrumb-item active">
-                                Modifier
-                            </li>
+                            <li class="breadcrumb-item active">Modifier</li>
                         </ol>
                     </div>
                 </div>
@@ -52,21 +42,78 @@
                     </div>
 
                     <div class="card-body">
-                        {{ include('eleve/_form.html.twig', {
-                        button_label: 'Mettre à jour'
-                    }) }}
+                        {{ form_start(form) }}
+
+                        <h5 class="mb-3">Informations personnelles</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">{{ form_row(form.nom) }}</div>
+                            <div class="col-md-6">{{ form_row(form.postnom) }}</div>
+                            <div class="col-md-6">{{ form_row(form.prenom) }}</div>
+                            <div class="col-md-6">{{ form_row(form.sexe) }}</div>
+                            <div class="col-md-6">{{ form_row(form.dateNaissance) }}</div>
+                            <div class="col-md-6">{{ form_row(form.lieuNaissance) }}</div>
+                            <div class="col-md-6">{{ form_row(form.adresse) }}</div>
+                            <div class="col-md-6">{{ form_row(form.phone) }}</div>
+                            <div class="col-md-6">{{ form_row(form.email) }}</div>
+                            <div class="col-md-6">{{ form_row(form.dateInscription) }}</div>
+                            <div class="col-md-6">{{ form_row(form.statut) }}</div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="mb-3">Affectation scolaire</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form_row(form.ecole, {
+                                    attr: {
+                                        id: 'eleve_ecole'
+                                    }
+                                }) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form_row(form.section, {
+                                    attr: {
+                                        id: 'eleve_section'
+                                    }
+                                }) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form_row(form.classe, {
+                                    attr: {
+                                        id: 'eleve_classe'
+                                    }
+                                }) }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form_row(form.option, {
+                                    attr: {
+                                        id: 'eleve_option'
+                                    }
+                                }) }}
+                            </div>
+
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti ti-device-floppy me-1"></i>
+                                    Mettre à jour
+                                </button>
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
                     </div>
+
                 </div>
-
             </div>
-
         </div>
-
-    </div>
-
 {% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="{{ asset('js/eleve-form.js') }}"></script>
-{% endblock %}
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="{{ asset('js/eleve-form.js') }}"></script>
+    {% endblock %}

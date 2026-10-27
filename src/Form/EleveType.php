@@ -35,9 +35,7 @@ final class EleveType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('matricule', TextType::class, [
-                'label' => 'Matricule',
-            ])
+          
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
             ])

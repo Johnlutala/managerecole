@@ -4,9 +4,6 @@
 {# Informations personnelles #}
 <div class="row">
     <div class="col-md-6">
-        {{ form_row(form.matricule) }}
-    </div>
-    <div class="col-md-6">
         {{ form_row(form.nom) }}
     </div>
     <div class="col-md-6">
@@ -54,7 +51,7 @@
         }) }}
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
         {{ form_row(form.section, {
             attr: {
                 id: 'eleve_section'
@@ -62,7 +59,7 @@
         }) }}
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
         {{ form_row(form.classe, {
             attr: {
                 id: 'eleve_classe'
@@ -70,7 +67,7 @@
         }) }}
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
         {{ form_row(form.option, {
             attr: {
                 id: 'eleve_option'

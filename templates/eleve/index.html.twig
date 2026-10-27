@@ -35,8 +35,6 @@
                             <input data-table-search type="search" class="form-control" placeholder="Rechercher...">
                             <i data-lucide="search" class="app-search-icon text-muted"></i>
                         </div>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                            <i class="ti ti-plus me-1"></i>Ajouter</button>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-custom table-centered table-hover w-100 mb-0">
@@ -45,8 +43,8 @@
                                     <th>Matricule</th>
                                     <th>Nom complet</th>
                                     <th>École</th>
-                                     <th>Classe</th>
-                                     <th>Option</th>
+                                    <th>Classe</th>
+                                    <th>Option</th>
                                     <th>Statut</th>
                                     <th>Compte</th>
                                     <th class="text-center">Actions</th>
@@ -73,13 +71,13 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                        <div class="d-flex justify-content-center gap-1">
-                                            <a href="{{ path('app_eleve_show', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-                                                <i class="ti ti-eye fs-lg"></i></a>
-                                            <a href="{{ path('app_eleve_edit', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-                                                <i class="ti ti-edit fs-lg"></i>
-                                            </a>
-                                        </div>
+                                            <div class="d-flex justify-content-center gap-1">
+                                                <a href="{{ path('app_eleve_show', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-eye fs-lg"></i></a>
+                                                <a href="{{ path('app_eleve_edit', {id: eleve.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
+                                                    <i class="ti ti-edit fs-lg"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% else %}
@@ -99,21 +97,5 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="addModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                {{ form_start(form) }}
-                <div class="modal-header">
-                    <h5 class="modal-title">Ajouter Élève</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal">
-
-                    </button></div><div class="modal-body">
-                    {% include 'crud/_form_fields.html.twig' with {form: form} %}</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-                    <button class="btn btn-primary">Enregistrer</button>
-                </div>
-                {{ form_end(form) }}
-            </div>
-        </div>
-    </div>{% endblock %}
+    
+    {% endblock %}
