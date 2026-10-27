@@ -69,6 +69,33 @@ final class InscriptionEleveController extends AbstractController
             'form' => $form->createView()
         ]);
     }
+     #[Route('/verifier-email', name: 'verifier_email', methods: ['GET'])]    
+    public function verifierEmail(
+        Request $request,
+        InscriptionEleveRepository $inscriptionRepository
+    ): JsonResponse {
+        $email = trim((string) $request->query->get('email', ''));
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->json([
+                'valid' => false,
+                'available' => false,
+                'message' => 'Veuillez saisir une adresse e-mail valide.',
+            ]);
+        }
+
+        $inscriptionExistante = $inscriptionRepository->findOneBy([
+            'email' => $email,
+        ]);
+
+        return $this->json([
+            'valid' => true,
+            'available' => $inscriptionExistante === null,
+            'message' => $inscriptionExistante
+                ? 'Cette adresse e-mail est déjà utilisée.'
+                : 'Adresse e-mail disponible.',
+        ]);
+    }
 
     #[Route('/lookup', name: 'lookup', methods: ['GET'])]
     public function lookup(
@@ -395,4 +422,6 @@ final class InscriptionEleveController extends AbstractController
             )
         );
     }
+
+   
 }

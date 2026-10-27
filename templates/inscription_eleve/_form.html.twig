@@ -42,10 +42,6 @@
 </div>
 
 
-{# ========================================================= #}
-{# INFORMATIONS DE L'ÉLÈVE #}
-{# ========================================================= #}
-
 <div class="card border mb-3">
 
     <div class="card-header">
@@ -125,15 +121,24 @@
             </div>
 
 
-            {# Gmail #}
+           {# Gmail de l'élève #}
             <div class="col-md-4">
                 {{ form_row(form.email, {
                     label: 'Gmail élève',
                     attr: {
                         class: 'form-control',
-                        placeholder: 'ex: johnjk@gmail.com'
+                        placeholder: 'ex: johnjk@gmail.com',
+                        id: 'inscription_email',
+                        autocomplete: 'email',
+                        'data-check-url': path('app_inscription_eleve_verifier_email')
                     }
                 }) }}
+
+                <div
+                    id="email-feedback"
+                    class="small mt-1"
+                    aria-live="polite"
+                ></div>
             </div>
 
             {# Téléphone #}
@@ -163,11 +168,6 @@
     </div>
 
 </div>
-
-
-{# ========================================================= #}
-{# INFORMATIONS DU PARENT / TUTEUR #}
-{# ========================================================= #}
 
 <div class="card border mb-3">
 
@@ -272,11 +272,6 @@
 
 </div>
 
-
-{# ========================================================= #}
-{# SCOLARITÉ #}
-{# ========================================================= #}
-
 <div class="card border mb-3">
 
     <div class="card-header">
@@ -347,10 +342,6 @@
 
 </div>
 
-
-{# ========================================================= #}
-{# BOUTONS #}
-{# ========================================================= #}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 
