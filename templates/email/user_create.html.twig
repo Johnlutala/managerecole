@@ -1,156 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vos identifiants de connexion</title>
+    <title>Vos identifiants de connexion - School Manager</title>
 </head>
 
 <body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#333333;">
 
     <div style="max-width:560px; margin:30px auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:28px;">
 
-        {# En-tête #}
         <div style="text-align:center; margin-bottom:25px;">
-
             <div style="font-size:24px; font-weight:bold; color:#1f3c88;">
                 SCHOOL MANAGER
             </div>
-
             <div style="font-size:12px; color:#888888; margin-top:5px;">
                 Plateforme de gestion scolaire
             </div>
-
         </div>
 
-        {# Salutation #}
         <p style="font-size:15px; margin:0 0 15px;">
-            Bonjour
-            <strong>
-                {{ user.firstname }}
-                {{ user.lastname }}
-            </strong>,
+            Bonjour <strong>{{ user.firstname }} {{ user.lastname }}</strong>,
         </p>
 
-        {# Message #}
-        <p style="font-size:14px; line-height:1.6; margin:0 0 18px; color:#555555;">
-
-            <strong style="color:#1f3c88;">
-                Vos identifiants de connexion ont été générés avec succès.
-            </strong>
-
-            <br>
-
-            Voici vos informations de connexion :
-
+        <p style="font-size:14px; line-height:1.7; margin:0 0 20px; color:#555555;">
+            Votre compte <strong style="color:#1f3c88;">School Manager</strong>
+            a été créé avec succès. Voici vos informations de connexion.
+            Veuillez les conserver précieusement.
         </p>
 
-        {# Bloc des identifiants #}
         <div style="background:#f7f8fa; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:20px;">
 
-            {# Nom utilisateur #}
             <div style="margin-bottom:15px;">
-
                 <div style="font-size:11px; color:#777777; margin-bottom:6px;">
                     NOM D'UTILISATEUR
                 </div>
-
-                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
-
-                    <span style="font-weight:bold; color:#222222;">
-                        {{ username }}
-                    </span>
-
-                    <span style="float:right; color:#1f3c88; font-size:16px;">
-                        &#128203;
-                    </span>
-
+                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:12px; font-size:14px;">
+                    <strong style="color:#222222;">{{ username }}</strong>
                 </div>
-
             </div>
 
-            {# Mot de passe #}
-            <div>
+            {% if matricule is defined and matricule %}
+                <div style="margin-bottom:15px;">
+                    <div style="font-size:11px; color:#777777; margin-bottom:6px;">
+                        NUMÉRO MATRICULE
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:12px; font-size:14px;">
+                        <strong style="color:#1f3c88;">{{ matricule }}</strong>
+                    </div>
+                </div>
+            {% endif %}
 
+            <div>
                 <div style="font-size:11px; color:#777777; margin-bottom:6px;">
                     MOT DE PASSE
                 </div>
-
-                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:10px 12px; font-size:14px;">
-
-                    <span style="font-family:monospace; font-weight:bold; color:#222222;">
-                        {{ password }}
-                    </span>
-
-                    <span style="float:right; color:#1f3c88; font-size:16px;">
-                        &#128203;
-                    </span>
-
+                <div style="background:#ffffff; border:1px solid #dfe3e8; border-radius:6px; padding:12px; font-size:14px;">
+                    <strong style="font-family:monospace; color:#222222;">{{ password }}</strong>
                 </div>
-
             </div>
 
         </div>
 
-        {# Lien de connexion #}
         <div style="background:#eef4ff; border:1px solid #d7e3ff; border-radius:8px; padding:16px; margin-bottom:20px;">
 
-            <p style="font-size:14px; line-height:1.6; color:#333333; margin:0 0 12px;">
-
-                Vous pouvez accéder à votre espace personnel en utilisant :
-
+            <p style="font-size:14px; line-height:1.6; color:#333333; margin:0 0 10px;">
+                <strong style="color:#1f3c88;">Comment vous connecter ?</strong>
             </p>
 
-            <p style="font-size:14px; line-height:1.6; margin:0 0 10px;">
+            {% if matricule is defined and matricule %}
+                <p style="font-size:13px; line-height:1.7; color:#555555; margin:0 0 12px;">
+                    Vous pouvez vous connecter avec votre <strong>nom d'utilisateur</strong>
+                    ou votre <strong>numéro matricule</strong>, accompagné de votre mot de passe.
+                </p>
+            {% else %}
+                <p style="font-size:13px; line-height:1.7; color:#555555; margin:0 0 12px;">
+                    Utilisez votre nom d'utilisateur et votre mot de passe pour accéder à votre espace personnel.
+                </p>
+            {% endif %}
 
-                <strong style="color:#1f3c88;">
-                    Connexion Web :
-                </strong>
+            <a href="https://ecoles.cloud-cd.com/login"
+               target="_blank"
+               style="display:inline-block; background:#1f3c88; color:#ffffff; padding:11px 18px; border-radius:6px; font-size:14px; font-weight:bold; text-decoration:none;">
+                Se connecter à School Manager
+            </a>
 
-                <br>
-
-                <a href="https://ecoles.cloud-cd.com/login"
-                   target="_blank"
-                   style="color:#1f3c88; font-weight:bold; text-decoration:none;">
-                    https://ecoles.cloud-cd.com/login
-                </a>
-
-            </p>
-
-            <p style="font-size:13px; line-height:1.6; color:#555555; margin:0;">
-
+            <p style="font-size:13px; line-height:1.6; color:#555555; margin:14px 0 0;">
                 Vous pouvez également utiliser notre application mobile
-                <strong style="color:#1f3c88;">
-                    Scool Manager
-                </strong>
-                pour vous connecter.
-
+                <strong style="color:#1f3c88;">School Manager</strong>.
             </p>
 
         </div>
 
-        {# Sécurité #}
-        <p style="font-size:13px; line-height:1.5; color:#666666; margin:0 0 20px;">
-
+        <p style="font-size:13px; line-height:1.6; color:#666666; margin:0 0 20px;">
             Pour votre sécurité, nous vous recommandons de modifier votre mot de passe
-            après votre première connexion et de ne pas communiquer vos identifiants.
-
+            après votre première connexion et de ne jamais communiquer vos identifiants à une autre personne.
         </p>
 
-        {# Signature #}
-        <p style="font-size:13px; line-height:1.5; color:#666666; margin:0;">
-
+        <p style="font-size:13px; line-height:1.6; color:#666666; margin:0;">
             Cordialement,<br>
-
-            <strong style="color:#1f3c88;">
-                L'équipe School Manager
-            </strong>
-
+            <strong style="color:#1f3c88;">L'équipe School Manager</strong>
         </p>
 
     </div>
 
 </body>
-
 </html>

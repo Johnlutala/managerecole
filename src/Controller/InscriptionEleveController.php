@@ -47,7 +47,7 @@ final class InscriptionEleveController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             $inscription = $form->getData();
-           
+
             $inscription->setStatut('en_attente');
 
             if ($this->getUser() instanceof User) {
@@ -140,42 +140,142 @@ final class InscriptionEleveController extends AbstractController
         return $this->render('inscription_eleve/new.html.twig', ['form' => $form]);
     }
 
+
     #[Route('/{id}/validate', name: 'validate', methods: ['POST'])]
-    public function validate(Request $request, InscriptionEleve $inscription, EleveRepository $eleves, ParentsRepository $parents, EntityManagerInterface $entityManager): Response
-    {
-        if (!$this->isCsrfTokenValid('validate' . $inscription->getId(), $request->request->get('_token'))) {
+    public function validate(
+        Request $request,
+        InscriptionEleve $inscription,
+        EleveRepository $eleves,
+        ParentsRepository $parents,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if (!$this->isCsrfTokenValid(
+            'validate' . $inscription->getId(),
+            $request->request->get('_token')
+        )) {
             throw $this->createAccessDeniedException();
         }
+
         if ($inscription->getStatut() === 'validee') {
             $this->addFlash('info', 'Cette inscription est déjà validée.');
             return $this->redirectToRoute('app_inscription_eleve_index');
         }
-        if (
-            $inscription->getOptions() !== null
-            && $inscription->getOptions()->getClasse()?->getId() !== $inscription->getClasse()?->getId()
-        ) {
-            $this->addFlash('danger', 'L’option sélectionnée ne correspond pas à la classe.');
+
+        // 1. Vérifier la présence de la classe.
+        $classe = $inscription->getClasse();
+
+        if (!$classe) {
+            $this->addFlash(
+                'danger',
+                'Validation impossible : aucune classe n’est associée à cette inscription.'
+            );
+
             return $this->redirectToRoute('app_inscription_eleve_index');
         }
-        $eleve = $inscription->getReference() ? $eleves->findOneBy(['matricule' => $inscription->getReference()]) : null;
+
+        // 2. Vérifier que l'option appartient à la classe.
+        $option = $inscription->getOptions();
+
+        if (
+            $option !== null
+            && $option->getClasse()?->getId() !== $classe->getId()
+        ) {
+            $this->addFlash(
+                'danger',
+                'L’option sélectionnée ne correspond pas à la classe.'
+            );
+
+            return $this->redirectToRoute('app_inscription_eleve_index');
+        }
+
+        // 3. Retrouver l'élève existant ou le créer.
+        $reference = trim((string) $inscription->getReference());
+
+        $eleve = $reference !== ''
+            ? $eleves->findOneBy(['matricule' => $reference])
+            : null;
+
         if (!$eleve) {
-            $eleve = (new Eleve())->setNom($inscription->getNom())->setPostnom($inscription->getPostnom())->setPrenom($inscription->getPrenom() ?? $inscription->getNom())->setSexe($inscription->getSexe())->setDateNaissance($inscription->getDateNaissance())->setLieuNaissance($inscription->getLieuNaissance())->setAdresse($inscription->getAdresse())->setPhone($inscription->getTelephone())->setDateInscription(new \DateTime())->setStatut(true);
+            $eleve = new Eleve();
+            $eleve->setDateInscription(new \DateTime());
+            $eleve->setStatut(true);
+
+            // Si une référence est fournie, on l'utilise comme matricule.
+            if ($reference !== '') {
+                $eleve->setMatricule($reference);
+            }
+
             $entityManager->persist($eleve);
         }
-        $eleve->setEcole($inscription->getEtablissement())
-            ->setClasse($inscription->getClasse())
-            ->setOption($inscription->getOptions());
-        $parent = $inscription->getTelephoneParent() ? $parents->findOneBy(['telephone' => $inscription->getTelephoneParent()]) : null;
+
+        // 4. Transférer toutes les informations de l'inscription vers l'élève.
+        $eleve
+            ->setNom($inscription->getNom())
+            ->setPostnom($inscription->getPostnom())
+            ->setPrenom($inscription->getPrenom() ?? '')
+            ->setSexe($inscription->getSexe())
+            ->setDateNaissance($inscription->getDateNaissance())
+            ->setLieuNaissance($inscription->getLieuNaissance())
+            ->setAdresse($inscription->getAdresse())
+            ->setPhone($inscription->getTelephone())
+            ->setEmail($inscription->getEmail())
+            ->setEcole($inscription->getEtablissement())
+            ->setClasse($classe)
+            ->setOption($option);
+
+        // 5. Retrouver le parent par téléphone ou créer un parent.
+        $telephoneParent = trim(
+            (string) $inscription->getTelephoneParent()
+        );
+
+        $parent = $telephoneParent !== ''
+            ? $parents->findOneBy(['telephone' => $telephoneParent])
+            : null;
+
         if (!$parent) {
-            $parent = (new Parents())->setNom($inscription->getNomParent())->setPostnom($inscription->getPostnomParent())->setPrenom($inscription->getPrenomParent())->setTelephone($inscription->getTelephoneParent() ?? 'Non renseigné')->setAdresse($inscription->getAdresseParent() ?? 'Non renseignée')->setProfession($inscription->getProfessionParent())->setType($inscription->getLienParental());
+            $parent = new Parents();
+
+            $parent
+                ->setNom($inscription->getNomParent())
+                ->setPostnom($inscription->getPostnomParent())
+                ->setPrenom($inscription->getPrenomParent())
+                ->setTelephone(
+                    $telephoneParent !== ''
+                        ? $telephoneParent
+                        : 'Non renseigné'
+                );
+
             $entityManager->persist($parent);
         }
+
+        // 6. Transférer aussi les informations du parent,
+        // y compris son e-mail, même s'il existe déjà.
+        $parent
+            ->setEmail($inscription->getEmailParent())
+            ->setAdresse(
+                $inscription->getAdresseParent() ?? 'Non renseignée'
+            )
+            ->setProfession($inscription->getProfessionParent())
+            ->setType($inscription->getLienParental());
+
+        // 7. Associer le parent à l'élève.
         $eleve->addParent($parent);
-        $inscription->setStatut('validee')->setDateValidation(new \DateTime());
+
+        // 8. Valider l'inscription.
+        $inscription
+            ->setStatut('validee')
+            ->setDateValidation(new \DateTime());
+
         $entityManager->flush();
-        $this->addFlash('success', 'Inscription validée : l’élève et son parent ont été enregistrés.');
+
+        $this->addFlash(
+            'success',
+            'Inscription validée : élève, classe, option et parent enregistrés.'
+        );
+
         return $this->redirectToRoute('app_inscription_eleve_index');
     }
+
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(InscriptionEleve $inscriptionEleve): Response

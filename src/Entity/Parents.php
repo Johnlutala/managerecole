@@ -55,7 +55,7 @@ class Parents
 
     public function __construct()
     {
-        $this->code = uniqid('PAR', true);
+       
         $this->eleve = new ArrayCollection();
     }
 

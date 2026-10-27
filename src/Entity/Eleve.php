@@ -89,9 +89,9 @@ class Eleve
 
     private function generateMatricule(): string
     {
-        return 'ELV' . date('Y') . str_pad(
-            (string) random_int(1, 999999),
-            6,
+        return date('Ymd') . str_pad(
+            (string) random_int(0, 999),
+            3,
             '0',
             STR_PAD_LEFT
         );

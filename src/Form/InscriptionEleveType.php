@@ -200,7 +200,7 @@ final class InscriptionEleveType extends AbstractType
             'class' => Classe::class,
             'choice_label' => 'nom',
             'placeholder' => 'Sélectionner une classe',
-            'required' => false,
+            'required' => true,
             'choices' => [],
         ]);
 

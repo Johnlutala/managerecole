@@ -67,11 +67,23 @@
                         <a href="{{ path('app_inscription_eleve_show', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
                           <i class="ti ti-eye fs-lg"></i></a>
                         <a href="{{ path('app_inscription_eleve_edit', {id: item.id}) }}" class="btn btn-default btn-icon btn-sm rounded-circle">
-                          <i class="ti ti-edit fs-lg"></i></a>{% if item.statut != 'validee' %}
-                          <form method="post" action="{{ path('app_inscription_eleve_validate', {id: item.id}) }}">
-                            <input type="hidden" name="_token" value="{{ csrf_token('validate' ~ item.id) }}">
-                            <button class="btn btn-success btn-sm">Valider</button>
-                          </form>{% endif %}
+                          <i class="ti ti-edit fs-lg"></i></a>
+                        {% if item.statut != 'validee' %}
+                          <form
+                            method="post"
+                            action="{{ path('app_inscription_eleve_validate', {id: item.id}) }}"
+                            class="form-validation-inscription"
+                            data-eleve="{{ item.nom }} {{ item.postnom }} {{ item.prenom }}"
+                          >
+                            <input type="hidden" name="_token"
+                              value="{{ csrf_token('validate' ~ item.id) }}"
+                            >
+
+                            <button type="submit" class="btn btn-success btn-sm">
+                              <i class="fas fa-check-circle"></i> Valider
+                            </button>
+                          </form>
+                        {% endif %}
                       </div>
                     </td>
                   </tr>
@@ -674,7 +686,6 @@
 
           nextButton.disabled = true;
         } finally {
-      
           lookupButton.disabled = false;
           lookupButton.innerHTML = `
                 <i class="ti ti-search me-1"></i>
@@ -699,7 +710,13 @@
 
       const optionSelect = document.querySelector("#inscription_eleve_options");
 
-      if ( !ecoleSelect || !anneeSelect || !sectionSelect || !classeSelect || !optionSelect ) {
+      if (
+        !ecoleSelect ||
+        !anneeSelect ||
+        !sectionSelect ||
+        !classeSelect ||
+        !optionSelect
+      ) {
         return;
       }
 
@@ -757,7 +774,7 @@
           select.disabled = true;
         }
       }
-    
+
       ecoleSelect.addEventListener("change", function () {
         const ecoleId = this.value;
 
@@ -792,7 +809,7 @@
           "libelle",
         );
       });
-      
+
       anneeSelect.addEventListener("change", function () {
         const anneeId = this.value;
         const ecoleId = ecoleSelect.value;
@@ -825,7 +842,7 @@
           "nom",
         );
       });
-    
+
       sectionSelect.addEventListener("change", function () {
         const sectionId = this.value;
 
@@ -854,7 +871,7 @@
           "nom",
         );
       });
-    
+
       classeSelect.addEventListener("change", function () {
         const classeId = this.value;
 
@@ -877,8 +894,12 @@
         }
 
         const sectionNom = selectedSection.textContent.trim().toLowerCase();
-       
-        if (  sectionNom === "primaire" || sectionNom === "c.o" || sectionNom === "co" ) {
+
+        if (
+          sectionNom === "primaire" ||
+          sectionNom === "c.o" ||
+          sectionNom === "co"
+        ) {
           resetSelect(optionSelect, "Aucune option pour cette section");
 
           optionSelect.disabled = true;
@@ -921,4 +942,44 @@
       }
     });
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.form-validation-inscription').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const nomEleve = form.dataset.eleve || 'cet élève';
+
+                Swal.fire({
+                    title: 'Confirmer la validation ?',
+                    html: `
+                        <p>Vous êtes sur le point de valider l'inscription de :</p>
+                        <strong>${nomEleve}</strong>
+                        <p class="mt-3">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                            Cette action permettra d'enregistrer l'élève et son parent
+                            dans le système et de confirmer l'inscription.
+                        </p>
+                        <p>Voulez-vous continuer ?</p>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-check"></i> Oui, valider',
+                    cancelButtonText: 'Annuler',
+                    reverseButtons: true,
+                    focusCancel: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}

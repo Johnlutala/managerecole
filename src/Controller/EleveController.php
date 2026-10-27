@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\PasswordGenerator;
 use Psr\Log\LoggerInterface;
+use App\Service\UsernameGenerator;
 
 #[Route('/eleve', name: 'app_eleve_')]
 final class EleveController extends AbstractController
@@ -77,6 +78,7 @@ final class EleveController extends AbstractController
         PasswordGenerator $passwordGenerator,
         MailerInterface $mailer,
         LoggerInterface $logger,
+        UsernameGenerator $usernameGenerator
     ): Response {
         if (!$this->isCsrfTokenValid('create-account' . $eleve->getId(), $request->getPayload()->getString('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -96,7 +98,7 @@ final class EleveController extends AbstractController
 
         $plainPassword = $passwordGenerator->generate();
         $user = (new User())
-            ->setUsername($eleve->getMatricule())
+            ->setUsername($usernameGenerator->generate($eleve->getPrenom(), $eleve->getNom()))
             ->setEmail($eleve->getEmail())
             ->setFirstname($eleve->getPrenom())
             ->setLastname($eleve->getNom())
@@ -119,6 +121,7 @@ final class EleveController extends AbstractController
                         'user' => $user,
                         'username' => $user->getUsername(),
                         'password' => $plainPassword,
+                        'matricule' => $eleve->getMatricule(),
                         'operation' => 'Création du compte élève',
                     ])
             );
@@ -176,22 +179,34 @@ final class EleveController extends AbstractController
         return $this->redirectToRoute('app_eleve_show', ['id' => $eleve->getId()]);
     }
 
-    private function sendCredentialsEmail(User $user, string $plainPassword, MailerInterface $mailer): void
-    {
+    private function sendCredentialsEmail(
+        User $user,
+        string $plainPassword,
+        MailerInterface $mailer
+    ): void {
+        $eleve = $user->getEleve();
+
+        $context = [
+            'user' => $user,
+            'username' => $user->getUsername(),
+            'password' => $plainPassword,
+            'operation' => 'Gestion des identifiants élève',
+        ];
+
+        if ($eleve !== null) {
+            $context['matricule'] = $eleve->getMatricule();
+        }
+
         $mailer->send(
             (new TemplatedEmail())
                 ->from(new Address($_ENV['SENDER_EMAIL'], $_ENV['SENDER_NAME']))
                 ->to($user->getEmail())
                 ->subject('Vos identifiants de connexion')
                 ->htmlTemplate('email/user_create.html.twig')
-                ->context([
-                    'user' => $user,
-                    'username' => $user->getUsername(),
-                    'password' => $plainPassword,
-                    'operation' => 'Gestion des identifiants élève',
-                ])
+                ->context($context)
         );
     }
+
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Eleve $eleve, EntityManagerInterface $entityManager): Response

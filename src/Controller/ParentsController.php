@@ -18,6 +18,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\UsernameGenerator;
 
 #[Route('/parents', name: 'app_parents_',)]
 final class ParentsController extends AbstractController
@@ -90,6 +91,7 @@ final class ParentsController extends AbstractController
         PasswordGenerator $passwordGenerator,
         MailerInterface $mailer,
         LoggerInterface $logger,
+        UsernameGenerator $usernameGenerator
     ): Response {
         if (!$this->isCsrfTokenValid('create-account-parent' . $parent->getId(), $request->getPayload()->getString('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -109,11 +111,12 @@ final class ParentsController extends AbstractController
 
         $plainPassword = $passwordGenerator->generate();
         $user = (new User())
-            ->setUsername('PAR' . $parent->getId())
+            ->setUsername($usernameGenerator->generate($parent->getPrenom(),$parent->getNom()))
             ->setEmail($parent->getEmail())
             ->setFirstname($parent->getPrenom())
             ->setLastname($parent->getNom())
             ->setRoles(['ROLE_PARENT']);
+            
         $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
         if ($this->getUser() instanceof User) {
             $user->setCreatedBy($this->getUser());

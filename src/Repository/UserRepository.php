@@ -75,6 +75,26 @@ class UserRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function findForLogin(string $identifier): ?User
+    {
+        // Recherche par username
+        $user = $this->findOneBy([
+            'username' => $identifier,
+        ]);
+
+        if ($user !== null) {
+            return $user;
+        }
+
+        // Recherche par matricule de l'élève
+        return $this->createQueryBuilder('u')
+            ->innerJoin('u.eleve', 'e')
+            ->andWhere('e.matricule = :matricule')
+            ->setParameter('matricule', $identifier)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    public function findOneBySomeField($value): ?User
     //    {
     //        return $this->createQueryBuilder('u')

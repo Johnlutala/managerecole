@@ -25,6 +25,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\UsernameGenerator;
 
 #[Route('/professeur', name: 'app_professeur_')]
 final class ProfesseurController extends AbstractController
@@ -106,6 +107,7 @@ final class ProfesseurController extends AbstractController
         PasswordGenerator $passwordGenerator,
         MailerInterface $mailer,
         LoggerInterface $logger,
+          UsernameGenerator $usernameGenerator
     ): Response {
         if (!$this->isCsrfTokenValid('create-account-professeur' . $professeur->getId(), $request->getPayload()->getString('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -125,7 +127,8 @@ final class ProfesseurController extends AbstractController
 
         $plainPassword = $passwordGenerator->generate();
         $user = (new User())
-            ->setUsername($professeur->getMatricule())
+
+            ->setUsername($usernameGenerator->generate($professeur->getPrenom(),$professeur->getNom()))
             ->setEmail($professeur->getEmail())
             ->setFirstname($professeur->getPrenom())
             ->setLastname($professeur->getNom())

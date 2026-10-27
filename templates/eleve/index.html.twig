@@ -44,8 +44,9 @@
                                 <tr class="text-uppercase fs-xxs">
                                     <th>Matricule</th>
                                     <th>Nom complet</th>
-                                    <th>Classe</th>
                                     <th>École</th>
+                                     <th>Classe</th>
+                                     <th>Option</th>
                                     <th>Statut</th>
                                     <th>Compte</th>
                                     <th class="text-center">Actions</th>
@@ -56,8 +57,9 @@
                                     <tr>
                                         <td>{{ eleve.matricule }}</td>
                                         <td>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</td>
-                                        <td>{{ eleve.classe ? eleve.classe.nom : '—' }}</td>
                                         <td>{{ eleve.ecole ? eleve.ecole.nom : '—' }}</td>
+                                        <td>{{ eleve.classe ? eleve.classe.nom : '—' }}</td>
+                                        <td>{{ eleve.option ? eleve.option.nom : '—' }}</td>
                                         <td>
                                             <span class="badge badge-soft-{{ eleve.statut ? 'success' : 'danger' }}">
                                                 {{ eleve.statut ? 'Actif' : 'Inactif' }}

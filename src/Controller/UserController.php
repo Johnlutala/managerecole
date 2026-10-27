@@ -43,13 +43,26 @@ final class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $this->createCredentials($user, $usernameGenerator, $passwordGenerator, $passwordHasher);
+            $plainPassword = $this->createCredentials(
+                $user,
+                $usernameGenerator,
+                $passwordGenerator,
+                $passwordHasher
+            );
             $user->setCreatedBy($this->getUser());
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $mailSent = $this->sendCreationEmail($user, $plainPassword, $mailer, $logger);
-            $this->addFlash($mailSent ? 'success' : 'warning', $mailSent ? 'Utilisateur cree avec succes et ses identifiants ont ete envoyes par e-mail.' : 'Utilisateur cree, mais le-mail des identifiants na pas pu etre envoye.');
+            $mailSent = $this->sendCreationEmail(
+                $user,
+                $plainPassword,
+                $mailer,
+                $logger
+            );
+            $this->addFlash(
+                $mailSent ? 'success' : 'warning',
+                $mailSent ? 'Utilisateur cree avec succes et ses identifiants ont ete envoyes par e-mail.' : 'Utilisateur cree, mais le-mail des identifiants na pas pu etre envoye.'
+            );
 
             return $this->redirectToRoute('app_user_index');
         }
@@ -141,10 +154,27 @@ final class UserController extends AbstractController
 
         return $plainPassword;
     }
-    private function sendCreationEmail(User $user, string $plainPassword, MailerInterface $mailer, LoggerInterface $logger): bool
-    {
 
+
+    private function sendCreationEmail(
+        User $user,
+        string $plainPassword,
+        MailerInterface $mailer,
+        LoggerInterface $logger,
+    ): bool {
         try {
+            $context = [
+                'user' => $user,
+                'username' => $user->getUsername(),
+                'password' => $plainPassword,
+                'operation' => 'Creation des identifiants',
+            ];
+
+            // Ajouter le matricule uniquement si l'utilisateur est un élève.
+            if ($user->getEleve() !== null) {
+                $context['matricule'] = $user->getEleve()->getMatricule();
+            }
+
             $mailer->send(
                 (new TemplatedEmail())
                     ->from(
@@ -156,22 +186,19 @@ final class UserController extends AbstractController
                     ->to($user->getEmail())
                     ->subject('Vos identifiants de connexion')
                     ->htmlTemplate('email/user_create.html.twig')
-                    ->context([
-                        'user' => $user,
-                        'username' => $user->getUsername(),
-                        'password' => $plainPassword,
-                        'operation' => 'Creation des identifiants',
-                    ])
+                    ->context($context)
             );
 
             return true;
         } catch (\Throwable $e) {
-
-            $logger->error('Echec de l\'envoi du mail de creation utilisateur.', [
-                'user_id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'error' => $e->getMessage(),
-            ]);
+            $logger->error(
+                "Échec de l'envoi du mail de création utilisateur.",
+                [
+                    'user_id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'error' => $e->getMessage(),
+                ]
+            );
 
             return false;
         }
