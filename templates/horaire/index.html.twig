@@ -2,6 +2,76 @@
 
 {% block title %}Horaires{% endblock %}
 
+{% block style %}
+    <style>
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #zone-emploi-du-temps,
+            #zone-emploi-du-temps * {
+                visibility: visible !important;
+            }
+
+            #zone-emploi-du-temps {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            #zone-emploi-du-temps .card-header {
+                display: block !important;
+                padding: 0 0 10px !important;
+                border-bottom: 1px solid #999 !important;
+            }
+
+            #zone-emploi-du-temps .card-header .btn,
+            #zone-emploi-du-temps .card-header button {
+                display: none !important;
+            }
+
+            #zone-emploi-du-temps .table-responsive {
+                overflow: visible !important;
+            }
+
+            #zone-emploi-du-temps table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+                font-size: 9pt !important;
+            }
+
+            #zone-emploi-du-temps th,
+            #zone-emploi-du-temps td {
+                border: 1px solid #777 !important;
+                padding: 6px 3px !important;
+                color: #000 !important;
+                background: #fff !important;
+                overflow-wrap: break-word !important;
+            }
+
+            #zone-emploi-du-temps thead {
+                display: table-header-group;
+            }
+
+            #zone-emploi-du-temps tr {
+                break-inside: avoid;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="wrapper">
         <div class="content-page">
@@ -115,29 +185,54 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-header d-flex align-items-center">
+                <div class="card" id="zone-emploi-du-temps">
+                    <div class="card-header d-flex align-items-center flex-wrap gap-3">
                         <div class="flex-grow-1">
                             <h4 class="card-title mb-1">
                                 <i class="ti ti-calendar-week me-2 text-primary"></i>
                                 Programmation hebdomadaire
                             </h4>
+
                             <p class="text-muted mb-0">
                                 {% if selectedClasse %}
                                     {{ selectedClasse.nom }}
-                                    {% if selectedOption %} — {{ selectedOption.nom }}{% else %} — Horaire général{% endif %}
-                                    {% if selectedEcole %} — {{ selectedEcole.nom }}{% endif %}
+                                    {% if selectedOption %}
+                                        — {{ selectedOption.nom }}
+                                    {% else %}
+                                        — Horaire général
+                                    {% endif %}
+                                    {% if selectedEcole %}
+                                        — {{ selectedEcole.nom }}
+                                    {% endif %}
                                 {% else %}
                                     Sélectionnez une école, une section et une classe.
                                 {% endif %}
                             </p>
                         </div>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal"
-                            {{ selectedClasse ? '' : 'disabled' }} >
-                            <i class="ti ti-plus me-1"></i>
-                            Ajouter / modifier l’horaire
-                        </button>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            {% if selectedClasse and horaire is defined and horaire %}
+                                <a
+                                    href="{{ path('app_horaire_emploi_du_temps', {'id': horaire.id}) }}"
+                                    class="btn btn-outline-dark"
+                                >
+                                    <i class="ti ti-eye me-1"></i>
+                                    Voir l'horaire
+                                </a>
+                            {% endif %}
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#addModal"
+                                {{ selectedClasse ? '' : 'disabled' }}
+                            >
+                                <i class="ti ti-plus me-1"></i>
+                                Ajouter / modifier l’horaire
+                            </button>
+                        </div>
                     </div>
+
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover align-middle mb-0">
@@ -220,7 +315,8 @@
                                 <label for="horaire_section" class="form-label">Section</label>
                                 <select id="horaire_section" name="horaire_section" class="form-select" required>
                                     {% for section in sections %}
-                                        <option value="{{ section.id }}"
+                                        <option
+                                            value="{{ section.id }}"
                                             data-ecole="{{ section.ecole ? section.ecole.id : '' }}"
                                             {{ selectedSection and selectedSection.id == section.id ? 'selected' : '' }}
                                         >

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <title>Charge horaire</title>
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 7mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 9px;
+            color: #212529;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* En-tête du document */
+        .schedule-heading {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .schedule-heading h2 {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 0 0 10px;
+            color: #25324b;
+        }
+
+        .schedule-heading h3 {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .schedule-heading p {
+            font-size: 10px;
+            margin: 3px 0;
+        }
+
+        /* Tableau de l'emploi du temps */
+        .schedule-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            border: 1px solid #495057;
+            padding: 6px 4px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        /* En-tête des jours */
+        .schedule-table thead th {
+            background-color: #25324b;
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 9px 4px;
+        }
+
+        /* Colonne des heures */
+        .schedule-table .time-column {
+            width: 105px;
+        }
+
+        .schedule-table .time-cell {
+            background-color: #f0f2f5;
+            font-weight: normal;
+        }
+
+        .hour-name {
+            font-size: 9px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .hour-range {
+            font-size: 8px;
+            white-space: nowrap;
+        }
+
+        /* Cellules des cours */
+        .course-cell {
+            height: 48px;
+            background-color: #ffffff;
+        }
+
+        .course-name {
+            font-size: 9px;
+            font-weight: bold;
+            color: #25324b;
+            margin-bottom: 5px;
+        }
+
+        .teacher-name {
+            font-size: 8px;
+            color: #555555;
+            margin-top: 3px;
+        }
+
+        .teacher-label {
+            font-weight: bold;
+            color: #25324b;
+        }
+
+        .empty-cell {
+            color: #adb5bd;
+        }
+
+        /* Récréation */
+        .recreation-row td {
+            background-color: #e9edf3;
+            color: #25324b;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            padding: 7px;
+        }
+
+        /* Pied du document */
+        .schedule-footer {
+            margin-top: 15px;
+            width: 100%;
+            font-size: 9px;
+        }
+
+        .schedule-footer td {
+            border: none;
+            padding: 5px 0;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    {# En-tête de la charge horaire #}
+    <div class="schedule-heading">
+        <h2>CHARGE HORAIRE</h2>
+
+        {% if horaire.classe %}
+            <h3>Classe : {{ horaire.classe.nom }}</h3>
+        {% endif %}
+
+        {% if horaire.classe and horaire.classe.section %}
+            <p>Section : {{ horaire.classe.section.nom }}</p>
+        {% endif %}
+
+        {% if horaire.ecole is defined and horaire.ecole %}
+            <p>École : {{ horaire.ecole.nom }}</p>
+        {% endif %}
+    </div>
+
+    {% if heures is empty or jours is empty %}
+
+        <p style="text-align: center; margin-top: 30px;">
+            Aucune heure ou aucun jour n'est configuré pour afficher le planning.
+        </p>
+
+    {% else %}
+
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th class="time-column">HEURES</th>
+
+                    {% for jour in jours %}
+                        <th>{{ jour.nom }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for heure in heures %}
+                    <tr>
+                        {# Heure de cours #}
+                        <td class="time-cell">
+                            <div class="hour-name">
+                                {{ heure.nom }}
+                            </div>
+
+                            <div class="hour-range">
+                                {% if heure.heureDebut and heure.heureFin %}
+                                    {{ heure.heureDebut|date('H:i') }}
+                                    -
+                                    {{ heure.heureFin|date('H:i') }}
+                                {% elseif heure.heureDebut %}
+                                    {{ heure.heureDebut|date('H:i') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        {# Cours programmés pour chaque jour #}
+                        {% for jour in jours %}
+                            {% set cellule = planning[heure.id][jour.id] ?? null %}
+
+                            <td class="course-cell">
+                                {% if cellule %}
+
+                                    {# Nom du cours #}
+                                    <div class="course-name">
+                                        {% if cellule.cours %}
+                                            {{ cellule.cours.nom }}
+                                        {% else %}
+                                            Cours non défini
+                                        {% endif %}
+                                    </div>
+
+                                    {# Professeur associé au créneau ou au cours #}
+                                    {% set professeur = cellule.professeur ?? (cellule.cours ? cellule.cours.professeur : null) %}
+
+                                    {% if professeur %}
+                                        <div class="teacher-name">
+                                            <span class="teacher-label">Prof :</span>
+                                            {{ professeur.nom }}
+
+                                            {% if professeur.prenom is defined and professeur.prenom %}
+                                                {{ professeur.prenom }}
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+                                {% else %}
+                                    <span class="empty-cell">—</span>
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    {# Récréation après la troisième heure #}
+                    {% if loop.index == 3 %}
+                        <tr class="recreation-row">
+                            <td colspan="{{ jours|length + 1 }}">
+                                R É C R É A T I O N
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% endif %}
+
+    {# Pied du document #}
+    <table class="schedule-footer">
+        <tr>
+            <td class="footer-left">
+                Année scolaire : ....................................
+            </td>
+
+            <td class="footer-right">
+                Direction : ....................................
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

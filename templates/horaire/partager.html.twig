@@ -1,0 +1,86 @@
+ 
+{% extends 'base.html.twig' %}
+
+{% block title %}Partager l'emploi du temps{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                <div class="page-title-head d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">Partager l'emploi du temps</h4>
+                        <p class="text-muted mb-0">
+                            {% if horaire.classe %}
+                                Classe : {{ horaire.classe.nom }}
+                            {% else %}
+                                Horaire n° {{ horaire.id }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ path('app_horaire_emploi_du_temps', {'id': horaire.id}) }}"
+                        class="btn btn-secondary"
+                    >
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour au planning
+                    </a>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="ti ti-info-circle me-1"></i>
+                            Le partage doit être limité aux élèves, parents et enseignants
+                            autorisés à consulter cet emploi du temps.
+                        </div>
+
+                        <h5 class="mb-3">Lien du planning</h5>
+
+                        <div class="input-group mb-3">
+                            <input
+                                type="text"
+                                id="lienHoraire"
+                                class="form-control"
+                                readonly
+                                value="{{ url('app_horaire_emploi_du_temps', {'id': horaire.id}) }}"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                onclick="copierLienHoraire()"
+                            >
+                                <i class="ti ti-copy me-1"></i>
+                                Copier le lien
+                            </button>
+                        </div>
+
+                        <p class="text-muted small">
+                            Le lien nécessite une connexion et une autorisation côté serveur.
+                            Ne le diffuse pas publiquement avant la mise en place des contrôles d'accès.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copierLienHoraire() {
+            const champ = document.getElementById("lienHoraire");
+
+            navigator.clipboard
+                .writeText(champ.value)
+                .then(() => alert("Lien copié."))
+                .catch(() => {
+                    champ.select();
+                    document.execCommand("copy");
+                    alert("Lien copié.");
+                });
+        }
+    </script>
+{% endblock %}

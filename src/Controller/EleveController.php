@@ -24,8 +24,28 @@ use App\Service\UsernameGenerator;
 final class EleveController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET', 'POST'])]
-    public function index(Request $request, EleveRepository $repository, EntityManagerInterface $entityManager): Response
-    {
+    public function index(
+        Request $request,
+        EleveRepository $repository,
+        EntityManagerInterface $entityManager
+    ): Response {
+
+        // Si l'utilisateur est un élève, afficher uniquement son dossier.
+        if ($this->isGranted('ROLE_ELEVE') && !$this->isGranted('ROLE_ADMIN')) {
+            $eleve = $this->getEleveConnecte();
+
+            if ($eleve === null) {
+                throw $this->createNotFoundException(
+                    'Aucun dossier élève n’est associé à ce compte.'
+                );
+            }
+            return $this->render('eleve/show.html.twig', [
+                'eleve' => $eleve,
+                'iscompte' => true,
+            ]);
+        }
+        //Admin 
+
         $eleve = new Eleve();
         $form = $this->createForm(EleveType::class, $eleve);
         $form->handleRequest($request);
@@ -38,12 +58,22 @@ final class EleveController extends AbstractController
             $this->addFlash('success', 'Élève créé(e) avec succès.');
             return $this->redirectToRoute('app_eleve_index');
         }
-        return $this->render('eleve/index.html.twig', ['eleve' => $eleve, 'eleves' => $repository->findAll(), 'form' => $form->createView()]);
+        return $this->render(
+            'eleve/index.html.twig',
+            [
+                'eleve' => $eleve,
+                'eleves' => $repository->findBy([], ['createdAt' => 'DESC']),
+                'form' => $form->createView()
+            ]
+        );
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    #[IsGranted('ROLE_ADMIN')]
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
         $eleve = new Eleve();
         $form = $this->createForm(EleveType::class, $eleve);
         $form->handleRequest($request);
@@ -56,7 +86,10 @@ final class EleveController extends AbstractController
             $this->addFlash('success', 'Élève créé(e) avec succès.');
             return $this->redirectToRoute('app_eleve_index');
         }
-        return $this->render('eleve/new.html.twig', ['eleve' => $eleve, 'form' => $form]);
+        return $this->render('eleve/new.html.twig', [
+            'eleve' => $eleve,
+            'form' => $form
+        ]);
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
@@ -80,7 +113,10 @@ final class EleveController extends AbstractController
         LoggerInterface $logger,
         UsernameGenerator $usernameGenerator
     ): Response {
-        if (!$this->isCsrfTokenValid('create-account' . $eleve->getId(), $request->getPayload()->getString('_token'))) {
+        if (!$this->isCsrfTokenValid(
+            'create-account' . $eleve->getId(),
+            $request->getPayload()->getString('_token')
+        )) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
@@ -91,7 +127,10 @@ final class EleveController extends AbstractController
         }
 
         if (!$eleve->getEmail()) {
-            $this->addFlash('danger', 'Impossible de créer le compte: l’élève ne possède pas d’adresse e-mail.');
+            $this->addFlash(
+                'danger',
+                'Impossible de créer le compte: l’élève ne possède pas d’adresse e-mail.'
+            );
 
             return $this->redirectToRoute('app_eleve_show', ['id' => $eleve->getId()]);
         }
@@ -125,7 +164,10 @@ final class EleveController extends AbstractController
                         'operation' => 'Création du compte élève',
                     ])
             );
-            $this->addFlash('success', 'Compte élève créé et identifiants envoyés par e-mail.');
+            $this->addFlash(
+                'success',
+                'Compte élève créé et identifiants envoyés par e-mail.'
+            );
         } catch (\Throwable $exception) {
             $logger->error('Échec de l’envoi du mail du compte élève.', [
                 'user_id' => $user->getId(),
@@ -149,7 +191,10 @@ final class EleveController extends AbstractController
         MailerInterface $mailer,
         LoggerInterface $logger,
     ): Response {
-        if (!$this->isCsrfTokenValid('reset-account' . $eleve->getId(), $request->getPayload()->getString('_token'))) {
+        if (!$this->isCsrfTokenValid(
+            'reset-account' . $eleve->getId(),
+            $request->getPayload()->getString('_token')
+        )) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
 
@@ -166,17 +211,26 @@ final class EleveController extends AbstractController
 
         try {
             $this->sendCredentialsEmail($user, $plainPassword, $mailer);
-            $this->addFlash('success', 'Mot de passe réinitialisé et nouveaux identifiants envoyés par e-mail.');
+            $this->addFlash(
+                'success',
+                'Mot de passe réinitialisé et nouveaux identifiants envoyés par e-mail.'
+            );
         } catch (\Throwable $exception) {
             $logger->error('Échec de l’envoi du mail de réinitialisation du compte élève.', [
                 'user_id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'error' => $exception->getMessage(),
             ]);
-            $this->addFlash('warning', 'Mot de passe réinitialisé, mais l’e-mail n’a pas pu être envoyé.');
+            $this->addFlash(
+                'warning',
+                'Mot de passe réinitialisé, mais l’e-mail n’a pas pu être envoyé.'
+            );
         }
 
-        return $this->redirectToRoute('app_eleve_show', ['id' => $eleve->getId()]);
+        return $this->redirectToRoute(
+            'app_eleve_show',
+            ['id' => $eleve->getId()]
+        );
     }
 
     private function sendCredentialsEmail(
@@ -209,8 +263,11 @@ final class EleveController extends AbstractController
 
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Eleve $eleve, EntityManagerInterface $entityManager): Response
-    {
+    public function edit(
+        Request $request,
+        Eleve $eleve,
+        EntityManagerInterface $entityManager
+    ): Response {
         $form = $this->createForm(EleveType::class, $eleve);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -222,13 +279,30 @@ final class EleveController extends AbstractController
     }
 
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(Request $request, Eleve $eleve, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $eleve->getId(), $request->getPayload()->getString('_token'))) {
+    public function delete(
+        Request $request,
+        Eleve $eleve,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($this->isCsrfTokenValid(
+            'delete' . $eleve->getId(),
+            $request->getPayload()->getString('_token')
+        )) {
             $entityManager->remove($eleve);
             $entityManager->flush();
             $this->addFlash('success', 'Élève supprimé(e) avec succès.');
         }
         return $this->redirectToRoute('app_eleve_index');
+    }
+
+    private function getEleveConnecte(): ?Eleve
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return null;
+        }
+
+        return $user->getEleve();
     }
 }

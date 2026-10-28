@@ -36,212 +36,213 @@
 
 
 				{# ==================== INSCRIPTION ==================== #}
-				<li class="side-nav-title">Gestion</li>
+				{% if is_granted('ROLE_ADMIN') %}
+					<li class="side-nav-title">Gestion</li>
 
-				<li class="side-nav-item">
-					<a
-						data-bs-toggle="collapse"
-						href="#sidebarInscr"
-						aria-expanded="false"
-						aria-controls="sidebarInscr"
-						class="side-nav-link"
-					>
+					<li class="side-nav-item">
+						<a
+							data-bs-toggle="collapse"
+							href="#sidebarInscr"
+							aria-expanded="false"
+							aria-controls="sidebarInscr"
+							class="side-nav-link"
+						>
 
-						<span class="menu-icon">
-							<i data-lucide="clipboard-pen-line"></i>
-						</span>
+							<span class="menu-icon">
+								<i data-lucide="clipboard-pen-line"></i>
+							</span>
 
-						<span class="menu-text">
-							Inscription
-						</span>
-					</a>
+							<span class="menu-text">
+								Inscription
+							</span>
+						</a>
 
-					<div class="collapse" id="sidebarInscr">
+						<div class="collapse" id="sidebarInscr">
 
-						<ul class="sub-menu">
+							<ul class="sub-menu">
 
-							{# Élève #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_inscription_eleve_index') }}" class="side-nav-link">
+								{# Élève #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_inscription_eleve_index') }}" class="side-nav-link">
 
-									<span class="menu-icon">
-										<i data-lucide="user-round-plus"></i>
-									</span>
+										<span class="menu-icon">
+											<i data-lucide="user-round-plus"></i>
+										</span>
 
-									<span class="menu-text">
-										Élève
-									</span>
-								</a>
-							</li>
+										<span class="menu-text">
+											Élève
+										</span>
+									</a>
+								</li>
 							
-						</ul>
-					</div>
-				</li>
+							</ul>
+						</div>
+					</li>
 
-				<li class="side-nav-item">
-					<a data-bs-toggle="collapse" href="#sidebarEtablissement" aria-expanded="false" aria-controls="sidebarEtablissement" class="side-nav-link">
-						<span class="menu-icon">
-							<i data-lucide="school"></i>
-						</span>
+					<li class="side-nav-item">
+						<a data-bs-toggle="collapse" href="#sidebarEtablissement" aria-expanded="false" aria-controls="sidebarEtablissement" class="side-nav-link">
+							<span class="menu-icon">
+								<i data-lucide="school"></i>
+							</span>
 
-						<span class="menu-text">
-							Établissement
-						</span>
-					</a>
+							<span class="menu-text">
+								Établissement
+							</span>
+						</a>
 
-					<div class="collapse" id="sidebarEtablissement">
-						<ul class="sub-menu">
-							{# École #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_ecole_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="school"></i>
-									</span>
+						<div class="collapse" id="sidebarEtablissement">
+							<ul class="sub-menu">
+								{# École #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_ecole_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="school"></i>
+										</span>
 
-									<span class="menu-text">
-										École
-									</span>
-								</a>
-							</li>
+										<span class="menu-text">
+											École
+										</span>
+									</a>
+								</li>
 
-							{# Section #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_section_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="panels-top-left"></i>
-									</span>
-									<span class="menu-text">
-										Section
-									</span>
-								</a>
-							</li>
-
-
-							{# Classes #}
-							<li class="side-nav-item">
-								<a
-									href="{{ path('app_classe_index') }}"
-									class="side-nav-link"
-								>
-
-									<span class="menu-icon">
-										<i data-lucide="book-open"></i>
-									</span>
-
-									<span class="menu-text">
-										Classes
-									</span>
-
-								</a>
-							</li>
+								{# Section #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_section_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="panels-top-left"></i>
+										</span>
+										<span class="menu-text">
+											Section
+										</span>
+									</a>
+								</li>
 
 
-							{# Options #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_option_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Options
-									</span>
-								</a>
-							</li>
-							{# Cours #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_cours_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Cours
-									</span>
-								</a>
-							</li>
-							{# Professeurs #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_professeur_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Professeurs
-									</span>
-								</a>
-							</li>
-							{# Parents #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_parents_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Parents
-									</span>
-								</a>
-							</li>
-							{# Présence #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_presence_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Présence
-									</span>
-								</a>
-							</li>
-							{# Parents #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_horaire_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Horaires
-									</span>
-								</a>
-							</li>
+								{# Classes #}
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_classe_index') }}"
+										class="side-nav-link"
+									>
+
+										<span class="menu-icon">
+											<i data-lucide="book-open"></i>
+										</span>
+
+										<span class="menu-text">
+											Classes
+										</span>
+
+									</a>
+								</li>
+
+
+								{# Options #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_option_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Options
+										</span>
+									</a>
+								</li>
+								{# Cours #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_cours_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Cours
+										</span>
+									</a>
+								</li>
+								{# Professeurs #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_professeur_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Professeurs
+										</span>
+									</a>
+								</li>
+								{# Parents #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_parents_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Parents
+										</span>
+									</a>
+								</li>
+								{# Présence #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_presence_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Présence
+										</span>
+									</a>
+								</li>
+								{# Parents #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_horaire_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Horaires
+										</span>
+									</a>
+								</li>
 								
-							{# Jour Scolaire #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_jour_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Jour
-									</span>
-								</a>
-							</li>
+								{# Jour Scolaire #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_jour_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Jour
+										</span>
+									</a>
+								</li>
 								
-							{# Heure #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_heure_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Heure
-									</span>
-								</a>
-							</li>
+								{# Heure #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_heure_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Heure
+										</span>
+									</a>
+								</li>
 
-							{# Année Scolaire #}
-							<li class="side-nav-item">
-								<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link">
-									<span class="menu-icon">
-										<i data-lucide="layers-3"></i>
-									</span>
-									<span class="menu-text">
-										Année Scolaire
-									</span>
-								</a>
-							</li>
-						</ul>
-					</div>
-				</li>
-
+								{# Année Scolaire #}
+								<li class="side-nav-item">
+									<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link">
+										<span class="menu-icon">
+											<i data-lucide="layers-3"></i>
+										</span>
+										<span class="menu-text">
+											Année Scolaire
+										</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+				{% endif %}
 				<li class="side-nav-title">
 					PERSONNELS
 				</li>
@@ -674,6 +675,10 @@
 							
 									{% if 'ROLE_ADMIN' in app.user.roles %}
 										<span class="fw-semibold text-success">Admin</span>
+									{% elseif 'ROLE_ELEVE' in app.user.roles %}
+										<span class="fw-semibold text-success">Elève</span>
+									{% elseif 'ROLE_PROFESSEUR' in app.user.roles %}
+										<span class="fw-semibold text-success">Professeur</span>
 									{% elseif 'ROLE_USER' in app.user.roles %}
 										<span class="fw-semibold text-success">Utilisateur</span>
 									{% else %}
@@ -712,12 +717,15 @@
 							</div>
 
 							<div class="dropdown-divider"></div>
-							<div class="dropdown-item py-1">
-								<small class="text-muted">
-									<strong>Username :</strong>
-								</small>
-								<span class="fw-semibold">{{ app.user.username ? app.user.username : '---' }}</span>
-							</div>
+							{% if is_granted('ROLE_ADMIN') %}
+								<div class="dropdown-item py-1">
+									<small class="text-muted">
+										<strong>Username :</strong>
+									</small>
+									<span class="fw-semibold">{{ app.user.username ? app.user.username : '---' }}</span>
+								</div>
+							{% endif %}
+
 
 							<div class="dropdown-item py-1">
 								<small class="text-muted">
@@ -728,6 +736,10 @@
 									<span class="fw-semibold text-danger">Super Administrateur</span>
 								{% elseif 'ROLE_ADMIN' in app.user.roles %}
 									<span class="fw-semibold text-primary">Administrateur</span>
+								{% elseif 'ROLE_ELEVE' in app.user.roles %}
+									<span class="fw-semibold text-success">Eleve</span>
+								{% elseif 'ROLE_PROFESSEUR' in app.user.roles %}
+									<span class="fw-semibold text-success">Professeur</span>
 								{% elseif 'ROLE_USER' in app.user.roles %}
 									<span class="fw-semibold text-success">Utilisateur</span>
 								{% else %}
@@ -736,11 +748,12 @@
 							</div>
 
 							<div class="dropdown-divider"></div>
-
-							<a href="{{ path('app_user_show', {'id': app.user.id}) }}" class="dropdown-item">
-								<i class="ti ti-user-circle me-2"></i>
-								Mon profil
-							</a>
+							{% if is_granted('ROLE_ADMIN') %}
+								<a href="{{ path('app_user_show', {'id': app.user.id}) }}" class="dropdown-item">
+									<i class="ti ti-user-circle me-2"></i>
+									Mon profil
+								</a>
+							{% endif %}
 
 							<a href="{{ path('app_logout') }}" class="dropdown-item text-danger">
 								<i class="ti ti-logout-2 me-2"></i>

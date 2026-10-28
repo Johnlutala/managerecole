@@ -24,6 +24,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 
 #[Route('/horaire')]
 final class HoraireController extends AbstractController
@@ -285,6 +288,40 @@ final class HoraireController extends AbstractController
         return $this->redirectToRoute('app_horaire_index');
     }
 
+    #[Route('/{id}/emploi-du-temps', name: 'app_horaire_emploi_du_temps', methods: ['GET'])]    public function emploiDuTemps(
+        Horaire $horaire,
+        CreneauHoraireRepository $creneauHoraireRepository,
+        HeureRepository $heureRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $heures = $heureRepository->findBy([], ['ordre' => 'ASC']);
+
+        $jours = $entityManager
+            ->getRepository(Jour::class)
+            ->findBy([], ['ordre' => 'ASC']);
+
+        $planning = [];
+
+        foreach ($creneauHoraireRepository->findForHoraire($horaire) as $cellule) {
+            $planning[$cellule->getHeure()->getId()][$cellule->getJour()->getId()] = $cellule;
+        }
+
+        return $this->render('horaire/emploitemps.html.twig', [
+            'horaire' => $horaire,
+            'heures' => $heures,
+            'jours' => $jours,
+            'planning' => $planning,
+        ]);
+    }
+    #[Route('/{id}/partager', name: 'app_horaire_partager', methods: ['GET', 'POST'])]
+    public function partager(
+        Horaire $horaire
+    ): Response {
+        return $this->render('horaire/partager.html.twig', [
+            'horaire' => $horaire,
+        ]);
+    }
+
     #[Route('/{id}', name: 'app_horaire_show', methods: ['GET'])]
     public function show(Horaire $horaire): Response
     {
@@ -367,5 +404,58 @@ final class HoraireController extends AbstractController
         }
 
         return $parameters;
+    }
+
+    #[Route('/{id}/pdf', name: 'app_horaire_pdf', methods: ['GET'])]
+    public function telechargerPdf(
+        Horaire $horaire,
+        CreneauHoraireRepository $creneauHoraireRepository,
+        HeureRepository $heureRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        $heures = $heureRepository->findBy([], ['ordre' => 'ASC']);
+
+        $jours = $entityManager
+            ->getRepository(Jour::class)
+            ->findBy([], ['ordre' => 'ASC']);
+
+        $planning = [];
+
+        foreach ($creneauHoraireRepository->findForHoraire($horaire) as $cellule) {
+            $planning[$cellule->getHeure()->getId()][$cellule->getJour()->getId()] = $cellule;
+        }
+
+        $html = $this->renderView('horaire/emploi_du_temps_pdf.html.twig', [
+            'horaire' => $horaire,
+            'heures' => $heures,
+            'jours' => $jours,
+            'planning' => $planning,
+        ]);
+
+        $options = new Options();
+        $options->set('isRemoteEnabled', false);
+        $options->set('defaultFont', 'DejaVu Sans');
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $nomClasse = $horaire->getClasse()
+            ? $horaire->getClasse()->getNom()
+            : 'classe';
+
+        $nomFichier = 'emploi-du-temps-' .
+            preg_replace('/[^A-Za-z0-9_-]/', '-', $nomClasse) .
+            '.pdf';
+
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $nomFichier . '"',
+            ]
+        );
     }
 }

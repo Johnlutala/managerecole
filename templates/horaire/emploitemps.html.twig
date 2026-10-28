@@ -1,0 +1,366 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Charge horaire{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                {# En-tête #}
+                <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3 no-print">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">Horaire hebdomadaire</h4>
+                        <p class="text-muted mb-0">
+                            Planning hebdomadaire des cours
+                        </p>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="window.print()"
+                        >
+                            <i class="ti ti-printer me-1"></i>
+                            Imprimer
+                        </button>
+
+                        <a
+                            href="{{ path('app_horaire_pdf', {'id': horaire.id}) }}"
+                            class="btn btn-danger"
+                        >
+                            <i class="ti ti-file-type-pdf me-1"></i>
+                            Télécharger PDF
+                        </a>
+
+                        <a
+                            href="{{ path('app_horaire_index') }}"
+                            class="btn btn-secondary"
+                        >
+                            <i class="ti ti-arrow-left me-1"></i>
+                            Retour
+                        </a>
+                    </div>
+                </div>
+
+                {# Feuille de planning #}
+                <div class="card schedule-card">
+                    <div class="card-body">
+
+                        <div class="schedule-heading text-center mb-4">
+                            <h3>CHARGE HORAIRE</h3>
+
+                            {% if horaire.classe %}
+                                <h5>Classe : {{ horaire.classe.nom }}</h5>
+                            {% endif %}
+
+                            {% if horaire.classe and horaire.classe.section %}
+                                <p>Section : {{ horaire.classe.section.nom }}</p>
+                            {% endif %}
+
+                            {% if horaire.ecole is defined and horaire.ecole %}
+                                <p> Ecole : {{ horaire.ecole.nom }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if heures is empty or jours is empty %}
+                            <div class="alert alert-warning no-print">
+                                Aucune heure ou aucun jour n'est configuré pour afficher le planning.
+                            </div>
+                        {% else %}
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered schedule-table text-center align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="time-column">HEURES</th>
+
+                                            {% for jour in jours %}
+                                                <th>{{ jour.nom }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for heure in heures %}
+                                            <tr>
+                                                <th class="time-cell">
+                                                    <div class="hour-name">{{ heure.nom }}</div>
+
+                                                    <div class="hour-range">
+                                                        {% if heure.heureDebut and heure.heureFin %}
+                                                            {{ heure.heureDebut|date('H:i') }}
+                                                            -
+                                                            {{ heure.heureFin|date('H:i') }}
+                                                        {% elseif heure.heureDebut %}
+                                                            {{ heure.heureDebut|date('H:i') }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </div>
+                                                </th>
+
+                                                {% for jour in jours %}
+                                                    {% set cellule = planning[heure.id][jour.id] ?? null %}
+
+                                                    <td class="course-cell">
+                                                        {% if cellule %}
+                                                            {# Titre du cours #}
+                                                            <div class="course-name">
+                                                                {% if cellule.cours %}
+                                                                    {{ cellule.cours.nom }}
+                                                                {% else %}
+                                                                    Cours non défini
+                                                                {% endif %}
+                                                            </div>
+
+                                                            {# Nom du professeur #}
+                                                            {% set professeur = cellule.professeur ?? (cellule.cours ? cellule.cours.professeur : null) %}
+
+                                                            {% if professeur %}
+                                                                <div class="teacher-name">
+                                                                    <strong>Prof :</strong>
+                                                                    {{ professeur.nom }}
+
+                                                                    {% if professeur.prenom is defined and professeur.prenom %}
+                                                                        {{ professeur.prenom }}
+                                                                    {% endif %}
+                                                                </div>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="empty-cell">—</span>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            {# Insérer la récréation après la troisième heure #}
+                                            {% if loop.index == 3 %}
+                                                <tr class="recreation-row">
+                                                    <td colspan="{{ jours|length + 1 }}">
+                                                        R É C R É A T I O N
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+
+                        <div class="schedule-footer mt-3">
+                            <span>Année scolaire : ....................................</span>
+                            <span>Direction : ....................................</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .schedule-card {
+            border: 1px solid #d9dee7;
+            box-shadow: none;
+        }
+
+        .schedule-heading h3 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .schedule-heading h5 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .schedule-heading p {
+            margin-bottom: 3px;
+        }
+
+        .schedule-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            border: 1px solid #495057 !important;
+            padding: 9px 5px;
+            vertical-align: middle;
+        }
+
+        .schedule-table thead th {
+            background: #25324b;
+            color: #fff;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 12px 5px;
+        }
+
+        .schedule-table .time-column {
+            width: 135px;
+        }
+
+        .schedule-table .time-cell {
+            background: #f0f2f5;
+            color: #212529;
+            font-weight: normal;
+        }
+
+        .hour-name {
+            font-weight: 800;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .hour-range {
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .course-cell {
+            height: 65px;
+            background: #fff;
+        }
+
+        .course-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: #25324b;
+            margin-bottom: 6px;
+            overflow-wrap: anywhere;
+        }
+
+        .teacher-name {
+            font-size: 11px;
+            color: #555;
+            margin-top: 3px;
+            overflow-wrap: anywhere;
+        }
+
+        .teacher-name strong {
+            color: #25324b;
+            font-weight: 700;
+        }
+
+        .empty-cell {
+            color: #adb5bd;
+        }
+
+        .recreation-row td {
+            background: #e9edf3 !important;
+            color: #25324b !important;
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: 5px;
+            padding: 10px;
+        }
+
+        .schedule-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            font-size: 11px;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 7mm;
+            }
+
+            body {
+                font-family:
+                    DejaVu Sans,
+                    sans-serif !important;
+                font-size: 9px !important;
+                background: #fff !important;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            .schedule-card,
+            .schedule-card * {
+                visibility: visible;
+            }
+
+            .schedule-card {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .schedule-card .card-body {
+                padding: 0 !important;
+            }
+
+            .schedule-heading {
+                margin-bottom: 12px !important;
+            }
+
+            .schedule-heading h3 {
+                font-size: 16px !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            .schedule-table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                font-size: 9px !important;
+            }
+
+            .schedule-table th,
+            .schedule-table td {
+                padding: 5px 3px !important;
+                color: #000 !important;
+                border: 1px solid #333 !important;
+                overflow-wrap: anywhere !important;
+            }
+
+            .schedule-table thead th {
+                background: #e9edf3 !important;
+                color: #000 !important;
+            }
+
+            .schedule-table .time-column {
+                width: 110px !important;
+            }
+
+            .course-cell {
+                height: 52px !important;
+            }
+
+            .recreation-row td {
+                background: #e9edf3 !important;
+                color: #000 !important;
+                letter-spacing: 4px !important;
+            }
+
+            .schedule-footer {
+                margin-top: 12px !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+{% endblock %}
