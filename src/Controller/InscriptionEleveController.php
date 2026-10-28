@@ -20,6 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/inscription/eleve', name: 'app_inscription_eleve_')]
@@ -37,6 +38,7 @@ final class InscriptionEleveController extends AbstractController
     public function index(
         Request $request,
         InscriptionEleveRepository $repository,
+        ParentsRepository $parents,
         EntityManagerInterface $entityManager
     ): Response {
         $inscription = new InscriptionEleve();
@@ -45,21 +47,45 @@ final class InscriptionEleveController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $inscription = $form->getData();
+            $parentMode = $form->get('parentMode')->getData();
 
-            $inscription->setStatut('en_attente');
+            if (!in_array($parentMode, ['nouveau', 'existant'], true)) {
+                $form->get('parentMode')->addError(
+                    new FormError('Veuillez choisir un parent nouveau ou existant.')
+                );
+            } elseif ($parentMode === 'existant') {
+                $parentId = filter_var(
+                    $form->get('parentExistantId')->getData(),
+                    FILTER_VALIDATE_INT
+                );
+                $parent = $parentId ? $parents->find($parentId) : null;
 
-            if ($this->getUser() instanceof User) {
-                $inscription->setCreatedBy($this->getUser());
+                if (!$parent) {
+                    $form->get('parentExistantId')->addError(
+                        new FormError('Veuillez rechercher et sélectionner un parent existant.')
+                    );
+                } else {
+                    $inscription->setParentExistant($parent);
+                }
+            } else {
+                $inscription->setParentExistant(null);
             }
-            $entityManager->persist($inscription);
-            $entityManager->flush();
-            $this->addFlash(
-                'success',
-                'La demande d’inscription a été enregistrée et attend validation.'
-            );
-            return $this->redirectToRoute('app_inscription_eleve_index');
+
+            if ($form->isValid()) {
+                $inscription->setStatut('en_attente');
+
+                if ($this->getUser() instanceof User) {
+                    $inscription->setCreatedBy($this->getUser());
+                }
+                $entityManager->persist($inscription);
+                $entityManager->flush();
+                $this->addFlash(
+                    'success',
+                    'La demande d’inscription a été enregistrée et attend validation.'
+                );
+                return $this->redirectToRoute('app_inscription_eleve_index');
+            }
         }
         return $this->render('inscription_eleve/index.html.twig', [
             'inscription_eleves' => $repository->findBy(
@@ -68,6 +94,34 @@ final class InscriptionEleveController extends AbstractController
             ),
             'form' => $form->createView()
         ]);
+    }
+
+    #[Route('/parents/search', name: 'parents_search', methods: ['GET'])]
+    public function searchParents(
+        Request $request,
+        ParentsRepository $parents
+    ): JsonResponse {
+        $term = trim((string) $request->query->get('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return $this->json(['results' => []]);
+        }
+
+        $results = array_map(static function (Parents $parent): array {
+            return [
+                'id' => $parent->getId(),
+                'nom' => $parent->getNom(),
+                'postnom' => $parent->getPostnom(),
+                'prenom' => $parent->getPrenom(),
+                'telephone' => $parent->getTelephone(),
+                'email' => $parent->getEmail(),
+                'adresse' => $parent->getAdresse(),
+                'profession' => $parent->getProfession(),
+                'type' => $parent->getType(),
+            ];
+        }, $parents->searchByIdentity($term));
+
+        return $this->json(['results' => $results]);
     }
      #[Route('/verifier-email', name: 'verifier_email', methods: ['GET'])]    
     public function verifierEmail(
@@ -250,40 +304,40 @@ final class InscriptionEleveController extends AbstractController
             ->setClasse($classe)
             ->setOption($option);
 
-        // 5. Retrouver le parent par téléphone ou créer un parent.
-        $telephoneParent = trim(
-            (string) $inscription->getTelephoneParent()
-        );
-
-        $parent = $telephoneParent !== ''
-            ? $parents->findOneBy(['telephone' => $telephoneParent])
-            : null;
+        // 5. Réutiliser le parent sélectionné ou conserver le flux existant.
+        $parent = $inscription->getParentExistant();
 
         if (!$parent) {
-            $parent = new Parents();
+            $telephoneParent = trim(
+                (string) $inscription->getTelephoneParent()
+            );
+            $parent = $telephoneParent !== ''
+                ? $parents->findOneBy(['telephone' => $telephoneParent])
+                : null;
+
+            if (!$parent) {
+                $parent = new Parents();
+                $parent
+                    ->setNom($inscription->getNomParent())
+                    ->setPostnom($inscription->getPostnomParent())
+                    ->setPrenom($inscription->getPrenomParent())
+                    ->setTelephone(
+                        $telephoneParent !== ''
+                            ? $telephoneParent
+                            : 'Non renseigné'
+                    );
+
+                $entityManager->persist($parent);
+            }
 
             $parent
-                ->setNom($inscription->getNomParent())
-                ->setPostnom($inscription->getPostnomParent())
-                ->setPrenom($inscription->getPrenomParent())
-                ->setTelephone(
-                    $telephoneParent !== ''
-                        ? $telephoneParent
-                        : 'Non renseigné'
-                );
-
-            $entityManager->persist($parent);
+                ->setEmail($inscription->getEmailParent())
+                ->setAdresse(
+                    $inscription->getAdresseParent() ?? 'Non renseignée'
+                )
+                ->setProfession($inscription->getProfessionParent())
+                ->setType($inscription->getLienParental());
         }
-
-        // 6. Transférer aussi les informations du parent,
-        // y compris son e-mail, même s'il existe déjà.
-        $parent
-            ->setEmail($inscription->getEmailParent())
-            ->setAdresse(
-                $inscription->getAdresseParent() ?? 'Non renseignée'
-            )
-            ->setProfession($inscription->getProfessionParent())
-            ->setType($inscription->getLienParental());
 
         // 7. Associer le parent à l'élève.
         $eleve->addParent($parent);

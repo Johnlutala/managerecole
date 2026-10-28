@@ -16,6 +16,24 @@ class ParentsRepository extends ServiceEntityRepository
         parent::__construct($registry, Parents::class);
     }
 
+    /**
+     * @return Parents[]
+     */
+    public function searchByIdentity(string $term): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('LOWER(p.nom) LIKE LOWER(:term)')
+            ->orWhere('LOWER(p.postnom) LIKE LOWER(:term)')
+            ->orWhere('LOWER(p.prenom) LIKE LOWER(:term)')
+            ->setParameter('term', '%' . $term . '%')
+            ->orderBy('p.nom', 'ASC')
+            ->addOrderBy('p.postnom', 'ASC')
+            ->addOrderBy('p.prenom', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Parents[] Returns an array of Parents objects
 //     */

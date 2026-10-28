@@ -14,6 +14,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -35,6 +36,14 @@ final class InscriptionEleveType extends AbstractType
          */
 
         $builder
+            ->add('parentMode', HiddenType::class, [
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('parentExistantId', HiddenType::class, [
+                'mapped' => false,
+                'required' => false,
+            ])
             ->add('reference', TextType::class, [
                 'label' => 'Matricule / référence',
                 'required' => false,

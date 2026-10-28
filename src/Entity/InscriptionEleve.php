@@ -90,6 +90,10 @@ class InscriptionEleve
     #[ORM\ManyToOne(inversedBy: 'inscriptionEleves')]
     private ?Option $options = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'parent_existant_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
+    private ?Parents $parentExistant = null;
+
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateValidation = null;
 
@@ -461,6 +465,18 @@ class InscriptionEleve
     public function setOptions(?Option $options): static
     {
         $this->options = $options;
+
+        return $this;
+    }
+
+    public function getParentExistant(): ?Parents
+    {
+        return $this->parentExistant;
+    }
+
+    public function setParentExistant(?Parents $parentExistant): static
+    {
+        $this->parentExistant = $parentExistant;
 
         return $this;
     }

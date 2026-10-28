@@ -1,206 +1,1005 @@
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Cours de {{ classe.nom }}{% endblock %}
 
 {% block body %}
+
     <div class="wrapper">
+
         <div class="content-page">
+
             <div class="container-fluid">
-                <div class="page-title-head d-flex align-items-center justify-content-between mb-4">
-                    <div>
-                        <h4 class="fs-xl fw-bold m-0">Classe {{ classe.nom }}</h4>
-                        <div class="text-muted mt-1">
-                            {{ classe.ecole ? classe.ecole.nom : 'École non définie' }}
-                            {% if classe.section %}
-                                · {{ classe.section.nom }}
-                            {% endif %}
-                        </div>
+                <div class="page-title-head d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Gestion des cours
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">
+                            Consultez les cours et gérez les attributions des professeurs.
+                        </p>
                     </div>
-                    <a href="{{ path('app_cours_index', {ecole: classe.ecole ? classe.ecole.id : null}) }}" class="btn btn-outline-secondary">
-                        <i class="ti ti-arrow-left me-1"></i>
-                        Retour aux cours
-                    </a>
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">
+                                    ADMIN
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_cours_index') }}">
+                                    Cours
+                                </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">
+                                {{ classe.nom }}
+                            </li>
+
+                        </ol>
+
+                    </div>
+
                 </div>
+
+
+                {# ==================== MESSAGES FLASH ==================== #}
 
                 {% for type, messages in app.flashes %}
                     {% for message in messages %}
-                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'danger' ? 'danger' : 'info') }}">
+
+                        <div class="alert alert-{{ type == 'success' ? 'success' : (type == 'danger' ? 'danger' : 'info') }} alert-dismissible fade show"
+                             role="alert">
+
                             {{ message }}
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert"
+                                    aria-label="Fermer">
+                            </button>
                         </div>
                     {% endfor %}
                 {% endfor %}
 
-                <div class="card mb-4">
-                    <div class="card-header border-light d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-0">Attributions des cours</h5>
-                            <small class="text-muted">Consultez ou modifiez les professeurs attribués à cette classe.</small>
+
+                {# ==================== CONTENU ==================== #}
+
+                <div class="row">
+                    <div class="col-xl-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    Classe N° : {{ classe.id }}
+                                </h4>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="avatar-xl mx-auto mb-3">
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+                                        <i class="ti ti-school fs-1"></i>
+                                    </div>
+                                </div>
+                                <h4 class="mb-1">
+                                    {{ classe.nom }}
+                                </h4>
+                                <p class="text-muted mb-2">
+                                    École :
+                                    <strong>
+                                        {{ classe.ecole ? classe.ecole.nom : 'Non définie' }}
+                                    </strong>
+                                </p>
+
+                                {% if classe.section %}
+
+                                    <p class="text-muted mb-2">
+
+                                        Section :
+                                        <strong>
+                                            {{ classe.section.nom }}
+                                        </strong>
+
+                                    </p>
+
+                                {% endif %}
+
+                                <hr>
+
+                                <div class="d-flex justify-content-around mb-3">
+                                    <div>
+                                        <h3 class="mb-0 text-primary">
+                                            {{ cours|length }}
+                                        </h3>
+                                        <small class="text-muted">
+                                            Cours
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <h3 class="mb-0 text-success">
+                                            {{ cours|filter(cour => cour.professeur)|length }}
+                                        </h3>
+
+                                        <small class="text-muted">
+                                            Attribués
+                                        </small>
+
+                                    </div>
+
+                                    <div>
+
+                                        <h3 class="mb-0 text-warning">
+                                            {{ cours|filter(cour => not cour.professeur)|length }}
+                                        </h3>
+
+                                        <small class="text-muted">
+                                            Non attribués
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                                <hr>
+
+                                <div class="d-grid gap-2">
+
+                                    <button class="btn btn-primary"
+                                            type="button"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editAllAttributionsModal"
+                                            {% if professeurs is empty or cours is empty %}disabled{% endif %}>
+
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier les attributions
+
+                                    </button>
+
+                                    <a href="{{ path('app_cours_index', classe.ecole ? {'ecole': classe.ecole.id} : {}) }}"
+                                       class="btn btn-secondary">
+
+                                        <i class="ti ti-arrow-left me-1"></i>
+                                        Retour aux cours
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
                         </div>
-                        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#editAllAttributionsModal">
-                            <i class="ti ti-edit me-1"></i>
-                            Modifier
-                        </button>
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-building me-2"></i>
+                                    Établissement
+                                </h4>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <div class="avatar-md flex-shrink-0">
+
+                                        <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                            <i class="ti ti-building-school fs-2"></i>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="flex-grow-1">
+
+                                        <h5 class="mb-1">
+
+                                            {{ classe.ecole ? classe.ecole.nom : 'École non définie' }}
+
+                                        </h5>
+
+                                        <p class="text-muted mb-0">
+
+                                            {{ classe.section ? classe.section.nom : 'Section non définie' }}
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light bg-opacity-25">
-                                <tr>
-                                    <th class="ps-3">#</th>
-                                    <th>Nom</th>
-                                    <th>Professeur</th>
-                                    <th class="text-end pe-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for cour in cours %}
-                                    <tr>
-                                        <td class="ps-3">{{ loop.index }}</td>
-                                        <td>
-                                            {{ cour.nom }}
-                                            {% if cour.option %}
-                                                <span class="text-muted small">· {{ cour.option.nom }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ cour.professeur ? cour.professeur.nom ~ ' ' ~ cour.professeur.prenom : 'Non attribué' }}                                        </td>
-                                        <td class="text-end pe-3">
-                                            <div class="d-flex justify-content-end align-items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-primary"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editCourseAttribution{{ cour.id }}"
-                                                    aria-label="Modifier le professeur de {{ cour.nom }}"
-                                                    title="Modifier l’attribution"
-                                                >
-                                                    <i class="ti ti-edit"></i>
-                                                </button>
-                                                {% if cour.professeur %}
-                                                    <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}" onsubmit="return confirm('Retirer le professeur de ce cours ?');">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
-                                                        <input type="hidden" name="cours" value="{{ cour.id }}">
-                                                        <input type="hidden" name="action" value="remove">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Retirer le professeur de {{ cour.nom }}" title="Retirer l’attribution">
-                                                            <i class="ti ti-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                {% endif %}
+
+                    {# ==================== LISTE DES COURS ==================== #}
+
+                    <div class="col-xl-9">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+
+                                <div>
+
+                                    <h4 class="card-title mb-1">
+                                        Cours de la classe
+                                    </h4>
+
+                                    <p class="text-muted mb-0">
+                                        Classe : {{ classe.nom }}
+                                    </p>
+
+                                </div>
+
+                                <span class="badge bg-primary-subtle text-primary fs-6">
+
+                                    {{ cours|length }}
+                                    cours
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                {# ==================== RÉSUMÉ ==================== #}
+
+                                <div class="row g-3 mb-4">
+
+                                    <div class="col-md-4">
+
+                                        <div class="border rounded p-3">
+
+                                            <div class="d-flex align-items-center gap-3">
+
+                                                <div class="avatar-md">
+
+                                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                                        <i class="ti ti-book fs-2"></i>
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <h4 class="mb-0">
+                                                        {{ cours|length }}
+                                                    </h4>
+
+                                                    <small class="text-muted">
+                                                        Total des cours
+                                                    </small>
+
+                                                </div>
+
                                             </div>
-                                        </td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted">Aucun cours n’est enregistré dans cette classe.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <div class="border rounded p-3">
+
+                                            <div class="d-flex align-items-center gap-3">
+
+                                                <div class="avatar-md">
+
+                                                    <div class="avatar-title bg-success-subtle text-success rounded">
+
+                                                        <i class="ti ti-user-check fs-2"></i>
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <h4 class="mb-0">
+                                                        {{ cours|filter(cour => cour.professeur)|length }}
+                                                    </h4>
+
+                                                    <small class="text-muted">
+                                                        Avec professeur
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <div class="border rounded p-3">
+
+                                            <div class="d-flex align-items-center gap-3">
+
+                                                <div class="avatar-md">
+
+                                                    <div class="avatar-title bg-warning-subtle text-warning rounded">
+
+                                                        <i class="ti ti-user-question fs-2"></i>
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <h4 class="mb-0">
+                                                        {{ cours|filter(cour => not cour.professeur)|length }}
+                                                    </h4>
+
+                                                    <small class="text-muted">
+                                                        Sans professeur
+                                                    </small>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                {# ==================== TABLEAU ==================== #}
+
+                                <div class="table-responsive">
+
+                                    <table class="table table-hover table-bordered align-middle mb-0">
+
+                                        <thead class="bg-light bg-opacity-25">
+
+                                            <tr>
+
+                                                <th width="60" class="text-center">
+                                                    #
+                                                </th>
+
+                                                <th>
+                                                    Code / Nom du cours
+                                                </th>
+
+                                                <th>
+                                                    Option
+                                                </th>
+
+                                                <th>
+                                                    Professeur responsable
+                                                </th>
+
+                                                <th class="text-center">
+                                                    Statut
+                                                </th>
+
+                                                <th width="120" class="text-center">
+                                                    Actions
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            {% for cour in cours %}
+
+                                                <tr>
+
+                                                    <td class="text-center">
+                                                        {{ loop.index }}
+                                                    </td>
+
+                                                    <td>
+
+                                                        <div class="d-flex align-items-center gap-2">
+
+                                                            <div class="avatar-sm flex-shrink-0">
+
+                                                                <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                                                    <i class="ti ti-book-2 fs-4"></i>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div>
+
+                                                                <h6 class="mb-0">
+                                                                    {{ cour.nom }}
+                                                                </h6>
+
+                                                                <small class="text-muted">
+                                                                    Cours N° {{ cour.id }}
+                                                                </small>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                    </td>
+
+                                                    <td>
+
+                                                        {% if cour.option %}
+
+                                                            <span class="badge bg-info-subtle text-info">
+
+                                                                {{ cour.option.nom }}
+
+                                                            </span>
+
+                                                        {% else %}
+
+                                                            <span class="text-muted">
+                                                                —
+                                                            </span>
+
+                                                        {% endif %}
+
+                                                    </td>
+
+                                                    <td>
+
+                                                        {% if cour.professeur %}
+
+                                                            <div class="d-flex align-items-center gap-2">
+
+                                                                <div class="avatar-sm">
+
+                                                                    <div class="avatar-title bg-success-subtle text-success rounded-circle">
+
+                                                                        <i class="ti ti-user fs-4"></i>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div>
+
+                                                                    <h6 class="mb-0">
+
+                                                                        {{ cour.professeur.nom }}
+                                                                        {{ cour.professeur.prenom }}
+
+                                                                    </h6>
+
+                                                                    <small class="text-muted">
+                                                                        Professeur attribué
+                                                                    </small>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        {% else %}
+
+                                                            <span class="text-muted">
+
+                                                                <i class="ti ti-user-x me-1"></i>
+                                                                Aucun professeur attribué
+
+                                                            </span>
+
+                                                        {% endif %}
+
+                                                    </td>
+
+                                                    <td class="text-center">
+
+                                                        {% if cour.professeur %}
+
+                                                            <span class="badge bg-success-subtle text-success">
+
+                                                                <i class="ti ti-check me-1"></i>
+                                                                Attribué
+
+                                                            </span>
+
+                                                        {% else %}
+
+                                                            <span class="badge bg-warning-subtle text-warning">
+
+                                                                <i class="ti ti-alert-circle me-1"></i>
+                                                                En attente
+
+                                                            </span>
+
+                                                        {% endif %}
+
+                                                    </td>
+
+                                                    <td class="text-center">
+
+                                                        <div class="d-flex justify-content-center align-items-center gap-2">
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-outline-primary"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editCourseAttribution{{ cour.id }}"
+                                                                title="Modifier le professeur"
+                                                                aria-label="Modifier le professeur de {{ cour.nom }}">
+
+                                                                <i class="ti ti-edit"></i>
+
+                                                            </button>
+
+                                                            {% if cour.professeur %}
+
+                                                                <form
+                                                                    method="post"
+                                                                    action="{{ path('app_cours_classe_assignments', {'id': classe.id}) }}"
+                                                                    onsubmit="return confirm('Voulez-vous vraiment retirer le professeur du cours {{ cour.nom|e('js') }} ?');">
+
+                                                                    <input
+                                                                        type="hidden"
+                                                                        name="_token"
+                                                                        value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+
+                                                                    <input
+                                                                        type="hidden"
+                                                                        name="cours"
+                                                                        value="{{ cour.id }}">
+
+                                                                    <input
+                                                                        type="hidden"
+                                                                        name="action"
+                                                                        value="remove">
+
+                                                                    <button
+                                                                        type="submit"
+                                                                        class="btn btn-sm btn-outline-danger"
+                                                                        title="Retirer l'attribution"
+                                                                        aria-label="Retirer le professeur de {{ cour.nom }}">
+
+                                                                        <i class="ti ti-user-minus"></i>
+
+                                                                    </button>
+
+                                                                </form>
+
+                                                            {% endif %}
+
+                                                        </div>
+
+                                                    </td>
+
+                                                </tr>
+
+                                            {% else %}
+
+                                                <tr>
+
+                                                    <td colspan="6" class="text-center py-5">
+
+                                                        <div class="avatar-xl mx-auto mb-3">
+
+                                                            <div class="avatar-title bg-light text-muted rounded">
+
+                                                                <i class="ti ti-book-off fs-1"></i>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                        <h5 class="text-muted">
+                                                            Aucun cours disponible
+                                                        </h5>
+
+                                                        <p class="text-muted mb-0">
+
+                                                            Aucun cours n'est enregistré pour cette classe.
+
+                                                        </p>
+
+                                                    </td>
+
+                                                </tr>
+
+                                            {% endfor %}
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 </div>
 
-                <div class="modal fade" id="editAllAttributionsModal" tabindex="-1" aria-labelledby="editAllAttributionsLabel" aria-hidden="true">
+
+                {# ==================== MODALE : MODIFICATION GLOBALE ==================== #}
+
+                <div class="modal fade"
+                     id="editAllAttributionsModal"
+                     tabindex="-1"
+                     aria-labelledby="editAllAttributionsLabel"
+                     aria-hidden="true">
+
                     <div class="modal-dialog modal-lg modal-dialog-scrollable">
+
                         <div class="modal-content">
-                            <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}">
-                                <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+
+                            <form method="post"
+                                  action="{{ path('app_cours_classe_assignments', {'id': classe.id}) }}">
+
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="editAllAttributionsLabel">Modifier les attributions de {{ classe.nom }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Annuler"></button>
+
+                                    <div>
+
+                                        <h5 class="modal-title" id="editAllAttributionsLabel">
+
+                                            <i class="ti ti-users me-2"></i>
+                                            Modifier les attributions
+
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Classe : {{ classe.nom }}
+                                        </small>
+
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Fermer">
+                                    </button>
+
                                 </div>
+
                                 <div class="modal-body">
-                                    <p class="text-muted">Choisissez le professeur pour chaque cours, puis enregistrez toutes les modifications.</p>
+
+                                    <div class="alert alert-info">
+
+                                        <i class="ti ti-info-circle me-1"></i>
+
+                                        Sélectionnez le professeur responsable de chaque cours,
+                                        puis enregistrez les modifications.
+
+                                    </div>
+
                                     <div class="table-responsive">
+
                                         <table class="table table-hover align-middle mb-0">
-                                            <thead>
+
+                                            <thead class="bg-light">
+
                                                 <tr>
-                                                    <th>#</th>
-                                                    <th>Nom du cours</th>
-                                                    <th>Professeur</th>
+
+                                                    <th width="50">
+                                                        #
+                                                    </th>
+
+                                                    <th>
+                                                        Cours
+                                                    </th>
+
+                                                    <th>
+                                                        Professeur
+                                                    </th>
+
                                                 </tr>
+
                                             </thead>
+
                                             <tbody>
+
                                                 {% for cour in cours %}
+
                                                     <tr>
-                                                        <td>{{ loop.index }}</td>
+
                                                         <td>
-                                                            {{ cour.nom }}
-                                                            {% if cour.option %}
-                                                                <span class="text-muted small">· {{ cour.option.nom }}</span>
-                                                            {% endif %}
+                                                            {{ loop.index }}
                                                         </td>
+
                                                         <td>
+
+                                                            <strong>
+                                                                {{ cour.nom }}
+                                                            </strong>
+
+                                                            {% if cour.option %}
+
+                                                                <br>
+
+                                                                <small class="text-muted">
+
+                                                                    Option :
+                                                                    {{ cour.option.nom }}
+
+                                                                </small>
+
+                                                            {% endif %}
+
+                                                        </td>
+
+                                                        <td>
+
                                                             <select
                                                                 name="assignments[{{ cour.id }}]"
                                                                 class="form-select"
-                                                                aria-label="Professeur pour {{ cour.nom }}"
-                                                                required
-                                                            >
-                                                                <option value="">Sélectionner un professeur</option>
+                                                                aria-label="Professeur pour {{ cour.nom }}">
+
+                                                                <option value="">
+                                                                    Sélectionner un professeur
+                                                                </option>
+
                                                                 {% for professeur in professeurs %}
+
                                                                     <option
                                                                         value="{{ professeur.id }}"
-                                                                        {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}
-                                                                    >
-                                                                        {{ professeur.nom }} {{ professeur.prenom }}
+                                                                        {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}>
+
+                                                                        {{ professeur.nom }}
+                                                                        {{ professeur.prenom }}
+
                                                                     </option>
+
                                                                 {% endfor %}
+
                                                             </select>
+
                                                         </td>
+
                                                     </tr>
+
                                                 {% else %}
+
                                                     <tr>
-                                                        <td colspan="3" class="text-center py-4 text-muted">Aucun cours à modifier.</td>
+
+                                                        <td colspan="3" class="text-center py-4 text-muted">
+
+                                                            Aucun cours à modifier.
+
+                                                        </td>
+
                                                     </tr>
+
                                                 {% endfor %}
+
                                             </tbody>
+
                                         </table>
+
                                     </div>
+
                                 </div>
+
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-                                    <button type="submit" class="btn btn-primary" {% if professeurs is empty or cours is empty %}disabled{% endif %}>
-                                        <i class="ti ti-device-floppy me-1"></i>
-                                        Enregistrer
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-light"
+                                        data-bs-dismiss="modal">
+
+                                        Annuler
+
                                     </button>
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                        {% if professeurs is empty or cours is empty %}disabled{% endif %}>
+
+                                        <i class="ti ti-device-floppy me-1"></i>
+                                        Enregistrer les modifications
+
+                                    </button>
+
                                 </div>
+
                             </form>
+
                         </div>
+
                     </div>
+
                 </div>
 
+
+                {# ==================== MODALES : ATTRIBUTION INDIVIDUELLE ==================== #}
+
                 {% for cour in cours %}
-                    <div class="modal fade" id="editCourseAttribution{{ cour.id }}" tabindex="-1" aria-labelledby="editCourseAttributionLabel{{ cour.id }}" aria-hidden="true">
+
+                    <div class="modal fade"
+                         id="editCourseAttribution{{ cour.id }}"
+                         tabindex="-1"
+                         aria-labelledby="editCourseAttributionLabel{{ cour.id }}"
+                         aria-hidden="true">
+
                         <div class="modal-dialog">
+
                             <div class="modal-content">
-                                <form method="post" action="{{ path('app_cours_classe_assignments', {id: classe.id}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
-                                    <input type="hidden" name="cours" value="{{ cour.id }}">
+
+                                <form method="post"
+                                      action="{{ path('app_cours_classe_assignments', {'id': classe.id}) }}">
+
+                                    <input
+                                        type="hidden"
+                                        name="_token"
+                                        value="{{ csrf_token('manage_class_courses_' ~ classe.id) }}">
+
+                                    <input
+                                        type="hidden"
+                                        name="cours"
+                                        value="{{ cour.id }}">
+
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="editCourseAttributionLabel{{ cour.id }}">Modifier l’attribution</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Annuler"></button>
+
+                                        <h5 class="modal-title"
+                                            id="editCourseAttributionLabel{{ cour.id }}">
+
+                                            <i class="ti ti-user-edit me-2"></i>
+                                            Attribution du professeur
+
+                                        </h5>
+
+                                        <button
+                                            type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Fermer">
+                                        </button>
+
                                     </div>
+
                                     <div class="modal-body">
-                                        <p class="text-muted mb-3">Cours : <strong>{{ cour.nom }}</strong></p>
-                                        <label for="professeur{{ cour.id }}" class="form-label">Professeur</label>
-                                        <select id="professeur{{ cour.id }}" name="professeur" class="form-select" required>
-                                            <option value="">Sélectionner un professeur</option>
+
+                                        <div class="text-center mb-4">
+
+                                            <div class="avatar-xl mx-auto mb-3">
+
+                                                <div class="avatar-title bg-primary-subtle text-primary rounded">
+
+                                                    <i class="ti ti-book fs-1"></i>
+
+                                                </div>
+
+                                            </div>
+
+                                            <h5 class="mb-1">
+                                                {{ cour.nom }}
+                                            </h5>
+
+                                            <p class="text-muted mb-0">
+
+                                                Classe :
+                                                {{ classe.nom }}
+
+                                            </p>
+
+                                            {% if cour.option %}
+
+                                                <p class="text-muted mb-0">
+
+                                                    Option :
+                                                    {{ cour.option.nom }}
+
+                                                </p>
+
+                                            {% endif %}
+
+                                        </div>
+
+                                        <hr>
+
+                                        <label
+                                            for="professeur{{ cour.id }}"
+                                            class="form-label">
+
+                                            Professeur responsable
+
+                                            <span class="text-danger">*</span>
+
+                                        </label>
+
+                                        <select
+                                            id="professeur{{ cour.id }}"
+                                            name="professeur"
+                                            class="form-select"
+                                            required>
+
+                                            <option value="">
+                                                Sélectionner un professeur
+                                            </option>
+
                                             {% for professeur in professeurs %}
-                                                <option value="{{ professeur.id }}" {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}>
-                                                    {{ professeur.nom }} {{ professeur.prenom }}
+
+                                                <option
+                                                    value="{{ professeur.id }}"
+                                                    {{ cour.professeur and cour.professeur.id == professeur.id ? 'selected' : '' }}>
+
+                                                    {{ professeur.nom }}
+                                                    {{ professeur.prenom }}
+
                                                 </option>
+
                                             {% endfor %}
+
                                         </select>
+
+                                        {% if professeurs is empty %}
+
+                                            <div class="form-text text-danger">
+
+                                                Aucun professeur disponible pour cette attribution.
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="form-text">
+
+                                                Choisissez le professeur qui assurera ce cours.
+
+                                            </div>
+
+                                        {% endif %}
+
                                     </div>
+
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-primary" {% if professeurs is empty %}disabled{% endif %}>Enregistrer</button>
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-light"
+                                            data-bs-dismiss="modal">
+
+                                            Annuler
+
+                                        </button>
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-primary"
+                                            {% if professeurs is empty %}disabled{% endif %}>
+
+                                            <i class="ti ti-device-floppy me-1"></i>
+                                            Enregistrer
+
+                                        </button>
+
                                     </div>
+
                                 </form>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 {% endfor %}
+
             </div>
+
         </div>
+
     </div>
+
 {% endblock %}

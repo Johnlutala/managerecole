@@ -261,7 +261,36 @@
           </div>
           <div class="form-step d-none" data-form-step="3">
             <h6>Parent ou tuteur légal</h6>
-            <div class="row g-3">
+            <div class="mb-3">
+              <p class="text-muted mb-2">Le parent est-il déjà enregistré ?</p>
+              <div class="d-flex flex-wrap gap-3">
+                <label class="form-check">
+                  <input class="form-check-input" type="radio" name="parent_type_choice" id="parent-nouveau" value="nouveau">
+                  <span class="form-check-label">Nouveau parent</span>
+                </label>
+                <label class="form-check">
+                  <input class="form-check-input" type="radio" name="parent_type_choice" id="parent-existant" value="existant">
+                  <span class="form-check-label">Parent déjà enregistré</span>
+                </label>
+              </div>
+              {{ form_widget(form.parentMode) }}
+              {{ form_widget(form.parentExistantId) }}
+              <div id="parent-selection-feedback" class="small mt-2" aria-live="polite">
+                {{ form_errors(form.parentMode) }}
+                {{ form_errors(form.parentExistantId) }}
+              </div>
+            </div>
+            <div id="parent-search" class="d-none mb-3">
+              <label for="parent-search-input" class="form-label">Rechercher un parent par nom, postnom ou prénom</label>
+              <div class="input-group">
+                <input id="parent-search-input" type="search" class="form-control" placeholder="Saisir au moins 2 caractères">
+                <button type="button" id="parent-search-button" class="btn btn-primary">
+                  <i class="ti ti-search me-1"></i>Rechercher
+                </button>
+              </div>
+              <div id="parent-search-results" class="list-group mt-2"></div>
+            </div>
+            <div id="parent-details" class="row g-3 d-none">
               <div class="col-md-4">{{ form_row(form.nomParent) }}</div>
               <div class="col-md-4">{{ form_row(form.postnomParent) }}</div>
               <div class="col-md-4">{{ form_row(form.prenomParent) }}</div>
@@ -301,7 +330,7 @@
               <i class="ti ti-info-circle me-1"></i>
               Après l'enregistrement, utilisez le bouton
               <strong>Valider</strong> dans la liste pour créer ou mettre à jour
-              l'élève et enregistrer le parent.
+              l'élève et associer le parent choisi ou enregistrer le nouveau parent.
             </div>
           </div>
         </div>
@@ -545,6 +574,36 @@
       const lookupButton = document.querySelector("#lookup-student");
       const referenceInput = document.querySelector("#inscription_eleve_reference");
       const lookupResult = document.querySelector("#lookup-result");
+      const parentMode = document.querySelector("#inscription_eleve_parentMode");
+      const parentExistingId = document.querySelector("#inscription_eleve_parentExistantId");
+      const parentNewChoice = document.querySelector("#parent-nouveau");
+      const parentExistingChoice = document.querySelector("#parent-existant");
+      const parentSearch = document.querySelector("#parent-search");
+      const parentDetails = document.querySelector("#parent-details");
+      const parentSearchInput = document.querySelector("#parent-search-input");
+      const parentSearchButton = document.querySelector("#parent-search-button");
+      const parentSearchResults = document.querySelector("#parent-search-results");
+      const parentSelectionFeedback = document.querySelector("#parent-selection-feedback");
+      const parentFields = {
+        nom: document.querySelector("#inscription_eleve_nomParent"),
+        postnom: document.querySelector("#inscription_eleve_postnomParent"),
+        prenom: document.querySelector("#inscription_eleve_prenomParent"),
+        telephone: document.querySelector("#inscription_eleve_telephoneParent"),
+        email: document.querySelector("#inscription_eleve_emailParent"),
+        adresse: document.querySelector("#inscription_eleve_adresseParent"),
+        profession: document.querySelector("#inscription_eleve_professionParent"),
+        type: document.querySelector("#inscription_eleve_lienParental"),
+      };
+
+      const updateParentStepActions = () => {
+        if (step !== 3) {
+          return;
+        }
+
+        nextButton.disabled =
+          (!parentNewChoice.checked && !parentExistingChoice.checked) ||
+          (parentExistingChoice.checked && !parentExistingId.value);
+      };
 
       const show = (n) => {
         step = n;
@@ -560,6 +619,7 @@
         prevButton.classList.toggle("d-none", n === 1);
         nextButton.classList.toggle("d-none", n === 4);
         saveButton.classList.toggle("d-none", n !== 4);
+        updateParentStepActions();
       };
 
       show(1);
@@ -582,6 +642,95 @@
         lookupResult.innerHTML = "";
       });
 
+      const setParentMode = (mode) => {
+        parentMode.value = mode;
+        const existing = mode === "existant";
+        parentSearch.classList.toggle("d-none", !existing);
+        parentDetails.classList.remove("d-none");
+        parentSearchResults.replaceChildren();
+        parentSelectionFeedback.textContent = "";
+        parentExistingId.value = "";
+
+        Object.values(parentFields).forEach((field) => {
+          if (field && field.tagName !== "SELECT") {
+            field.readOnly = false;
+          }
+        });
+        updateParentStepActions();
+      };
+
+      parentNewChoice.addEventListener("change", () => setParentMode("nouveau"));
+      parentExistingChoice.addEventListener("change", () => setParentMode("existant"));
+
+      parentSearchInput.addEventListener("input", () => {
+        parentExistingId.value = "";
+        parentSearchResults.replaceChildren();
+        parentSelectionFeedback.textContent = "";
+        updateParentStepActions();
+      });
+
+      parentSearchButton.addEventListener("click", async () => {
+        const term = parentSearchInput.value.trim();
+        parentSearchResults.replaceChildren();
+        parentSelectionFeedback.textContent = "";
+
+        if (term.length < 2) {
+          parentSelectionFeedback.textContent = "Saisissez au moins 2 caractères pour lancer la recherche.";
+          parentSelectionFeedback.className = "small mt-2 text-warning";
+          return;
+        }
+
+        parentSearchButton.disabled = true;
+        parentSearchButton.textContent = "Recherche...";
+
+        try {
+          const response = await fetch(
+            `{{ path('app_inscription_eleve_parents_search') }}?q=${encodeURIComponent(term)}`,
+            { headers: { Accept: "application/json" } },
+          );
+          if (!response.ok) {
+            throw new Error("La recherche des parents a échoué.");
+          }
+
+          const data = await response.json();
+          if (data.results.length === 0) {
+            parentSelectionFeedback.textContent = "Aucun parent trouvé. Vérifiez l'orthographe ou choisissez « Nouveau parent ».";
+            parentSelectionFeedback.className = "small mt-2 text-warning";
+            return;
+          }
+
+          data.results.forEach((parent) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "list-group-item list-group-item-action";
+            const identity = [parent.nom, parent.postnom, parent.prenom].filter(Boolean).join(" ");
+            button.textContent = `${identity} — ${parent.telephone || "Sans téléphone"}`;
+            button.addEventListener("click", () => {
+              parentExistingId.value = parent.id;
+              Object.entries(parentFields).forEach(([key, field]) => {
+                if (field) {
+                  field.value = parent[key] || "";
+                  if (field.tagName !== "SELECT") {
+                    field.readOnly = true;
+                  }
+                }
+              });
+              parentSelectionFeedback.textContent = `Parent sélectionné : ${identity}. Ses informations sont reprises dans l'inscription.`;
+              parentSelectionFeedback.className = "small mt-2 text-success";
+              updateParentStepActions();
+            });
+            parentSearchResults.appendChild(button);
+          });
+        } catch (error) {
+          console.error(error);
+          parentSelectionFeedback.textContent = "Une erreur est survenue pendant la recherche. Veuillez réessayer.";
+          parentSelectionFeedback.className = "small mt-2 text-danger";
+        } finally {
+          parentSearchButton.disabled = false;
+          parentSearchButton.innerHTML = '<i class="ti ti-search me-1"></i>Rechercher';
+        }
+      });
+
       nextButton.addEventListener("click", () => {
         if (step === 1) {
           // Aucun choix
@@ -589,6 +738,19 @@
             return;
           }
           if (typeAncien.checked && nextButton.disabled) {
+            return;
+          }
+        }
+
+        if (step === 3) {
+          if (!parentNewChoice.checked && !parentExistingChoice.checked) {
+            parentSelectionFeedback.textContent = "Veuillez indiquer si le parent est nouveau ou déjà enregistré.";
+            parentSelectionFeedback.className = "small mt-2 text-warning";
+            return;
+          }
+          if (parentMode.value === "existant" && !parentExistingId.value) {
+            parentSelectionFeedback.textContent = "Recherchez puis sélectionnez un parent existant avant de continuer.";
+            parentSelectionFeedback.className = "small mt-2 text-warning";
             return;
           }
         }
@@ -1147,4 +1309,3 @@
 
 </script>
 {% endblock %}
-
