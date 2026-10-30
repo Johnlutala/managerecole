@@ -1,0 +1,198 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail du modèle de bulletin{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                {# ==================== TITRE ==================== #}
+                <div class="page-title-head d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="fs-xl fw-bold m-0">
+                            Détail du modèle de bulletin
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">
+                            Consultez les informations du modèle sélectionné.
+                        </p>
+                    </div>
+
+                    <div class="text-end">
+                        <ol class="breadcrumb m-0 py-0">
+                            <li class="breadcrumb-item">
+                                <a href="javascript:void(0);">ADMIN</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="{{ path('app_modele_bulletin_index') }}">
+                                    Modèles de bulletin
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">
+                                Détail
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                {# ==================== MESSAGES FLASH ==================== #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type in ['success', 'danger', 'warning', 'info'] ? type : 'info' }} alert-dismissible fade show"
+                             role="alert">
+                            {{ message }}
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert"
+                                    aria-label="Fermer"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {# ==================== CONTENU ==================== #}
+                <div class="row g-3">
+
+                    {# ==================== INFORMATIONS RAPIDES ==================== #}
+                    <div class="col-xl-3 col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    Modèle N° : {{ modele_bulletin.id }}
+                                </h4>
+                            </div>
+
+                            <div class="card-body text-center">
+                                <div class="avatar-xl mx-auto mb-3">
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded">
+                                        <i class="ti ti-file-certificate fs-1"></i>
+                                    </div>
+                                </div>
+
+                                <h4 class="mb-2">
+                                    {{ modele_bulletin.nom }}
+                                </h4>
+
+                                <p class="text-muted small mb-3">
+                                    Modèle de bulletin scolaire
+                                </p>
+
+                                {% if modele_bulletin.statut == 'actif' %}
+                                    <span class="badge bg-success-subtle text-success">
+                                        <i class="ti ti-check me-1"></i>Actif
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary">
+                                        <i class="ti ti-ban me-1"></i>
+                                        {{ modele_bulletin.statut|default('inactif')|capitalize }}
+                                    </span>
+                                {% endif %}
+
+                                <hr>
+                                <div class="d-grid gap-2">
+
+									<a href="{{ path('app_modele_bulletin_edit', {'id': modele_bulletin.id}) }}"
+									   class="btn btn-warning">
+
+										<i class="ti ti-edit me-1"></i>
+										Modifier
+
+									</a>
+
+									  {{ include('modele_bulletin/_delete_form.html.twig') }}
+
+									<a href="{{ path('app_modele_bulletin_index') }}"
+									   class="btn btn-secondary">
+
+										<i class="ti ti-arrow-left me-1"></i>
+										Retour
+
+									</a>
+
+								</div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ==================== INFORMATIONS DU MODÈLE ==================== #}
+                    <div class="col-xl-7 col-lg-8">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">
+                                    <i class="ti ti-info-circle me-2"></i>
+                                    Informations du modèle
+                                </h4>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <th style="width: 35%;">
+                                                    Référence
+                                                </th>
+                                                <td>
+                                                    #{{ modele_bulletin.id }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Nom du modèle</th>
+                                                <td class="fw-semibold">
+                                                    {{ modele_bulletin.nom }}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Description</th>
+                                                <td class="text-break">
+                                                    {% if modele_bulletin.description %}
+                                                        {{ modele_bulletin.description }}
+                                                    {% else %}
+                                                        <span class="text-muted fst-italic">
+                                                            Aucune description renseignée.
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Statut</th>
+                                                <td>
+                                                    {% if modele_bulletin.statut == 'actif' %}
+                                                        <span class="badge bg-success-subtle text-success">
+                                                            Actif
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary-subtle text-secondary">
+                                                            {{ modele_bulletin.statut|default('inactif')|capitalize }}
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Date de création</th>
+                                                <td>
+                                                    {% if modele_bulletin.createdAt %}
+                                                        {{ modele_bulletin.createdAt|date('d/m/Y à H:i') }}
+                                                    {% else %}
+                                                        <span class="text-muted">Non renseignée</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

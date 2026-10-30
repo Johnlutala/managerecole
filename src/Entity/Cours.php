@@ -41,9 +41,16 @@ class Cours
     #[ORM\OneToMany(targetEntity: CreneauHoraire::class, mappedBy: 'cours')]
     private Collection $horaires;
 
+    /**
+     * @var Collection<int, Evaluation>
+     */
+    #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'cours')]
+    private Collection $evaluations;
+
     public function __construct()
     {
         $this->horaires = new ArrayCollection();
+        $this->evaluations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -140,6 +147,36 @@ class Cours
             // set the owning side to null (unless already changed)
             if ($horaire->getCours() === $this) {
                 $horaire->setCours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Evaluation>
+     */
+    public function getEvaluations(): Collection
+    {
+        return $this->evaluations;
+    }
+
+    public function addEvaluation(Evaluation $evaluation): static
+    {
+        if (!$this->evaluations->contains($evaluation)) {
+            $this->evaluations->add($evaluation);
+            $evaluation->setCours($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvaluation(Evaluation $evaluation): static
+    {
+        if ($this->evaluations->removeElement($evaluation)) {
+            // set the owning side to null (unless already changed)
+            if ($evaluation->getCours() === $this) {
+                $evaluation->setCours(null);
             }
         }
 

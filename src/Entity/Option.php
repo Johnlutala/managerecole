@@ -41,10 +41,17 @@ class Option
     #[ORM\OneToMany(targetEntity: Horaire::class, mappedBy: 'option')]
     private Collection $horaires;
 
+    /**
+     * @var Collection<int, ConfigurationBulletin>
+     */
+    #[ORM\OneToMany(targetEntity: ConfigurationBulletin::class, mappedBy: 'options')]
+    private Collection $configurationBulletins;
+
     public function __construct()
     {
         $this->inscriptionEleves = new ArrayCollection();
         $this->horaires = new ArrayCollection();
+        $this->configurationBulletins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -125,6 +132,36 @@ class Option
             // set the owning side to null (unless already changed)
             if ($inscriptionElefe->getOptions() === $this) {
                 $inscriptionElefe->setOptions(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConfigurationBulletin>
+     */
+    public function getConfigurationBulletins(): Collection
+    {
+        return $this->configurationBulletins;
+    }
+
+    public function addConfigurationBulletin(ConfigurationBulletin $configurationBulletin): static
+    {
+        if (!$this->configurationBulletins->contains($configurationBulletin)) {
+            $this->configurationBulletins->add($configurationBulletin);
+            $configurationBulletin->setOptions($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConfigurationBulletin(ConfigurationBulletin $configurationBulletin): static
+    {
+        if ($this->configurationBulletins->removeElement($configurationBulletin)) {
+            // set the owning side to null (unless already changed)
+            if ($configurationBulletin->getOptions() === $this) {
+                $configurationBulletin->setOptions(null);
             }
         }
 

@@ -1,0 +1,74 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle période de bulletin{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">
+                            Nouvelle période de bulletin
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">
+                            Configurez une période de saisie et de gestion des notes.
+                        </p>
+                    </div>
+
+                    <a href="{{ path('app_configuration_bulletin_index') }}"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour à la liste
+                    </a>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type in ['success', 'danger', 'warning', 'info'] ? type : 'info' }} alert-dismissible fade show"
+                             role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close"
+                                    data-bs-dismiss="alert" aria-label="Fermer"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="row justify-content-center">
+                    <div class="col-xl-9 col-lg-10">
+
+                        <div class="card border shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded border bg-light d-flex align-items-center justify-content-center"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="ti ti-calendar-plus fs-2 text-primary"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="card-title mb-1">
+                                            Paramètres de la période
+                                        </h5>
+                                        <p class="text-muted small mb-0">
+                                            Renseignez les informations ci-dessous.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4">
+                                {{ include('configuration_bulletin/_form.html.twig', {
+                                    button_label: 'Créer la période'
+                                }) }}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

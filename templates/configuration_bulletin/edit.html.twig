@@ -1,0 +1,89 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une période de bulletin{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                    <div>
+                        <h4 class="fs-xl fw-bold m-0">
+                            Modifier une période de bulletin
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">
+                            Modifiez la période et ses paramètres scolaires.
+                        </p>
+                    </div>
+
+                    <a href="{{ path('app_configuration_bulletin_index') }}"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-arrow-left me-1"></i>
+                        Retour à la liste
+                    </a>
+                </div>
+
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type in ['success', 'danger', 'warning', 'info'] ? type : 'info' }} alert-dismissible fade show"
+                             role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close"
+                                    data-bs-dismiss="alert" aria-label="Fermer"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <div class="row justify-content-center">
+                    <div class="col-xl-9 col-lg-10">
+
+                        <div class="card border shadow-sm">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded border bg-light d-flex align-items-center justify-content-center"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="ti ti-calendar-event fs-2 text-primary"></i>
+                                    </div>
+
+                                    <div>
+                                        <h5 class="card-title mb-1">
+                                            {{ configuration_bulletin.nom }}
+                                        </h5>
+                                        <p class="text-muted small mb-0">
+                                            Référence #{{ configuration_bulletin.id }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4">
+                                {{ include('configuration_bulletin/_form.html.twig', {
+                                    button_label: 'Enregistrer les modifications'
+                                }) }}
+                            </div>
+                        </div>
+
+                        <div class="card border border-danger-subtle mt-4">
+                            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                <div>
+                                    <h6 class="fw-semibold mb-1">
+                                        Supprimer cette période
+                                    </h6>
+                                    <p class="text-muted small mb-0">
+                                        Cette action peut être irréversible.
+                                    </p>
+                                </div>
+
+                                {{ include('configuration_bulletin/_delete_form.html.twig') }}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div> 
+        </div>
+    </div>
+{% endblock %}

@@ -23,9 +23,18 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CoursController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET', 'POST'])]
-    public function index(Request $request, CoursRepository $repository, EcoleRepository $ecoleRepository, EntityManagerInterface $entityManager): Response
-    {
+    public function index(
+        Request $request,
+        CoursRepository $repository,
+        EcoleRepository $ecoleRepository,
+        EntityManagerInterface $entityManager
+    ): Response {
+        // ==========================================
+        // 1. ÉCOLES ET ÉTABLISSEMENT SÉLECTIONNÉ
+        // ==========================================
+
         $ecoles = $ecoleRepository->findBy([], ['id' => 'ASC']);
+
         $selectedEcole = null;
         $requestedEcoleId = $request->query->get('ecole');
 
@@ -37,25 +46,78 @@ final class CoursController extends AbstractController
             $selectedEcole = $ecoles[0] ?? null;
         }
 
+        // ==========================================
+        // 2. SECTION SÉLECTIONNÉE
+        // ==========================================
+
+        $selectedSection = null;
+
+        $sectionRepository = $entityManager->getRepository(Section::class);
+
+        $sections = $selectedEcole
+            ? $sectionRepository->findBy(
+                ['ecole' => $selectedEcole],
+                ['nom' => 'ASC']
+            )
+            : [];
+
+        $requestedSectionId = $request->query->get('section');
+
+        if ($selectedEcole && $requestedSectionId) {
+            $candidateSection = $sectionRepository->find($requestedSectionId);
+
+            if ($candidateSection && $candidateSection->getEcole() === $selectedEcole) {
+                $selectedSection = $candidateSection;
+            }
+        }
+
+        // ==========================================
+        // 3. FILTRE PAR CLASSE
+        // ==========================================
+
         $selectedClasse = null;
         $requestedClasseId = $request->query->get('classe');
+
         if ($selectedEcole && $requestedClasseId) {
-            $candidateClasse = $entityManager->getRepository(Classe::class)->find($requestedClasseId);
-            if ($candidateClasse?->getEcole() === $selectedEcole) {
+            $candidateClasse = $entityManager
+                ->getRepository(Classe::class)
+                ->find($requestedClasseId);
+
+            if (
+                $candidateClasse
+                && $candidateClasse->getEcole() === $selectedEcole
+                && (
+                    !$selectedSection
+                    || $candidateClasse->getSection() === $selectedSection
+                )
+            ) {
                 $selectedClasse = $candidateClasse;
             }
         }
 
+        // ==========================================
+        // 4. FILTRE PAR PROFESSEUR
+        // ==========================================
+
         $selectedProfesseur = null;
         $requestedProfesseurId = $request->query->get('professeur');
+
         if ($selectedEcole && $requestedProfesseurId) {
-            $candidateProfesseur = $entityManager->getRepository(Professeur::class)->find($requestedProfesseurId);
-            if ($candidateProfesseur?->getEcole() === $selectedEcole) {
+            $candidateProfesseur = $entityManager
+                ->getRepository(Professeur::class)
+                ->find($requestedProfesseurId);
+
+            if ($candidateProfesseur && $candidateProfesseur->getEcole() === $selectedEcole) {
                 $selectedProfesseur = $candidateProfesseur;
             }
         }
 
+        // ==========================================
+        // 5. FORMULAIRE DE CRÉATION D'UN COURS
+        // ==========================================
+
         $cour = new Cours();
+
         $form = $this->createForm(CoursType::class, $cour);
         $form->handleRequest($request);
 
@@ -65,6 +127,7 @@ final class CoursController extends AbstractController
             $classe = $cour->getClasse();
             $option = $cour->getOption();
 
+            // Vérification de la cohérence école / section / classe / option.
             if (
                 !$ecole
                 || !$section
@@ -74,26 +137,37 @@ final class CoursController extends AbstractController
                 || $classe->getEcole() !== $ecole
                 || ($option && $option->getClasse() !== $classe)
             ) {
-                $this->addFlash('danger', 'La section, la classe ou l’option ne correspond pas à l’école sélectionnée.');
+                $this->addFlash(
+                    'danger',
+                    'La section, la classe ou l’option ne correspond pas à l’école sélectionnée.'
+                );
 
                 return $this->redirectToRoute('app_cours_index', [
                     'ecole' => $ecole?->getId() ?? $selectedEcole?->getId(),
-                    'classe' => $selectedClasse?->getId(),
+                    'section' => $section?->getId(),
+                    'classe' => $classe?->getId(),
                     'professeur' => $selectedProfesseur?->getId(),
                     'add' => 1,
                 ]);
             }
 
-            if ($repository->findOneBy([
+            // Vérifier si le cours existe déjà pour cette classe et cette option.
+            $coursExistant = $repository->findOneBy([
                 'nom' => $cour->getNom(),
                 'classe' => $classe,
                 'option' => $option,
-            ])) {
-                $this->addFlash('warning', 'Ce cours est déjà enregistré pour cette classe et cette option.');
+            ]);
+
+            if ($coursExistant) {
+                $this->addFlash(
+                    'warning',
+                    'Ce cours est déjà enregistré pour cette classe et cette option.'
+                );
 
                 return $this->redirectToRoute('app_cours_index', [
                     'ecole' => $ecole->getId(),
-                    'classe' => $selectedClasse?->getId(),
+                    'section' => $section->getId(),
+                    'classe' => $classe->getId(),
                     'professeur' => $selectedProfesseur?->getId(),
                     'add' => 1,
                 ]);
@@ -105,85 +179,236 @@ final class CoursController extends AbstractController
 
             $entityManager->persist($cour);
             $entityManager->flush();
-            $this->addFlash('success', 'Cours créé(e) avec succès.');
+
+            $this->addFlash('success', 'Cours créé avec succès.');
 
             return $this->redirectToRoute('app_cours_index', [
                 'ecole' => $ecole->getId(),
-                'classe' => $selectedClasse?->getId(),
+                'section' => $section->getId(),
+                'classe' => $classe->getId(),
                 'professeur' => $selectedProfesseur?->getId(),
                 'add' => 1,
             ]);
         }
 
+        // ==========================================
+        // 6. CLASSES ET PROFESSEURS DE L'ÉTABLISSEMENT
+        // ==========================================
+
+        $criteresClasses = [
+            'ecole' => $selectedEcole,
+        ];
+
+        if ($selectedSection) {
+            $criteresClasses['section'] = $selectedSection;
+        }
+
         $classes = $selectedEcole
-            ? $entityManager->getRepository(Classe::class)->findBy(['ecole' => $selectedEcole], ['nom' => 'ASC'])
-            : [];
-        $professeurs = $selectedEcole
-            ? $entityManager->getRepository(Professeur::class)->findBy(['ecole' => $selectedEcole], ['nom' => 'ASC'])
-            : [];
-        $cours = $selectedEcole
-            ? $repository->findForEcole($selectedEcole, $selectedClasse, $selectedProfesseur)
+            ? $entityManager->getRepository(Classe::class)->findBy(
+                $criteresClasses,
+                ['nom' => 'ASC']
+            )
             : [];
 
+        $professeurs = $selectedEcole
+            ? $entityManager->getRepository(Professeur::class)->findBy(
+                ['ecole' => $selectedEcole],
+                ['nom' => 'ASC']
+            )
+            : [];
+
+        // ==========================================
+        // 7. COURS DE LA LISTE PRINCIPALE
+        // ==========================================
+
+        $cours = $selectedEcole
+            ? $repository->findForEcole(
+                $selectedEcole,
+                $selectedClasse,
+                $selectedProfesseur
+            )
+            : [];
+
+        // Appliquer également le filtre de section à la liste principale.
+        if ($selectedSection) {
+            $cours = array_values(array_filter(
+                $cours,
+                static function (Cours $coursItem) use ($selectedSection): bool {
+                    return $coursItem->getClasse()?->getSection() === $selectedSection;
+                }
+            ));
+        }
+
+        // Regroupement des cours par classe.
         $coursParClasse = [];
-        $coursParClasseEtProfesseur = [];
+
         foreach ($cours as $coursItem) {
-            $classeId = $coursItem->getClasse()->getId();
+            $classe = $coursItem->getClasse();
+
+            if (!$classe) {
+                continue;
+            }
+
+            $classeId = $classe->getId();
+
             if (!isset($coursParClasse[$classeId])) {
                 $coursParClasse[$classeId] = [
-                    'classe' => $coursItem->getClasse(),
+                    'classe' => $classe,
                     'cours' => [],
                     'professeurs' => [],
                 ];
             }
+
             $coursParClasse[$classeId]['cours'][] = $coursItem;
 
             $professeur = $coursItem->getProfesseur();
             $professeurId = $professeur?->getId() ?? 0;
+
             $coursParClasse[$classeId]['professeurs'][$professeurId] = $professeur
                 ? trim($professeur->getNom() . ' ' . $professeur->getPrenom())
                 : 'Non attribué';
-
-            $professeurId = $coursItem->getProfesseur()?->getId() ?? 0;
-            $groupeId = $classeId . '-' . $professeurId;
-
-            if (!isset($coursParClasseEtProfesseur[$groupeId])) {
-                $coursParClasseEtProfesseur[$groupeId] = [
-                    'classe' => $coursItem->getClasse(),
-                    'professeur' => $coursItem->getProfesseur(),
-                    'cours' => [],
-                ];
-            }
-
-            $coursParClasseEtProfesseur[$groupeId]['cours'][] = $coursItem;
         }
 
-        $coursParClasse = array_map(
+        $coursParClasse = array_values(array_map(
             static function (array $groupe): array {
                 $groupe['professeurs'] = array_values($groupe['professeurs']);
 
                 return $groupe;
             },
-            array_values($coursParClasse)
-        );
+            $coursParClasse
+        ));
+
+        // ==========================================
+        // 8. APERÇU : COURS DE L'ÉCOLE ET DE LA SECTION
+        // ==========================================
+
+        $coursApercu = [];
+
+        // L'aperçu est chargé uniquement si une école et une section sont sélectionnées.
+        if ($selectedEcole && $selectedSection) {
+            $coursApercu = $repository->createQueryBuilder('c')
+                ->innerJoin('c.classe', 'cl')
+                ->andWhere('cl.ecole = :ecole')
+                ->andWhere('cl.section = :section')
+                ->setParameter('ecole', $selectedEcole)
+                ->setParameter('section', $selectedSection)
+                ->orderBy('cl.nom', 'ASC')
+                ->addOrderBy('c.nom', 'ASC')
+                ->getQuery()
+                ->getResult();
+        }
+
+        // ==========================================
+        // 9. REGROUPEMENT DE L'APERÇU PAR CLASSE
+        // ==========================================
+
+        $coursApercuParClasse = [];
+
+        foreach ($coursApercu as $coursItem) {
+            $classe = $coursItem->getClasse();
+
+            if (!$classe) {
+                continue;
+            }
+
+            $classeId = $classe->getId();
+
+            if (!isset($coursApercuParClasse[$classeId])) {
+                $coursApercuParClasse[$classeId] = [
+                    'classe' => $classe,
+                    'cours' => [],
+                ];
+            }
+
+            $coursApercuParClasse[$classeId]['cours'][] = $coursItem;
+        }
+
+        $coursApercuParClasse = array_values($coursApercuParClasse);
+
+        // ==========================================
+        // 10. TRI DES CLASSES ET DES COURS
+        // ==========================================
+
+        $trierGroupes = static function (array &$groupes): void {
+
+            usort($groupes, static function (array $a, array $b): int {
+                $nomA = trim((string) $a['classe']->getNom());
+                $nomB = trim((string) $b['classe']->getNom());
+
+                $humaniteA = stripos($nomA, 'human') !== false;
+                $humaniteB = stripos($nomB, 'human') !== false;
+
+                if ($humaniteA !== $humaniteB) {
+                    return $humaniteA <=> $humaniteB;
+                }
+
+                // Extraire le premier numéro présent dans le nom de la classe.
+                preg_match('/\d+/', $nomA, $matchA);
+                preg_match('/\d+/', $nomB, $matchB);
+
+                $numeroA = isset($matchA[0]) ? (int) $matchA[0] : 999;
+                $numeroB = isset($matchB[0]) ? (int) $matchB[0] : 999;
+
+                if ($numeroA !== $numeroB) {
+                    return $numeroA <=> $numeroB;
+                }
+
+                return strnatcasecmp($nomA, $nomB);
+            });
+
+            foreach ($groupes as &$groupe) {
+                usort(
+                    $groupe['cours'],
+                    static function ($a, $b): int {
+                        return strnatcasecmp(
+                            (string) $a->getNom(),
+                            (string) $b->getNom()
+                        );
+                    }
+                );
+            }
+
+            unset($groupe);
+        };
+
+        $trierGroupes($coursParClasse);
+        $trierGroupes($coursApercuParClasse);
+
+        // ==========================================
+        // 11. DONNÉES ENVOYÉES À TWIG
+        // ==========================================
 
         return $this->render('cours/index.html.twig', [
             'cour' => $cour,
+
             'cours' => $cours,
             'coursParClasse' => $coursParClasse,
-            'coursParClasseEtProfesseur' => array_values($coursParClasseEtProfesseur),
+
+            'coursApercuParClasse' => $coursApercuParClasse,
+
             'allCours' => $repository->findAll(),
+
             'ecoles' => $ecoles,
             'selectedEcole' => $selectedEcole,
+
+            'sections' => $sections,
+            'selectedSection' => $selectedSection,
+
             'classes' => $classes,
             'professeurs' => $professeurs,
+
             'selectedClasse' => $selectedClasse,
             'selectedProfesseur' => $selectedProfesseur,
+
             'openAddModal' => $request->query->getBoolean('add') || $form->isSubmitted(),
             'openGestionModal' => $request->query->getBoolean('gestion'),
+
             'form' => $form->createView(),
         ]);
     }
+
+
+
     #[Route('/ajax/sections/{ecole}', name: 'ajax_sections', methods: ['GET'])]
     public function ajaxSections(
         Ecole $ecole,

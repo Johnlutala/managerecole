@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: NoteRepository::class)]
+#[ORM\Table(name: 'note', uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_NOTE_ELEVE_EVALUATION', columns: ['eleve_id', 'evaluation_id'])])]
 class Note
 {
     #[ORM\Id]
@@ -22,6 +23,13 @@ class Note
 
     #[ORM\ManyToOne(inversedBy: 'notes')]
     private ?Eleve $eleve = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Evaluation $evaluation = null;
+
+    #[ORM\Column(length: 30)]
+    private string $statut = 'brouillon';
 
     public function getId(): ?int
     {
@@ -60,6 +68,30 @@ class Note
     public function setEleve(?Eleve $eleve): static
     {
         $this->eleve = $eleve;
+
+        return $this;
+    }
+
+    public function getEvaluation(): ?Evaluation
+    {
+        return $this->evaluation;
+    }
+
+    public function setEvaluation(?Evaluation $evaluation): static
+    {
+        $this->evaluation = $evaluation;
+
+        return $this;
+    }
+
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
 
         return $this;
     }

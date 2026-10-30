@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notes — {{ cours.nom }}{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <a href="{{ path('app_professeur_notes_index') }}" class="text-muted">← Gérer les notes</a>
+                    <h4 class="fs-xl fw-bold mt-2 mb-0">{{ cours.classe.nom }} · {{ cours.nom }}</h4>
+                </div>
+            </div>
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            {% for periode in periodes %}
+                {% set configuration = periode.configuration %}
+                <section class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ configuration.nom }}</h5>
+                        {% if periode.ouverte %}
+                            <span class="badge bg-success">Saisie autorisée</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Saisie désactivée — en attente d’autorisation administrative</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if periode.evaluations is empty %}
+                            <div class="alert alert-info mb-0">Aucune évaluation n’est configurée pour ce cours et cette période.</div>
+                        {% else %}
+                            <form method="post" action="{{ path('app_professeur_notes_cours', {id: cours.id, periode: configuration.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('notes_' ~ cours.id ~ '_' ~ configuration.id) }}">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Élève</th>
+                                                {% for evaluation in periode.evaluations %}
+                                                    <th class="text-center">
+                                                        {{ evaluation.nom }}<br>
+                                                        <small class="text-muted">/{{ evaluation.bareme }}</small>
+                                                    </th>
+                                                {% endfor %}
+                                                <th class="text-center">Total / {{ periode.total_max }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for eleve in eleves %}
+                                                <tr>
+                                                    <th>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</th>
+                                                    {% for evaluation in periode.evaluations %}
+                                                        {% set note = periode.notes[evaluation.id][eleve.id]|default(null) %}
+                                                        <td>
+                                                            <input
+                                                                class="form-control form-control-sm text-center"
+                                                                type="number"
+                                                                min="0"
+                                                                max="{{ evaluation.bareme }}"
+                                                                step="1"
+                                                                name="notes[{{ evaluation.id }}][{{ eleve.id }}]"
+                                                                value="{{ note ? note.cote : '' }}"
+                                                                {% if not periode.ouverte %}disabled{% elseif note and note.statut in ['soumise', 'validee'] %}readonly{% endif %}
+                                                                aria-label="{{ evaluation.nom }} — {{ eleve.nom }} {{ eleve.prenom }}"
+                                                            >
+                                                            {% if note and note.statut == 'soumise' %}
+                                                                <small class="text-success">Soumise</small>
+                                                            {% elseif note and note.statut == 'validee' %}
+                                                                <small class="text-primary">Validée</small>
+                                                        </td>
+                                                            {% endif %}
+                                                    {% endfor %}
+                                                    <td class="text-center fw-semibold">
+                                                        {{ periode.totaux[eleve.id]|default(0) }} / {{ periode.total_max }}
+                                                    </td>
+                                                </tr>
+                                            {% else %}
+                                                <tr><td colspan="{{ periode.evaluations|length + 2 }}" class="text-center">Aucun élève actif inscrit dans cette classe.</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if periode.ouverte %}
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-outline-primary" type="submit" name="action" value="enregistrer">Enregistrer</button>
+                                        <button class="btn btn-primary" type="submit" name="action" value="soumettre">Soumettre à l’administration</button>
+                                    </div>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    </div>
+                </section>
+            {% else %}
+                <div class="alert alert-warning">Aucune période de bulletin n’est configurée pour cette classe.</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

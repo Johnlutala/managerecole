@@ -1,30 +1,148 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Note{% endblock %}
+{% block title %}Détails de la note{% endblock %}
 
 {% block body %}
-    <h1>Note</h1>
+<div class="wrapper">
+    <div class="content-page">
+        <div class="container-fluid">
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ note.id }}</td>
-            </tr>
-            <tr>
-                <th>Cote</th>
-                <td>{{ note.cote }}</td>
-            </tr>
-            <tr>
-                <th>Observation</th>
-                <td>{{ note.observation }}</td>
-            </tr>
-        </tbody>
-    </table>
+            {# En-tête #}
+            <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <div>
+                    <h4 class="fs-xl fw-bold m-0">Détails de la note</h4>
+                    <p class="text-muted mb-0 mt-1">
+                        Consultation des informations de la note enregistrée.
+                    </p>
+                </div>
 
-    <a href="{{ path('app_note_index') }}">back to list</a>
+                <a href="{{ path('app_note_index') }}" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i>
+                    Retour à la liste
+                </a>
+            </div>
 
-    <a href="{{ path('app_note_edit', {'id': note.id}) }}">edit</a>
+            {# Messages flash #}
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type in ['success', 'danger', 'warning', 'info'] ? type : 'info' }} alert-dismissible fade show"
+                         role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close"
+                                data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
 
-    {{ include('note/_delete_form.html.twig') }}
+            <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10">
+
+                    {# Carte des détails #}
+                    <div class="card border shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded border bg-light d-flex align-items-center justify-content-center"
+                                     style="width: 48px; height: 48px;">
+                                    <i class="ti ti-report-analytics fs-2 text-primary"></i>
+                                </div>
+
+                                <div>
+                                    <h5 class="card-title mb-1">Note #{{ note.id }}</h5>
+                                    <p class="text-muted small mb-0">
+                                        Informations détaillées
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+
+                                {# Cote #}
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-2">
+                                            <i class="ti ti-calculator me-1"></i>
+                                            Cote obtenue
+                                        </div>
+
+                                        <h4 class="fw-bold mb-0">
+                                            {{ note.cote is not null ? note.cote : '—' }}
+                                        </h4>
+                                    </div>
+                                </div>
+
+                                {# Identifiant #}
+                                <div class="col-md-6">
+                                    <div class="border rounded p-3 h-100">
+                                        <div class="text-muted small mb-2">
+                                            <i class="ti ti-hash me-1"></i>
+                                            Identifiant
+                                        </div>
+
+                                        <h5 class="fw-semibold mb-0">
+                                            #{{ note.id }}
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                {# Observation #}
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small mb-2">
+                                            <i class="ti ti-message-circle me-1"></i>
+                                            Observation
+                                        </div>
+
+                                        {% if note.observation %}
+                                            <p class="mb-0 text-break">{{ note.observation }}</p>
+                                        {% else %}
+                                            <span class="text-muted fst-italic">
+                                                Aucune observation renseignée.
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {# Actions #}
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 pt-3 border-top">
+                                <a href="{{ path('app_note_index') }}"
+                                   class="btn btn-outline-secondary">
+                                    <i class="ti ti-arrow-left me-1"></i>
+                                    Retour
+                                </a>
+
+                                <div class="d-flex gap-2">
+                                    <a href="{{ path('app_note_edit', {'id': note.id}) }}"
+                                       class="btn btn-outline-primary">
+                                        <i class="ti ti-edit me-1"></i>
+                                        Modifier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Suppression #}
+                    <div class="card border border-danger-subtle mt-4">
+                        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h6 class="fw-semibold mb-1">Supprimer cette note</h6>
+                                <p class="text-muted small mb-0">
+                                    Cette action supprimera définitivement cette note.
+                                </p>
+                            </div>
+
+                            {{ include('note/_delete_form.html.twig') }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}

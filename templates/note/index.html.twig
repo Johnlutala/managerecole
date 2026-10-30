@@ -11,6 +11,8 @@
                 <th>Id</th>
                 <th>Cote</th>
                 <th>Observation</th>
+                <th>Évaluation</th>
+                <th>État</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -20,6 +22,8 @@
                 <td>{{ note.id }}</td>
                 <td>{{ note.cote }}</td>
                 <td>{{ note.observation }}</td>
+                <td>{{ note.evaluation ? note.evaluation.nom : '—' }}</td>
+                <td>{{ note.statut }}</td>
                 <td>
                     <a href="{{ path('app_note_show', {'id': note.id}) }}">show</a>
                     <a href="{{ path('app_note_edit', {'id': note.id}) }}">edit</a>
@@ -27,7 +31,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="6">Aucune note trouvée.</td>
             </tr>
         {% endfor %}
         </tbody>

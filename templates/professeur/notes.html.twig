@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les notes{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">Gérer les notes</h4>
+                </div>
+            </div>
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label for="ecoles" class="form-label">Écoles associées</label>
+                            <select class="form-select" id="ecoles" name="ecoles[]" multiple size="{{ min(max(ecoles|length, 2), 6) }}">
+                                {% for ecole in ecoles %}
+                                    <option value="{{ ecole.id }}" {{ ecole.id in ecoles_selectionnees ? 'selected' : '' }}>
+                                        {{ ecole.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Sans sélection, toutes vos écoles associées sont affichées. Utilisez Ctrl pour choisir plusieurs écoles.</small>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" type="submit">Filtrer</button>
+                        </div>
+                        <div class="col-md-2">
+                            <a class="btn btn-outline-secondary w-100" href="{{ path('app_professeur_notes_index') }}">Tout afficher</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% for item in classes %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ item.classe.nom }} <small class="text-muted">· {{ item.classe.ecole.nom }}</small></h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for cours in item.cours %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ cours.nom }}</span>
+                                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_professeur_notes_cours', {id: cours.id}) }}">
+                                    Ouvrir <i class="ti ti-arrow-right"></i>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Aucun cours ne vous est actuellement attribué dans les écoles sélectionnées.</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -34,250 +34,65 @@
 					</a>
 				</li>
 
-
-				{# ==================== INSCRIPTION ==================== #}
 				{% if is_granted('ROLE_ADMIN') %}
-					<li class="side-nav-title">Gestion</li>
-
+					<li class="side-nav-title">ESPACE ÉTABLISSEMENT</li>
 					<li class="side-nav-item">
-						<a
-							data-bs-toggle="collapse"
-							href="#sidebarInscr"
-							aria-expanded="false"
-							aria-controls="sidebarInscr"
-							class="side-nav-link"
-						>
-
-							<span class="menu-icon">
-								<i data-lucide="clipboard-pen-line"></i>
-							</span>
-
-							<span class="menu-text">
-								Inscription
-							</span>
+						<a data-bs-toggle="collapse" href="#sidebarEtablissement" class="side-nav-link" aria-expanded="false">
+							<span class="menu-icon"><i data-lucide="school"></i></span>
+							<span class="menu-text">Paramétrage scolaire</span>
 						</a>
-
-						<div class="collapse" id="sidebarInscr">
-
-							<ul class="sub-menu">
-
-								{# Élève #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_inscription_eleve_index') }}" class="side-nav-link">
-
-										<span class="menu-icon">
-											<i data-lucide="user-round-plus"></i>
-										</span>
-
-										<span class="menu-text">
-											Élève
-										</span>
-									</a>
-								</li>
-							
-							</ul>
-						</div>
-					</li>
-
-					<li class="side-nav-item">
-						<a data-bs-toggle="collapse" href="#sidebarEtablissement" aria-expanded="false" aria-controls="sidebarEtablissement" class="side-nav-link">
-							<span class="menu-icon">
-								<i data-lucide="school"></i>
-							</span>
-
-							<span class="menu-text">
-								Établissement
-							</span>
-						</a>
-
 						<div class="collapse" id="sidebarEtablissement">
 							<ul class="sub-menu">
-								{# École #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_ecole_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="school"></i>
-										</span>
-
-										<span class="menu-text">
-											École
-										</span>
-									</a>
-								</li>
-
-								{# Section #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_section_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="panels-top-left"></i>
-										</span>
-										<span class="menu-text">
-											Section
-										</span>
-									</a>
-								</li>
-
-
-								{# Classes #}
-								<li class="side-nav-item">
-									<a
-										href="{{ path('app_classe_index') }}"
-										class="side-nav-link"
-									>
-
-										<span class="menu-icon">
-											<i data-lucide="book-open"></i>
-										</span>
-
-										<span class="menu-text">
-											Classes
-										</span>
-
-									</a>
-								</li>
-
-
-								{# Options #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_option_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Options
-										</span>
-									</a>
-								</li>
-								{# Cours #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_cours_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Cours
-										</span>
-									</a>
-								</li>
-								{# Professeurs #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_professeur_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Professeurs
-										</span>
-									</a>
-								</li>
-								{# Parents #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_parents_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Parents
-										</span>
-									</a>
-								</li>
-								{# Présence #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_presence_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Présence
-										</span>
-									</a>
-								</li>
-								{# Parents #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_horaire_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Horaires
-										</span>
-									</a>
-								</li>
-								
-								{# Jour Scolaire #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_jour_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Jour
-										</span>
-									</a>
-								</li>
-								
-								{# Heure #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_heure_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Heure
-										</span>
-									</a>
-								</li>
-
-								{# Année Scolaire #}
-								<li class="side-nav-item">
-									<a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link">
-										<span class="menu-icon">
-											<i data-lucide="layers-3"></i>
-										</span>
-										<span class="menu-text">
-											Année Scolaire
-										</span>
-									</a>
-								</li>
+								<li class="side-nav-item"><a href="{{ path('app_ecole_index') }}" class="side-nav-link"><span class="menu-text">Écoles</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_annee_scolaire_index') }}" class="side-nav-link"><span class="menu-text">Années scolaires</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_section_index') }}" class="side-nav-link"><span class="menu-text">Sections</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_classe_index') }}" class="side-nav-link"><span class="menu-text">Classes</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_option_index') }}" class="side-nav-link"><span class="menu-text">Options</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_horaire_index') }}" class="side-nav-link"><span class="menu-text">Horaires</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_jour_index') }}" class="side-nav-link"><span class="menu-text">Jours</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_heure_index') }}" class="side-nav-link"><span class="menu-text">Heures</span></a></li>
 							</ul>
 						</div>
 					</li>
 				{% endif %}
-				<li class="side-nav-title">
-					PERSONNELS
-				</li>
 
-				{# Élèves #}
-				<li class="side-nav-item">
-					<a href="{{ path('app_eleve_index') }}" class="side-nav-link">
-						<span class="menu-icon">
-							<i data-lucide="users-round"></i>
-						</span>
-						<span class="menu-text">
-							Élèves
-						</span>
-					</a>
-				</li>
-
-
-				{# Administrateurs #}
-				{% if is_granted('ROLE_ADMIN') %}
-
-					<li class="side-nav-title">
-						UTILISATEURS
-					</li>
-
+				{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_PROFESSEUR') %}
+					<li class="side-nav-title">ESPACE MATIÈRE</li>
 					<li class="side-nav-item">
-						<a href="{{ path('app_user_index') }}" class="side-nav-link">
-							<span class="menu-icon">
-								<i data-lucide="users"></i>
-							</span>
-							<span class="menu-text">
-								Utilisateurs
-							</span>
+						<a data-bs-toggle="collapse" href="#sidebarMatiere" class="side-nav-link" aria-expanded="false">
+							<span class="menu-icon"><i data-lucide="book-open-check"></i></span>
+							<span class="menu-text">Cours et notes</span>
 						</a>
+						<div class="collapse" id="sidebarMatiere">
+							<ul class="sub-menu">
+								{% if is_granted('ROLE_ADMIN') %}
+									<li class="side-nav-item"><a href="{{ path('app_cours_index') }}" class="side-nav-link"><span class="menu-text">Cours et attributions</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_modele_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Modèles de bulletin</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_configuration_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Périodes de bulletin</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_evaluation_index') }}" class="side-nav-link"><span class="menu-text">Évaluations</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_validation_notes_index') }}" class="side-nav-link"><span class="menu-text">Validation des notes</span></a></li>
+								{% endif %}
+								{% if is_granted('ROLE_PROFESSEUR') %}
+									<li class="side-nav-item"><a href="{{ path('app_professeur_notes_index') }}" class="side-nav-link"><span class="menu-text">Gérer les notes</span></a></li>
+								{% endif %}
+							</ul>
+						</div>
 					</li>
+				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
+					<li class="side-nav-title">ESPACE PERSONNEL</li>
+					<li class="side-nav-item"><a href="{{ path('app_inscription_eleve_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="user-round-plus"></i></span><span class="menu-text">Inscriptions</span></a></li>
+					<li class="side-nav-item"><a href="{{ path('app_eleve_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="graduation-cap"></i></span><span class="menu-text">Élèves</span></a></li>
+					<li class="side-nav-item"><a href="{{ path('app_professeur_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="briefcase-business"></i></span><span class="menu-text">Professeurs</span></a></li>
+					<li class="side-nav-item"><a href="{{ path('app_parents_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="users-round"></i></span><span class="menu-text">Parents</span></a></li>
+					<li class="side-nav-item"><a href="{{ path('app_presence_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="calendar-check-2"></i></span><span class="menu-text">Présences</span></a></li>
+
+					<li class="side-nav-title">ESPACE FINANCE</li>
+					<li class="side-nav-item"><a href="javascript:void(0)" class="side-nav-link disabled" aria-disabled="true"><span class="menu-icon"><i data-lucide="wallet-cards"></i></span><span class="menu-text">Frais scolaires — bientôt</span></a></li>
+
+					<li class="side-nav-title">ESPACE UTILISATEUR</li>
+					<li class="side-nav-item"><a href="{{ path('app_user_index') }}" class="side-nav-link"><span class="menu-icon"><i data-lucide="users"></i></span><span class="menu-text">Utilisateurs</span></a></li>
 				{% endif %}
 
 			</ul>

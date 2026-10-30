@@ -34,9 +34,16 @@ class AnneeScolaire
     #[ORM\OneToMany(targetEntity: InscriptionEleve::class, mappedBy: 'anneeScolaire')]
     private Collection $inscriptionEleves;
 
+    /**
+     * @var Collection<int, ConfigurationBulletin>
+     */
+    #[ORM\OneToMany(targetEntity: ConfigurationBulletin::class, mappedBy: 'anneeScolaire')]
+    private Collection $configurationBulletins;
+
     public function __construct()
     {
         $this->inscriptionEleves = new ArrayCollection();
+        $this->configurationBulletins = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -116,6 +123,36 @@ class AnneeScolaire
             // set the owning side to null (unless already changed)
             if ($inscriptionElefe->getAnneeScolaire() === $this) {
                 $inscriptionElefe->setAnneeScolaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConfigurationBulletin>
+     */
+    public function getConfigurationBulletins(): Collection
+    {
+        return $this->configurationBulletins;
+    }
+
+    public function addConfigurationBulletin(ConfigurationBulletin $configurationBulletin): static
+    {
+        if (!$this->configurationBulletins->contains($configurationBulletin)) {
+            $this->configurationBulletins->add($configurationBulletin);
+            $configurationBulletin->setAnneeScolaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConfigurationBulletin(ConfigurationBulletin $configurationBulletin): static
+    {
+        if ($this->configurationBulletins->removeElement($configurationBulletin)) {
+            // set the owning side to null (unless already changed)
+            if ($configurationBulletin->getAnneeScolaire() === $this) {
+                $configurationBulletin->setAnneeScolaire(null);
             }
         }
 
