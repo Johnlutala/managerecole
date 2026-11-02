@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    {% include 'fiche_cotation/_styles.html.twig' %}
+</head>
+<body>
+    {% include 'fiche_cotation/_sheet.html.twig' with {
+        ecole: ecole,
+        structure: structure,
+        groupes_colonnes: groupes_colonnes,
+        annee_scolaire: annee_scolaire
+    } %}
+</body>
+</html>

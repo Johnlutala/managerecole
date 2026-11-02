@@ -21,10 +21,11 @@ class ConfigurationBulletinType extends AbstractType
     {
         $builder
             ->add('nom', TextType::class, [
-                'label' => 'Nom de la période',
+                'label' => 'Semestre ou trimestre',
+                'help' => 'Respectez la structure choisie pour l’école : Semestre I/II ou Trimestre I/II/III.',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex. Premier trimestre',
+                    'placeholder' => 'Ex. Semestre I ou Trimestre I',
                 ],
             ])
             ->add('statut', ChoiceType::class, [

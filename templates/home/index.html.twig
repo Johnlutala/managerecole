@@ -3,5 +3,22 @@
 {% block title %}{% endblock %}
 
 {% block body %}
-
+    {% if is_granted('ROLE_PROFESSEUR') or is_granted('ROLE_ADMIN') %}
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                    <div>
+                        <h4 class="fs-xl fw-bold mb-1">{{ is_granted('ROLE_ADMIN') ? 'Espace administration' : 'Espace professeur' }}</h4>
+                        <p class="text-muted mb-0">
+                            {{ is_granted('ROLE_ADMIN') ? 'Configurez le modèle global des fiches de cotation.' : 'Accédez rapidement à vos fiches de cotation.' }}
+                        </p>
+                    </div>
+                    <a href="{{ path(is_granted('ROLE_ADMIN') ? 'app_fiche_cotation_index' : 'app_professeur_notes_index') }}" class="btn btn-primary">
+                        <i class="ti ti-clipboard-pen-line me-1"></i>
+                        {{ is_granted('ROLE_ADMIN') ? 'Configurer la fiche de cotation' : 'Ouvrir la cotation des élèves' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

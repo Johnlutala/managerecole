@@ -1,13 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Gérer les notes{% endblock %}
+{% block title %}Fiche de cotation{% endblock %}
 
 {% block body %}
     <div class="content-page">
         <div class="container-fluid">
             <div class="page-title-head d-flex align-items-center mb-3">
-                <div class="flex-grow-1">
-                    <h4 class="fs-xl fw-bold m-0">Gérer les notes</h4>
+                <div>
+                    <h4 class="fs-xl fw-bold m-0">Fiche de cotation</h4>
+                    <p class="text-muted mb-0 mt-1">Choisissez une école et une classe. Les cours attribués se chargent automatiquement; l’option est facultative.</p>
                 </div>
             </div>
 
@@ -17,49 +18,401 @@
                 {% endfor %}
             {% endfor %}
 
-            <div class="card mb-3">
+            <div class="card mb-4">
+                <div class="card-header"><h5 class="mb-0">Cours attribué</h5></div>
                 <div class="card-body">
-                    <form method="get" class="row g-3 align-items-end">
-                        <div class="col-md-8">
-                            <label for="ecoles" class="form-label">Écoles associées</label>
-                            <select class="form-select" id="ecoles" name="ecoles[]" multiple size="{{ min(max(ecoles|length, 2), 6) }}">
-                                {% for ecole in ecoles %}
-                                    <option value="{{ ecole.id }}" {{ ecole.id in ecoles_selectionnees ? 'selected' : '' }}>
-                                        {{ ecole.nom }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            <small class="text-muted">Sans sélection, toutes vos écoles associées sont affichées. Utilisez Ctrl pour choisir plusieurs écoles.</small>
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-primary w-100" type="submit">Filtrer</button>
-                        </div>
-                        <div class="col-md-2">
-                            <a class="btn btn-outline-secondary w-100" href="{{ path('app_professeur_notes_index') }}">Tout afficher</a>
+                    <form
+                        method="get"
+                        id="notes-filters"
+                        class="row g-3 align-items-end"
+                        data-classes-url="{{ path('app_professeur_notes_filtres', {niveau: 'classes'}) }}"
+                        data-options-url="{{ path('app_professeur_notes_filtres', {niveau: 'options'}) }}"
+                        data-cours-url="{{ path('app_professeur_notes_filtres', {niveau: 'cours'}) }}"
+                    >
+                        <div class="row g-2 align-items-end">
+
+                            <div class="col-md-2">
+                                <label for="notes-ecole" class="form-label">École</label>
+                                <select class="form-select" id="notes-ecole" name="ecole" required>
+                                    <option value="">Choisir une école</option>
+                                    {% for ecole in ecoles %}
+                                        <option value="{{ ecole.id }}" {{ ecole.id == ecole_selectionnee ? 'selected' : '' }}>
+                                            {{ ecole.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="notes-classe" class="form-label">Classe</label>
+                                <select
+                                    class="form-select"
+                                    id="notes-classe"
+                                    name="classe"
+                                    {{ ecole_selectionnee is null ? 'disabled' : '' }}
+                                    required
+                                >
+                                    <option value="">Choisir une classe</option>
+                                    {% for classe in classes %}
+                                        <option value="{{ classe.id }}" {{ classe.id == classe_selectionnee ? 'selected' : '' }}>
+                                            {{ classe.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="notes-option" class="form-label">Option</label>
+                                <select
+                                    class="form-select"
+                                    id="notes-option"
+                                    name="option"
+                                    {{ classe_selectionnee is null ? 'disabled' : '' }}
+                                >
+                                    <option value="">Toutes les options</option>
+                                    {% for option in options %}
+                                        <option value="{{ option.id }}" {{ option.id == option_selectionnee ? 'selected' : '' }}>
+                                            {{ option.nom }}
+                                        </option>
+                                    {% endfor %}
+                                    {% if cours_sans_option %}
+                                        <option value="0" {{ option_selectionnee is same as(0) ? 'selected' : '' }}>
+                                            Cours sans option
+                                        </option>
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="notes-cours" class="form-label">Cours</label>
+                                <select
+                                    class="form-select"
+                                    id="notes-cours"
+                                    name="cours"
+                                    {{ classe_selectionnee is null ? 'disabled' : '' }}
+                                    required
+                                >
+                                    <option value="">Choisir un cours</option>
+                                    {% for item in cours %}
+                                        <option value="{{ item.id }}" {{ cours_selectionne and item.id == cours_selectionne.id ? 'selected' : '' }}>
+                                            {{ item.nom }} — {{ item.classe.nom }}{% if item.option %} ({{ item.option.nom }}){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <button
+                                    class="btn btn-primary w-100"
+                                    type="submit"
+                                    id="notes-filter-submit"
+                                >
+                                    <i class="ti ti-filter me-1"></i>
+                                    Afficher
+                                </button>
+                            </div>
+
                         </div>
                     </form>
+                    <div id="notes-filter-status" class="mt-3 small" role="status" aria-live="polite"></div>
                 </div>
             </div>
 
-            {% for item in classes %}
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">{{ item.classe.nom }} <small class="text-muted">· {{ item.classe.ecole.nom }}</small></h5>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        {% for cours in item.cours %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>{{ cours.nom }}</span>
-                                <a class="btn btn-sm btn-outline-primary" href="{{ path('app_professeur_notes_cours', {id: cours.id}) }}">
-                                    Ouvrir <i class="ti ti-arrow-right"></i>
+            {% if cours_selectionne %}
+                <div class="card">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h5 class="mb-1">{{ cours_selectionne.classe.nom }} — {{ cours_selectionne.nom }}</h5>
+                            <span class="text-muted">
+                                {{ cours_selectionne.classe.ecole.nom }}
+                                {% if cours_selectionne.option %} · {{ cours_selectionne.option.nom }}{% endif %}
+                            </span>
+                        </div>
+                        {% if configuration_fiche_cotation is not null %}
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn btn-primary" href="{{ path('app_professeur_notes_cours', {id: cours_selectionne.id, mode: 'noter'}) }}">
+                                    <i class="ti ti-plus me-1"></i>Ajouter
+                                </a>
+                                <a class="btn btn-outline-primary" href="{{ path('app_professeur_notes_cours', {id: cours_selectionne.id, mode: 'modifier'}) }}">
+                                    <i class="ti ti-edit me-1"></i>Modifier
                                 </a>
                             </div>
-                        {% endfor %}
+                        {% endif %}
                     </div>
+                    {% if configuration_fiche_cotation is null %}
+                        <div class="alert alert-warning m-3 mb-0">
+                            L’administration n’a pas encore configuré le modèle de cotation pour cette école.
+                        </div>
+                    {% else %}
+                        <div class="px-3 pt-3">
+                            <div class="d-flex flex-wrap justify-content-between gap-2 small text-muted">
+                                <span>Structure : <strong>{{ structure_fiche_cotation == 'semestre' ? 'Semestrielle' : 'Trimestrielle' }}</strong></span>
+                                <span>Professeur : <strong>{{ cours_selectionne.professeur.nom }} {{ cours_selectionne.professeur.prenom }}</strong></span>
+                                <span>Année scolaire : <strong>{{ groupes_cours[0].configuration_entity.anneeScolaire.libelle|default('—') }}</strong></span>
+                            </div>
+                        </div>
+                        <div class="table-responsive p-3">
+                            {% set column_count = 4 + groupes_colonnes|length * 4 %}
+                            <table class="table table-bordered table-hover align-middle mb-0 cotation-index-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" class="text-center">N°</th>
+                                        <th rowspan="2">NOM ET POST-NOMS</th>
+                                        {% for groupe in groupes_colonnes %}
+                                            <th class="text-center" colspan="{{ groupe.periodes|length + 1 }}">{{ groupe.nom }}</th>
+                                        {% endfor %}
+                                        <th rowspan="2" class="text-center">T.SE</th>
+                                        <th rowspan="2" class="text-center">T.GE</th>
+                                    </tr>
+                                    <tr>
+                                        {% for groupe in groupes_colonnes %}
+                                            {% for periode in groupe.periodes %}
+                                                <th class="text-center">{{ periode.libelle }}</th>
+                                            {% endfor %}
+                                            <th class="text-center">{{ groupe.total }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr class="table-warning">
+                                        <th colspan="2">MAXIMA</th>
+                                        {% for groupe_index, groupe in groupes_colonnes %}
+                                            {% for periode in groupe.periodes %}
+                                                <th class="text-center">
+                                                    {% set maximum = 0 %}
+                                                    {% for evaluation in groupes_cours[groupe_index].evaluations[periode.nom]|default([]) %}
+                                                        {% set maximum = maximum + evaluation.bareme %}
+                                                    {% endfor %}
+                                                    {{ maximum > 0 ? maximum : '—' }}
+                                                </th>
+                                            {% endfor %}
+                                            <th class="text-center">—</th>
+                                        {% endfor %}
+                                        <th class="text-center">—</th>
+                                        <th class="text-center">—</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for eleve in eleves %}
+                                        <tr>
+                                            <td class="text-center">{{ '%02d'|format(loop.index) }}</td>
+                                            <td>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</td>
+                                            {% for groupe in groupes_colonnes %}
+                                                {% for periode in groupe.periodes %}
+                                                    {% set cote = cotes_par_periode[eleve.id][periode.nom]|default(null) %}
+                                                    <td class="text-center">{{ cote ? cote.cote : '—' }}</td>
+                                                {% endfor %}
+                                                <td class="text-center fw-semibold">
+                                                    {{ totaux_groupes[eleve.id][groupe.configuration]|default('—') }}
+                                                </td>
+                                            {% endfor %}
+                                            <td class="text-center">—</td>
+                                            <td class="text-center">—</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="{{ column_count }}" class="text-center text-muted py-4">Aucun élève actif inscrit dans ce cours.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    {% if groupes_manquants %}
+                        <div class="alert alert-info mx-3 mb-3">
+                            Certaines périodes ne sont pas encore préparées pour ce cours. Elles restent affichées avec un tiret jusqu’à leur configuration.
+                        </div>
+                    {% endif %}
                 </div>
             {% else %}
-                <div class="alert alert-info">Aucun cours ne vous est actuellement attribué dans les écoles sélectionnées.</div>
-            {% endfor %}
+                <div class="alert alert-info">Choisissez une école pour commencer.</div>
+            {% endif %}
         </div>
     </div>
+
+    <script>
+        (() => {
+            const form = document.getElementById("notes-filters");
+            if (!form) {
+                return;
+            }
+
+            const school = document.getElementById("notes-ecole");
+            const classSelect = document.getElementById("notes-classe");
+            const optionSelect = document.getElementById("notes-option");
+            const courseSelect = document.getElementById("notes-cours");
+            const status = document.getElementById("notes-filter-status");
+            const requests = new Map();
+
+            const reset = (select, label) => {
+                requests.get(select.id)?.abort();
+                requests.delete(select.id);
+                select.replaceChildren(new Option(label, ""));
+                select.disabled = true;
+            };
+
+            const showStatus = (message, isError = false) => {
+                status.textContent = message;
+                status.className = `mt-3 small${isError ? " text-danger" : " text-muted"}`;
+            };
+
+            const loadChoices = async (
+                url,
+                params,
+                select,
+                placeholder,
+                optional = false,
+            ) => {
+                requests.get(select.id)?.abort();
+                const controller = new AbortController();
+                requests.set(select.id, controller);
+                const endpoint = new URL(url, window.location.origin);
+                Object.entries(params).forEach(([key, value]) =>
+                    endpoint.searchParams.set(key, value),
+                );
+
+                const response = await fetch(endpoint, {
+                    headers: { Accept: "application/json" },
+                    credentials: "same-origin",
+                    signal: controller.signal,
+                });
+                if (requests.get(select.id) !== controller) {
+                    return 0;
+                }
+                if (!response.ok) {
+                    throw new Error(
+                        `Le chargement a échoué (HTTP ${response.status}).`,
+                    );
+                }
+                const payload = await response.json();
+                if (requests.get(select.id) !== controller) {
+                    return 0;
+                }
+                if (!Array.isArray(payload.items)) {
+                    throw new Error("La réponse du serveur est invalide.");
+                }
+
+                select.replaceChildren(new Option(placeholder, optional ? "" : ""));
+                payload.items.forEach((item) =>
+                    select.add(new Option(item.nom, item.id)),
+                );
+                select.disabled = !optional && payload.items.length === 0;
+                requests.delete(select.id);
+                return payload.items.length;
+            };
+
+            school.addEventListener("change", async () => {
+                reset(classSelect, "Chargement des classes...");
+                reset(optionSelect, "Toutes les options (facultatif)");
+                reset(courseSelect, "Choisir un cours");
+                if (!school.value) {
+                    reset(classSelect, "Choisir une classe");
+                    showStatus("");
+                    return;
+                }
+                try {
+                    const count = await loadChoices(
+                        form.dataset.classesUrl,
+                        { ecole: school.value },
+                        classSelect,
+                        "Choisir une classe",
+                    );
+                    showStatus(
+                        count
+                            ? "Choisissez une classe."
+                            : "Aucune classe avec cours attribué dans cette école.",
+                    );
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        reset(classSelect, "Choisir une classe");
+                        showStatus(error.message, true);
+                    }
+                }
+            });
+
+            classSelect.addEventListener("change", async () => {
+                reset(optionSelect, "Chargement des options...");
+                reset(courseSelect, "Chargement des cours...");
+                if (!classSelect.value) {
+                    reset(optionSelect, "Toutes les options (facultatif)");
+                    showStatus("");
+                    return;
+                }
+                try {
+                    const params = { ecole: school.value, classe: classSelect.value };
+                    const [optionCount, courseCount] = await Promise.all([
+                        loadChoices(
+                            form.dataset.optionsUrl,
+                            params,
+                            optionSelect,
+                            "Toutes les options (facultatif)",
+                            true,
+                        ),
+                        loadChoices(
+                            form.dataset.coursUrl,
+                            params,
+                            courseSelect,
+                            "Choisir un cours",
+                        ),
+                    ]);
+                    showStatus(
+                        courseCount
+                            ? `${courseCount} cours chargé(s). Choisissez un cours puis cliquez sur « Filtrer et afficher ».`
+                            : optionCount
+                              ? "Aucun cours attribué à cette classe."
+                              : "Aucune option ni cours attribué à cette classe.",
+                    );
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        reset(optionSelect, "Toutes les options (facultatif)");
+                        reset(courseSelect, "Choisir un cours");
+                        showStatus(error.message, true);
+                    }
+                }
+            });
+
+            optionSelect.addEventListener("change", async () => {
+                reset(courseSelect, "Chargement des cours...");
+                if (!classSelect.value) return;
+                try {
+                    const params = {
+                        ecole: school.value,
+                        classe: classSelect.value,
+                    };
+                    if (optionSelect.value !== "") {
+                        params.option = optionSelect.value;
+                    }
+                    const count = await loadChoices(
+                        form.dataset.coursUrl,
+                        params,
+                        courseSelect,
+                        "Choisir un cours",
+                    );
+                    showStatus(
+                        count
+                            ? `${count} cours chargé(s). Choisissez un cours puis cliquez sur « Filtrer et afficher ».`
+                            : "Aucun cours attribué pour ce filtre.",
+                    );
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        reset(courseSelect, "Choisir un cours");
+                        showStatus(error.message, true);
+                    }
+                }
+            });
+
+            form.addEventListener("submit", () => {
+                const button = document.getElementById("notes-filter-submit");
+                button.disabled = true;
+                button.textContent = "Chargement...";
+                showStatus("Chargement de la fiche de cotation...");
+            });
+
+            if (school.value && !classSelect.value) {
+                showStatus("Choisissez une classe.");
+            } else if (classSelect.value && !courseSelect.value) {
+                showStatus("Choisissez un cours.");
+            } else if (courseSelect.value) {
+                showStatus(
+                    "Cliquez sur « Filtrer et afficher » pour afficher la fiche.",
+                );
+            }
+        })();
+    </script>
 {% endblock %}

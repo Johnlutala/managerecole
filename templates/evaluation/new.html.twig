@@ -1,7 +1,7 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvelle évaluation{% endblock %}
+{% block title %}Préparer une cotation{% endblock %}
 
 {% block body %}
     <div class="wrapper">
@@ -10,9 +10,9 @@
 
                 <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
                     <div>
-                        <h4 class="fs-xl fw-bold m-0">Nouvelle évaluation</h4>
+                        <h4 class="fs-xl fw-bold m-0">Préparer une cotation</h4>
                         <p class="text-muted mb-0 mt-1">
-                            Créez une évaluation et associez-la à un cours et à une période de bulletin.
+                            Préparez un point qui sera proposé au professeur dans sa fiche de cotation.
                         </p>
                     </div>
 
@@ -37,6 +37,11 @@
                 <div class="row justify-content-center">
                     <div class="col-xl-9 col-lg-10">
                         <div class="card border shadow-sm">
+                            <div class="alert alert-info mb-0">
+                                Préparez un point de cotation par période et par cours, en respectant l’organisation enregistrée pour l’école :
+                                <strong>Semestre I/II</strong> ou <strong>Trimestre I/II/III</strong>.
+                                Le professeur retrouvera ces périodes dans la fiche de sa classe. Le type et le barème configurés ici s’appliquent à la saisie.
+                            </div>
                             <div class="card-header bg-white py-3">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="rounded border bg-light d-flex align-items-center justify-content-center"
@@ -44,9 +49,9 @@
                                         <i class="ti ti-clipboard-check fs-2 text-primary"></i>
                                     </div>
                                     <div>
-                                        <h5 class="card-title mb-1">Informations de l'évaluation</h5>
+                                        <h5 class="card-title mb-1">Paramètres de la cotation</h5>
                                         <p class="text-muted small mb-0">
-                                            Renseignez les caractéristiques de l'évaluation.
+                                            Associez la période, le type, le barème et le cours à la période préparée.
                                         </p>
                                     </div>
                                 </div>
@@ -54,7 +59,7 @@
 
                             <div class="card-body p-4">
                                 {{ include('evaluation/_form.html.twig', {
-                                    button_label: "Créer l'évaluation"
+                                    button_label: "Préparer cette cotation"
                                 }) }}
                             </div>
                         </div>

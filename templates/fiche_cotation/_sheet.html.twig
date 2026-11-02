@@ -1,0 +1,93 @@
+<section class="grading-sheet">
+    <header class="grading-heading">
+        <div>République Démocratique du Congo</div>
+        <div>Ministère de l’Éducation Nationale</div>
+        <div>Enseignement primaire, secondaire et technique</div>
+        <div class="grading-school">{{ ecole.nom }}</div>
+    </header>
+
+    <div class="grading-details mt-3">
+        <div class="grading-details-column">
+            Professeur : ................................................................................
+        </div>
+        <div class="grading-details-column">
+            Classe : ........................................<br>
+            Branche : ......................................<br>
+            Année : {{ annee_scolaire }}
+        </div>
+    </div>
+
+    <h1 class="grading-title">Fiche de cotation</h1>
+
+    {% set nombre_periodes = 0 %}
+    {% for groupe in groupes_colonnes %}
+        {% set nombre_periodes = nombre_periodes + groupe.periodes|length %}
+    {% endfor %}
+    {% set colonnes_total = structure == 'semestre' ? ['T.SE', 'T.GE'] : ['T.ST', 'T.GE'] %}
+    {% set largeur_periode = (100 - 4 - 25 - (groupes_colonnes|length * 5) - (colonnes_total|length * 6)) / nombre_periodes %}
+
+    <table class="grading-table">
+        <colgroup>
+            <col style="width: 4%">
+            <col style="width: 25%">
+            {% for groupe in groupes_colonnes %}
+                {% for periode in groupe.periodes %}
+                    <col style="width: {{ largeur_periode }}%">
+                {% endfor %}
+                <col style="width: 5%">
+            {% endfor %}
+            {% for colonne in colonnes_total %}
+                <col style="width: 6%">
+            {% endfor %}
+        </colgroup>
+        <thead>
+            <tr>
+                <th rowspan="2">N°</th>
+                <th rowspan="2">NOM ET POST-NOMS</th>
+                {% for groupe in groupes_colonnes %}
+                    <th colspan="{{ groupe.periodes|length + 1 }}">{{ groupe.nom }}</th>
+                {% endfor %}
+                {% for colonne in colonnes_total %}
+                    <th class="total-heading" rowspan="2">{{ colonne }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for groupe in groupes_colonnes %}
+                    {% for periode in groupe.periodes %}
+                        <th>{{ periode.libelle }}</th>
+                    {% endfor %}
+                    <th>{{ groupe.total }}</th>
+                {% endfor %}
+            </tr>
+            <tr class="maxima-row">
+                <th colspan="2" class="maxima-label">MAXIMA</th>
+                {% for groupe in groupes_colonnes %}
+                    {% for periode in groupe.periodes %}
+                        <th></th>
+                    {% endfor %}
+                    <th></th>
+                {% endfor %}
+                {% for colonne in colonnes_total %}
+                    <th></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for numero in 1..35 %}
+                <tr>
+                    <td class="student-number">{{ numero < 10 ? '0' ~ numero : numero }}</td>
+                    <td class="student-name"></td>
+                    {% for groupe in groupes_colonnes %}
+                        {% for periode in groupe.periodes %}
+                            <td></td>
+                        {% endfor %}
+                        <td></td>
+                    {% endfor %}
+                    {% for colonne in colonnes_total %}
+                        <td></td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>

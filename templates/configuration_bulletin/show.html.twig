@@ -1,7 +1,7 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail de la période de bulletin{% endblock %}
+{% block title %}Détail du semestre{% endblock %}
 
 {% block body %}
     <div class="wrapper">
@@ -11,10 +11,10 @@
                 <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
                     <div>
                         <h4 class="fs-xl fw-bold m-0">
-                            Détail de la période de bulletin
+                            Détail du semestre
                         </h4>
                         <p class="text-muted mb-0 mt-1">
-                            Consultez les paramètres de la période sélectionnée.
+                            Consultez les paramètres du semestre sélectionné.
                         </p>
                     </div>
 
@@ -25,7 +25,7 @@
                             </li>
                             <li class="breadcrumb-item">
                                 <a href="{{ path('app_configuration_bulletin_index') }}">
-                                    Périodes de bulletin
+                                    Semestres de cotation
                                 </a>
                             </li>
                             <li class="breadcrumb-item active">Détail</li>
@@ -51,7 +51,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title mb-0">
-                                    Période N° : {{ configuration_bulletin.id }}
+                                    Semestre N° : {{ configuration_bulletin.id }}
                                 </h4>
                             </div>
 
@@ -67,7 +67,7 @@
                                 </h4>
 
                                 <p class="text-muted small mb-3">
-                                    Période de bulletin scolaire
+                                    Semestre scolaire de cotation
                                 </p>
 
                                 {% set statuts = {
@@ -123,7 +123,7 @@
                             <div class="card-header">
                                 <h4 class="card-title mb-0">
                                     <i class="ti ti-info-circle me-2"></i>
-                                    Informations de la période
+                                    Informations du semestre
                                 </h4>
                             </div>
 
@@ -136,7 +136,7 @@
                                                 <td>#{{ configuration_bulletin.id }}</td>
                                             </tr>
                                             <tr>
-                                                <th>Nom de la période</th>
+                                                <th>Semestre</th>
                                                 <td class="fw-semibold">
                                                     {{ configuration_bulletin.nom }}
                                                 </td>

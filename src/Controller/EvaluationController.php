@@ -33,7 +33,7 @@ final class EvaluationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$this->evaluationEstCoherente($evaluation)) {
-                $this->addFlash('danger', 'Le cours sélectionné ne correspond pas à la classe, l’école ou l’option de la période.');
+                $this->addFlash('danger', 'Vérifiez la période, le type, le cours, la classe et l’option, puis évitez de préparer deux fois le même type pour une période.');
 
                 return $this->render('evaluation/new.html.twig', [
                     'evaluation' => $evaluation,
@@ -68,7 +68,7 @@ final class EvaluationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$this->evaluationEstCoherente($evaluation)) {
-                $this->addFlash('danger', 'Le cours sélectionné ne correspond pas à la classe, l’école ou l’option de la période.');
+                $this->addFlash('danger', 'Vérifiez la période, le type, le cours, la classe et l’option, puis évitez de préparer deux fois le même type pour une période.');
 
                 return $this->render('evaluation/edit.html.twig', [
                     'evaluation' => $evaluation,
@@ -104,8 +104,72 @@ final class EvaluationController extends AbstractController
 
         return $cours !== null
             && $configuration !== null
+            && $this->periodeAutoriseePourSemestre($evaluation)
             && $cours->getClasse()?->getId() === $configuration->getClasse()?->getId()
             && $cours->getClasse()?->getEcole()?->getId() === $configuration->getEcole()?->getId()
-            && ($configuration->getOptions() === null || $cours->getOption()?->getId() === $configuration->getOptions()?->getId());
+            && ($configuration->getOptions() === null || $cours->getOption()?->getId() === $configuration->getOptions()?->getId())
+            && (
+                $cours->getProfesseur()?->getAnneeScolaire() === null
+                || $cours->getProfesseur()?->getAnneeScolaire()?->getId() === $configuration->getAnneeScolaire()?->getId()
+            )
+            && $this->cotationUniqueDansLeCours($evaluation);
+    }
+
+    private function cotationUniqueDansLeCours(Evaluation $evaluation): bool
+    {
+        $configuration = $evaluation->getConfigurationBulletin();
+        $cours = $evaluation->getCours();
+        if ($configuration === null || $cours === null) {
+            return false;
+        }
+
+        foreach ($configuration->getEvaluations() as $existing) {
+            if (
+                $existing->getId() !== $evaluation->getId()
+                && $existing->getCours()?->getId() === $cours->getId()
+                && strcasecmp(trim((string) $existing->getNom()), trim((string) $evaluation->getNom())) === 0
+                && strcasecmp(trim((string) $existing->getType()), trim((string) $evaluation->getType())) === 0
+            ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function periodeAutoriseePourSemestre(Evaluation $evaluation): bool
+    {
+        $nomPeriode = $evaluation->getConfigurationBulletin()?->getNom();
+        if (
+            $nomPeriode === null
+            || preg_match('/^(Semestre|Trimestre)\s+(I{1,3}|[1-3])$/iu', trim($nomPeriode), $matches) !== 1
+        ) {
+            return false;
+        }
+
+        $kind = strtolower($matches[1]);
+        $number = match (strtoupper($matches[2])) {
+            'I', '1' => 1,
+            'II', '2' => 2,
+            'III', '3' => 3,
+        };
+        if (($kind === 'semestre' && $number > 2) || ($kind === 'trimestre' && $number > 3)) {
+            return false;
+        }
+
+        $firstPeriod = $kind === 'semestre' ? (($number - 1) * 2 + 1) : (($number - 1) * 2 + 1);
+        $periodes = [
+            'Période ' . $firstPeriod,
+            'Période ' . ($firstPeriod + 1),
+            'Examen ' . $number,
+        ];
+
+        foreach ($periodes as $periode) {
+            if (strcasecmp(trim((string) $evaluation->getNom()), $periode) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

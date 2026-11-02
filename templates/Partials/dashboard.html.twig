@@ -56,6 +56,34 @@
 					</li>
 				{% endif %}
 
+				{% if is_granted('ROLE_ADMIN') %}
+					<li class="side-nav-title">MODÈLES</li>
+					<li class="side-nav-item">
+						<a data-bs-toggle="collapse" href="#sidebarModeles" class="side-nav-link" aria-expanded="false">
+							<span class="menu-icon"><i data-lucide="files"></i></span>
+							<span class="menu-text">Modèle</span>
+						</a>
+						<div class="collapse" id="sidebarModeles">
+							<ul class="sub-menu">
+								<li class="side-nav-item"><a href="{{ path('app_modele_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Bulletin</span></a></li>
+								<li class="side-nav-item"><a href="{{ path('app_fiche_cotation_index') }}" class="side-nav-link"><span class="menu-text">Fiche de cotation</span></a></li>
+								<li class="side-nav-item">
+									<a data-bs-toggle="collapse" href="#sidebarModelesAutres" class="side-nav-link" aria-expanded="false">
+										<span class="menu-text">Autres</span>
+									</a>
+									<div class="collapse" id="sidebarModelesAutres">
+										<ul class="sub-menu">
+											<li class="side-nav-item"><a href="{{ path('app_eleve_index') }}" class="side-nav-link"><span class="menu-text">Carte / fiche élève</span></a></li>
+											<li class="side-nav-item"><a href="{{ path('app_configuration_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Configuration des semestres</span></a></li>
+											<li class="side-nav-item"><a href="{{ path('app_evaluation_index') }}" class="side-nav-link"><span class="menu-text">Cotations des cours</span></a></li>
+										</ul>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</li>
+				{% endif %}
+
 				{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_PROFESSEUR') %}
 					<li class="side-nav-title">ESPACE MATIÈRE</li>
 					<li class="side-nav-item">
@@ -67,13 +95,10 @@
 							<ul class="sub-menu">
 								{% if is_granted('ROLE_ADMIN') %}
 									<li class="side-nav-item"><a href="{{ path('app_cours_index') }}" class="side-nav-link"><span class="menu-text">Cours et attributions</span></a></li>
-									<li class="side-nav-item"><a href="{{ path('app_modele_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Modèles de bulletin</span></a></li>
-									<li class="side-nav-item"><a href="{{ path('app_configuration_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Périodes de bulletin</span></a></li>
-									<li class="side-nav-item"><a href="{{ path('app_evaluation_index') }}" class="side-nav-link"><span class="menu-text">Évaluations</span></a></li>
 									<li class="side-nav-item"><a href="{{ path('app_validation_notes_index') }}" class="side-nav-link"><span class="menu-text">Validation des notes</span></a></li>
 								{% endif %}
 								{% if is_granted('ROLE_PROFESSEUR') %}
-									<li class="side-nav-item"><a href="{{ path('app_professeur_notes_index') }}" class="side-nav-link"><span class="menu-text">Gérer les notes</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_professeur_notes_index') }}" class="side-nav-link"><span class="menu-text">Cotation des élèves</span></a></li>
 								{% endif %}
 							</ul>
 						</div>

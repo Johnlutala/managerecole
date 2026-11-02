@@ -1,14 +1,85 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Notes — {{ cours.nom }}{% endblock %}
+{% block title %}{{ mode == 'modifier' ? 'Modifier la cotation' : 'Noter les élèves' }} — {{ cours.nom }}{% endblock %}
 
 {% block body %}
+    <style>
+        .cotation-heading {
+            border-bottom: 2px solid #263238;
+            padding-bottom: .75rem;
+            margin-bottom: .75rem;
+        }
+
+        .cotation-table th,
+        .cotation-table td {
+            border: 1px solid #59636a !important;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            #cotation-sheet,
+            #cotation-sheet * {
+                visibility: visible !important;
+            }
+
+            #cotation-sheet {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                margin: 0;
+            }
+
+            #cotation-sheet .no-print {
+                display: none !important;
+            }
+
+            #cotation-sheet .card {
+                border: 0 !important;
+                box-shadow: none !important;
+            }
+
+            #cotation-sheet .table-responsive {
+                overflow: visible !important;
+            }
+
+            #cotation-sheet .cotation-table {
+                font-size: 9pt;
+            }
+
+            #cotation-sheet .cotation-table input {
+                min-width: 14mm;
+                padding: 0;
+                border: 0 !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+        }
+    </style>
+
     <div class="content-page">
         <div class="container-fluid">
             <div class="page-title-head d-flex align-items-center justify-content-between mb-3">
                 <div>
-                    <a href="{{ path('app_professeur_notes_index') }}" class="text-muted">← Gérer les notes</a>
-                    <h4 class="fs-xl fw-bold mt-2 mb-0">{{ cours.classe.nom }} · {{ cours.nom }}</h4>
+                    <a href="{{ path('app_professeur_notes_index', {
+                        ecole: cours.classe.ecole.id,
+                        classe: cours.classe.id,
+                        option: cours.option ? cours.option.id : 0,
+                        cours: cours.id
+                    }) }}" class="text-muted">← Retour à la liste des élèves</a>
+                    <h4 class="fs-xl fw-bold mt-2 mb-0">{{ cours.classe.nom }} — {{ cours.nom }}</h4>
+                    <span class="text-muted">
+                        {{ cours.classe.ecole.nom }}
+                        {% if cours.option %} · {{ cours.option.nom }}{% else %} · Sans option{% endif %}
+                        · {{ cours.professeur.nom }} {{ cours.professeur.prenom }}
+                    </span>
                 </div>
             </div>
 
@@ -18,85 +89,165 @@
                 {% endfor %}
             {% endfor %}
 
-            {% for periode in periodes %}
-                {% set configuration = periode.configuration %}
-                <section class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">{{ configuration.nom }}</h5>
-                        {% if periode.ouverte %}
-                            <span class="badge bg-success">Saisie autorisée</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Saisie désactivée — en attente d’autorisation administrative</span>
-                        {% endif %}
+            {% if semestres is empty %}
+                <div class="alert alert-warning">Aucune configuration de période n’a encore été préparée par l’administration pour ce cours.</div>
+            {% elseif nombre_periodes_autorisees == 0 %}
+                <div class="alert alert-warning">Aucune période n’est actuellement autorisée par l’administration.</div>
+            {% endif %}
+
+            {% if groupes_colonnes is not empty %}
+                <section class="card" id="cotation-sheet">
+                    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="flex-grow-1">
+                            <div class="cotation-heading">
+                                <div class="text-center text-uppercase small fw-semibold">{{ cours.classe.ecole.nom }}</div>
+                                <h3 class="text-center text-uppercase fw-bold my-2">Fiche de cotation</h3>
+                                <div class="d-flex flex-wrap justify-content-between gap-2">
+                                    <span>Année scolaire : <strong>{{ annee_scolaire ? annee_scolaire.libelle : '—' }}</strong></span>
+                                    <span>Classe : <strong>{{ cours.classe.nom }}</strong></span>
+                                    <span>Option : <strong>{{ cours.option ? cours.option.nom : '—' }}</strong></span>
+                                    <span>Cours : <strong>{{ cours.nom }}</strong></span>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-between gap-2">
+                                <span>Professeur : <strong>{{ cours.professeur.nom }} {{ cours.professeur.prenom }}</strong></span>
+                                <span>Structure : <strong>{{ structure_fiche_cotation == 'semestre' ? 'Semestrielle' : 'Trimestrielle' }}</strong></span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 no-print">
+                            {% if peut_saisir %}
+                                <span class="badge bg-success">Saisie autorisée</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Consultation seulement</span>
+                            {% endif %}
+                            <button class="btn btn-outline-secondary" type="button" onclick="window.print()">
+                                <i class="ti ti-printer me-1"></i>Imprimer
+                            </button>
+                        </div>
                     </div>
+
                     <div class="card-body">
-                        {% if periode.evaluations is empty %}
-                            <div class="alert alert-info mb-0">Aucune évaluation n’est configurée pour ce cours et cette période.</div>
+                        {% if eleves is empty %}
+                            <div class="alert alert-info mb-0">Aucun élève actif inscrit dans ce cours.</div>
                         {% else %}
-                            <form method="post" action="{{ path('app_professeur_notes_cours', {id: cours.id, periode: configuration.id}) }}">
-                                <input type="hidden" name="_token" value="{{ csrf_token('notes_' ~ cours.id ~ '_' ~ configuration.id) }}">
+                            {% if periodes_avec_doublons %}
+                                <div class="alert alert-warning no-print">
+                                    Des cotations en doublon existent pour certaines périodes; elles restent consultables, mais verrouillées. Demandez à l’administration de corriger les doublons.
+                                </div>
+                            {% endif %}
+                            {% if peut_saisir %}
+                                <form method="post" action="{{ path('app_professeur_notes_cours', {id: cours.id, mode: mode}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('notes_' ~ cours.id) }}">
+                            {% else %}
+                                <div>
+                            {% endif %}
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover align-middle">
+                                    <table class="table table-bordered align-middle cotation-table">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Élève</th>
-                                                {% for evaluation in periode.evaluations %}
-                                                    <th class="text-center">
-                                                        {{ evaluation.nom }}<br>
-                                                        <small class="text-muted">/{{ evaluation.bareme }}</small>
-                                                    </th>
+                                                <th rowspan="2" class="text-center">N°</th>
+                                                <th rowspan="2">Nom des élèves</th>
+                                                {% for groupe in groupes_colonnes %}
+                                                    <th class="text-center" colspan="{{ groupe.periodes|length + 1 }}">{{ groupe.nom }}</th>
                                                 {% endfor %}
-                                                <th class="text-center">Total / {{ periode.total_max }}</th>
+                                                <th rowspan="2" class="text-center">T.SE</th>
+                                                <th rowspan="2" class="text-center">T.GE</th>
+                                            </tr>
+                                            <tr>
+                                                {% for groupe in groupes_colonnes %}
+                                                    {% for periode in groupe.periodes %}
+                                                        <th class="text-center">
+                                                            {{ periode.libelle }}
+                                                            {% if not autorisations_periodes[periode.nom]|default(false) %}
+                                                                <span class="d-block small text-danger">Fermée</span>
+                                                            {% elseif evaluations_saisissables[periode.nom]|default(null) is null %}
+                                                                <span class="d-block small text-warning">Max. non configuré</span>
+                                                            {% endif %}
+                                                        </th>
+                                                    {% endfor %}
+                                                    <th class="text-center">{{ groupe.total }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr class="table-warning">
+                                                <th colspan="2">MAXIMA</th>
+                                                {% for groupe_index, groupe in groupes_colonnes %}
+                                                    {% for periode in groupe.periodes %}
+                                                        {% set maximum = 0 %}
+                                                        {% for evaluation in groupes_cours[groupe_index].evaluations[periode.nom]|default([]) %}
+                                                            {% set maximum = maximum + (evaluation.bareme|default(0)) %}
+                                                        {% endfor %}
+                                                        <th class="text-center">{{ maximum > 0 ? maximum : '—' }}</th>
+                                                    {% endfor %}
+                                                    {% set groupe_maximum = 0 %}
+                                                    {% for periode in groupe.periodes %}
+                                                        {% for evaluation in groupes_cours[groupe_index].evaluations[periode.nom]|default([]) %}
+                                                            {% set groupe_maximum = groupe_maximum + evaluation.bareme %}
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                    <th class="text-center">{{ groupe_maximum > 0 ? groupe_maximum : '—' }}</th>
+                                                {% endfor %}
+                                                <th class="text-center">—</th>
+                                                <th class="text-center">—</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for eleve in eleves %}
                                                 <tr>
-                                                    <th>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</th>
-                                                    {% for evaluation in periode.evaluations %}
-                                                        {% set note = periode.notes[evaluation.id][eleve.id]|default(null) %}
-                                                        <td>
-                                                            <input
-                                                                class="form-control form-control-sm text-center"
-                                                                type="number"
-                                                                min="0"
-                                                                max="{{ evaluation.bareme }}"
-                                                                step="1"
-                                                                name="notes[{{ evaluation.id }}][{{ eleve.id }}]"
-                                                                value="{{ note ? note.cote : '' }}"
-                                                                {% if not periode.ouverte %}disabled{% elseif note and note.statut in ['soumise', 'validee'] %}readonly{% endif %}
-                                                                aria-label="{{ evaluation.nom }} — {{ eleve.nom }} {{ eleve.prenom }}"
-                                                            >
-                                                            {% if note and note.statut == 'soumise' %}
-                                                                <small class="text-success">Soumise</small>
-                                                            {% elseif note and note.statut == 'validee' %}
-                                                                <small class="text-primary">Validée</small>
-                                                        </td>
-                                                            {% endif %}
+                                                    <td class="text-center">{{ loop.index }}</td>
+                                                    <td>{{ eleve.nom }} {{ eleve.postnom }} {{ eleve.prenom }}</td>
+                                                    {% for groupe_index, groupe in groupes_colonnes %}
+                                                        {% for periode in groupe.periodes %}
+                                                            {% set cote = cotes_par_periode[eleve.id][periode.nom]|default(null) %}
+                                                            {% set evaluation = evaluations_saisissables[periode.nom]|default(null) %}
+                                                            {% set note = evaluation ? notes[evaluation.id][eleve.id]|default(null) : null %}
+                                                            {% set editable = evaluation and ((mode == 'noter' and not note) or (mode == 'modifier' and note and note.statut == 'brouillon')) %}
+                                                            <td class="text-center">
+                                                                {% if editable %}
+                                                                    <input
+                                                                        class="form-control form-control-sm text-center"
+                                                                        type="number"
+                                                                        min="0"
+                                                                        max="{{ evaluation.bareme }}"
+                                                                        step="1"
+                                                                        name="notes[{{ evaluation.id }}][{{ eleve.id }}]"
+                                                                        value="{{ note ? note.cote : '' }}"
+                                                                        aria-label="{{ periode.libelle }} — {{ eleve.nom }} {{ eleve.prenom }}"
+                                                                    >
+                                                                {% else %}
+                                                                    {{ cote ? cote.cote : '—' }}
+                                                                {% endif %}
+                                                            </td>
+                                                        {% endfor %}
+                                                        <td class="text-center fw-semibold">{{ totaux_groupes[eleve.id][groupe.configuration]|default('—') }}</td>
                                                     {% endfor %}
-                                                    <td class="text-center fw-semibold">
-                                                        {{ periode.totaux[eleve.id]|default(0) }} / {{ periode.total_max }}
-                                                    </td>
+                                                    <td class="text-center">—</td>
+                                                    <td class="text-center">—</td>
                                                 </tr>
-                                            {% else %}
-                                                <tr><td colspan="{{ periode.evaluations|length + 2 }}" class="text-center">Aucun élève actif inscrit dans cette classe.</td></tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
-                                {% if periode.ouverte %}
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button class="btn btn-outline-primary" type="submit" name="action" value="enregistrer">Enregistrer</button>
+                                {% if peut_saisir %}
+                                    <div class="d-flex flex-wrap justify-content-end gap-2 mt-3 no-print">
+                                        <button class="btn btn-outline-primary" type="submit" name="action" value="enregistrer">Enregistrer les cotes</button>
                                         <button class="btn btn-primary" type="submit" name="action" value="soumettre">Soumettre à l’administration</button>
                                     </div>
+                                    </form>
+                                {% else %}
+                                    </div>
                                 {% endif %}
-                            </form>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <span>Signature du professeur : ____________________</span>
+                                    <span>Date : ____ / ____ / ______</span>
+                                </div>
                         {% endif %}
                     </div>
                 </section>
             {% else %}
-                <div class="alert alert-warning">Aucune période de bulletin n’est configurée pour cette classe.</div>
-            {% endfor %}
+                <div class="alert alert-warning">Le modèle de fiche ne contient aucune période. Contactez l’administration.</div>
+            {% endif %}
         </div>
     </div>
+
 {% endblock %}

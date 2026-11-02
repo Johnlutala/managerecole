@@ -7,21 +7,23 @@
 
 <div class="row g-3">
 
-    {# Nom et type #}
+    {# Période et type de cotation #}
     <div class="col-md-6">
-        {{ form_label(form.nom, "Nom de l'évaluation", {
+        {{ form_label(form.nom, 'Période ou examen', {
             label_attr: {class: 'form-label fw-semibold'}
         }) }}
         {{ form_widget(form.nom) }}
         {{ form_errors(form.nom) }}
+        {{ form_help(form.nom) }}
     </div>
 
     <div class="col-md-6">
-        {{ form_label(form.type, "Type d'évaluation", {
+        {{ form_label(form.type, 'Type de cotation', {
             label_attr: {class: 'form-label fw-semibold'}
         }) }}
         {{ form_widget(form.type) }}
         {{ form_errors(form.type) }}
+        {{ form_help(form.type) }}
     </div>
 
     {# Barème et coefficient #}
@@ -58,9 +60,9 @@
         {{ form_errors(form.cours) }}
     </div>
 
-    {# Période de bulletin #}
+    {# Semestre #}
     <div class="col-md-6">
-        {{ form_label(form.configurationBulletin, 'Période de bulletin', {
+        {{ form_label(form.configurationBulletin, 'Semestre', {
             label_attr: {class: 'form-label fw-semibold'}
         }) }}
         {{ form_widget(form.configurationBulletin) }}

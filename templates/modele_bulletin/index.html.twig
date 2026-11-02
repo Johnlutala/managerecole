@@ -35,12 +35,78 @@
                 </button>
             </div>
 
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Choisir où appliquer le modèle</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ path('app_modele_bulletin_index') }}" id="bulletin-context" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="bulletin-section" class="form-label">Section</label>
+                            <select class="form-select" id="bulletin-section" name="section" required>
+                                <option value="">Sélectionner une section</option>
+                                {% for section in sections %}
+                                    <option value="{{ section.id }}" {{ section_selectionnee and section.id == section_selectionnee.id ? 'selected' : '' }}>
+                                        {{ section.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bulletin-classe" class="form-label">Classe</label>
+                            <select class="form-select" id="bulletin-classe" name="classe" {{ section_selectionnee is null ? 'disabled' : '' }} required>
+                                <option value="">Sélectionner une classe</option>
+                                {% for classe in classes %}
+                                    <option value="{{ classe.id }}" {{ classe_selectionnee and classe.id == classe_selectionnee.id ? 'selected' : '' }}>
+                                        {{ classe.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="bulletin-option" class="form-label">Option</label>
+                            <select class="form-select" id="bulletin-option" name="option" {{ classe_selectionnee is null ? 'disabled' : '' }} required>
+                                <option value="">Sélectionner une option</option>
+                                {% for option in options %}
+                                    <option value="{{ option.id }}" {{ option_selectionnee is same as(option.id) ? 'selected' : '' }}>
+                                        {{ option.nom }}
+                                    </option>
+                                {% else %}
+                                    {% if classe_selectionnee %}
+                                        <option value="0" {{ option_selectionnee is same as(0) ? 'selected' : '' }}>Sans option</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                    {% if section_selectionnee and classe_selectionnee and option_selectionnee is not null %}
+                        <div class="alert alert-success mt-3 mb-0">
+                            Modèle de bulletin sélectionné pour
+                            <strong>{{ section_selectionnee.nom }} — {{ classe_selectionnee.nom }}</strong>
+                            {% if option_selectionnee is not same as(0) %} — <strong>{{ option_selectionnee.nom }}</strong>{% else %} — sans option{% endif %}.
+                        </div>
+                    {% else %}
+                        <p class="small text-muted mb-0 mt-3">
+                            Les choix sont chargés dans l’ordre : section, classe, puis option.
+                        </p>
+                    {% endif %}
+                    {% if section_selectionnee and classes is empty %}
+                        <div class="alert alert-warning mt-3 mb-0">
+                            Aucune classe active n’est configurée dans cette section.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             {# Tableau des modèles #}
             <div class="card border shadow-sm">
                 <div class="card-header bg-white py-3">
-                    <h5 class="card-title mb-1">Liste des modèles</h5>
+                    <h5 class="card-title mb-1">
+                        {{ contexte_selectionne ? 'Modèles complets disponibles pour cette classe' : 'Liste des modèles' }}
+                    </h5>
                     <p class="text-muted small mb-0">
                         {{ modele_bulletins|length }} modèle(s) enregistré(s)
+                        {% if contexte_selectionne %} — {{ section_selectionnee.nom }} / {{ classe_selectionnee.nom }}{% endif %}
                     </p>
                 </div>
 
@@ -80,7 +146,9 @@
                                     </td>
 
                                     <td>
-                                        {% if modele_bulletin.description %}
+                                        {% if modele_bulletin.description and contexte_selectionne %}
+                                            {{ modele_bulletin.description }}
+                                        {% elseif modele_bulletin.description %}
                                             {{ modele_bulletin.description|length > 70
                                                 ? modele_bulletin.description|slice(0, 70) ~ '…'
                                                 : modele_bulletin.description }}
@@ -240,6 +308,33 @@
         </div>
     </div>
 </div>
+
+<script>
+    (() => {
+        const form = document.getElementById('bulletin-context');
+        if (!form) {
+            return;
+        }
+
+        const section = document.getElementById('bulletin-section');
+        const classe = document.getElementById('bulletin-classe');
+        const option = document.getElementById('bulletin-option');
+
+        section.addEventListener('change', () => {
+            classe.value = '';
+            classe.disabled = true;
+            option.value = '';
+            option.disabled = true;
+            form.requestSubmit();
+        });
+        classe.addEventListener('change', () => {
+            option.value = '';
+            option.disabled = true;
+            form.requestSubmit();
+        });
+        option.addEventListener('change', () => form.requestSubmit());
+    })();
+</script>
 
 {# Si la soumission échoue, rouvrir la modale pour afficher les erreurs #}
 {% if form.vars.submitted and not form.vars.valid %}

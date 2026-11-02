@@ -19,17 +19,19 @@ class EvaluationType extends AbstractType
     {
         $builder
             ->add('nom', TextType::class, [
-                'label' => "Nom de l'évaluation",
+                'label' => 'Période ou examen',
+                'help' => 'Nom du point préconfiguré, par exemple « Période 1 » ou « Examen 1 ». ',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex. Interrogation de mathématiques',
+                    'placeholder' => 'Ex. Période 1',
                 ],
             ])
             ->add('type', TextType::class, [
-                'label' => "Type d'évaluation",
+                'label' => 'Type de cotation',
+                'help' => 'Ce libellé sera proposé au professeur, par exemple interrogation, devoir ou examen.',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Ex. Interrogation, devoir, examen',
+                    'placeholder' => 'Ex. Interrogation',
                 ],
             ])
             ->add('bareme', NumberType::class, [
@@ -68,7 +70,7 @@ class EvaluationType extends AbstractType
             ->add('configurationBulletin', EntityType::class, [
                 'class' => ConfigurationBulletin::class,
                 'choice_label' => 'nom',
-                'label' => 'Période de bulletin',
+                'label' => 'Semestre ou trimestre',
                 'placeholder' => 'Sélectionnez une période',
                 'attr' => [
                     'class' => 'form-select',

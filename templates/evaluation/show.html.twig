@@ -14,7 +14,7 @@
                             Détail de l'évaluation
                         </h4>
                         <p class="text-muted mb-0 mt-1">
-                            Consultez les informations de l'évaluation sélectionnée.
+                            Consultez les paramètres de la cotation sélectionnée.
                         </p>
                     </div>
 
@@ -25,7 +25,7 @@
                             </li>
                             <li class="breadcrumb-item">
                                 <a href="{{ path('app_evaluation_index') }}">
-                                    Évaluations
+                                    Cotations préparées
                                 </a>
                             </li>
                             <li class="breadcrumb-item active">Détail</li>
@@ -53,7 +53,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title mb-0">
-                                    Évaluation N° : {{ evaluation.id }}
+                                    Cotation N° : {{ evaluation.id }}
                                 </h4>
                             </div>
 
@@ -69,7 +69,7 @@
                                 </h4>
 
                                 <p class="text-muted small mb-3">
-                                    Évaluation scolaire
+                                    Point de cotation scolaire
                                 </p>
 
                                 <span class="badge bg-primary-subtle text-primary">
@@ -105,7 +105,7 @@
                             <div class="card-header">
                                 <h4 class="card-title mb-0">
                                     <i class="ti ti-info-circle me-2"></i>
-                                    Informations de l'évaluation
+                                    Informations de la cotation
                                 </h4>
                             </div>
 
@@ -118,7 +118,7 @@
                                                 <td>#{{ evaluation.id }}</td>
                                             </tr>
                                             <tr>
-                                                <th>Nom de l'évaluation</th>
+                                                <th>Période ou examen</th>
                                                 <td class="fw-semibold">
                                                     {{ evaluation.nom }}
                                                 </td>
@@ -142,7 +142,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th>Date de l'évaluation</th>
+                                                <th>Date de cotation</th>
                                                 <td>
                                                     {% if evaluation.dateEvaluation %}
                                                         {{ evaluation.dateEvaluation|date('d/m/Y') }}

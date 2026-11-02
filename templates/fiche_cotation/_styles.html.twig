@@ -1,0 +1,106 @@
+<style>
+    @page {
+        size: A4 landscape;
+        margin: 8mm;
+    }
+
+    .grading-sheet {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #222;
+        background: #fff;
+        color: #111;
+        padding: 3mm;
+        font-family: Arial, sans-serif;
+        font-size: 9pt;
+    }
+
+    .grading-heading {
+        text-align: center;
+        font-weight: bold;
+        line-height: 1.25;
+        text-transform: uppercase;
+    }
+
+    .grading-school {
+        display: inline-block;
+        min-width: 55%;
+        margin-top: 1mm;
+        padding: .5mm 5mm;
+        border-top: 2px solid #111;
+    }
+
+    .grading-details {
+        display: table;
+        width: 100%;
+        margin-top: 3mm;
+        font-weight: bold;
+        line-height: 1.3;
+    }
+
+    .grading-details-column {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+    }
+
+    .grading-title {
+        margin: 2mm 0 1mm;
+        text-align: center;
+        font-size: 13pt;
+        text-decoration: underline;
+        text-transform: uppercase;
+    }
+
+    .grading-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-family: "DejaVu Serif", serif;
+        font-size: 7pt;
+    }
+
+    .grading-table th,
+    .grading-table td {
+        border: 1px solid #111;
+        padding: .4mm .3mm;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+
+    .grading-table thead th {
+        background: #ded9bd;
+        font-weight: bold;
+    }
+
+    .grading-table .student-name,
+    .grading-table .maxima-label {
+        text-align: left;
+        padding-left: 2mm;
+    }
+
+    .grading-table .maxima-row {
+        background: #eee9ce;
+        height: 3mm;
+    }
+
+    .grading-table tbody tr {
+        height: 3.1mm;
+    }
+
+    .grading-table .student-number {
+        font-family: Arial, sans-serif;
+    }
+
+    .grading-table .total-heading {
+        background: #d3cfb6;
+    }
+
+    @media screen {
+        .grading-sheet {
+            max-width: 1100px;
+            margin: 0 auto 2rem;
+            box-shadow: 0 2px 14px rgb(0 0 0 / 12%);
+        }
+    }
+</style>

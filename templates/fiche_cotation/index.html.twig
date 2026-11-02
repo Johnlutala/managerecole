@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Fiches de cotation{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                <div>
+                    <h4 class="fs-xl fw-bold m-0">Fiches de cotation</h4>
+                    <p class="text-muted mb-0 mt-1">Gérez le modèle utilisé dans chaque école, les barèmes et les autorisations de saisie.</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addCotationSheet">
+                        <i class="ti ti-plus me-1"></i>Ajouter
+                    </button>
+                    <a class="btn btn-outline-primary" href="{{ path('app_fiche_cotation_config_index') }}">
+                        <i class="ti ti-settings me-1"></i>Configuration cours
+                    </a>
+                    <a class="btn btn-outline-secondary" href="{{ path('app_fiche_cotation_config_autorisations') }}">
+                        <i class="ti ti-lock-open me-1"></i>Autorisations
+                    </a>
+                </div>
+            </div>
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type in ['success', 'danger', 'warning', 'info'] ? type : 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0">Établissements configurés</h5></div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nom établissement</th>
+                                <th>Structure</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in configurations %}
+                                <tr>
+                                    <td class="fw-semibold">{{ loop.index }}</td>
+                                    <td class="fw-semibold">{{ item.ecole.nom }}</td>
+                                    <td>{{ item.structure == 'semestre' ? 'Semestrielle' : 'Trimestrielle' }}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_fiche_cotation_index', {ecole: item.ecole.id}) }}" title="Voir le modèle de fiche" aria-label="Voir le modèle de fiche de {{ item.ecole.nom }}">
+                                                <i class="ti ti-eye"></i>
+                                            </a>
+                                            <a class="btn btn-outline-danger btn-sm" href="{{ path('app_fiche_cotation_pdf', {ecole: item.ecole.id}) }}" title="Télécharger le PDF" aria-label="Télécharger le PDF de {{ item.ecole.nom }}">
+                                                <i class="ti ti-download"></i>
+                                            </a>
+                                            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_fiche_cotation_config_index', {ecole: item.ecole.id, structure: item.structure}) }}" title="Configurer les maxima" aria-label="Configurer les maxima pour {{ item.ecole.nom }}">
+                                                <i class="ti ti-settings"></i> Maxima
+                                            </a>
+                                            <button class="btn btn-outline-warning btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#editCotationSheet{{ item.id }}" title="Modifier">
+                                                <i class="ti ti-edit"></i> Modifier
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="3" class="text-center text-muted py-4">Aucune fiche de cotation configurée.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% if ecole_selectionnee and configuration_enregistree %}
+                <div class="d-flex align-items-center justify-content-between mt-4 mb-3">
+                    <h5 class="mb-0">Aperçu — {{ ecole_selectionnee.nom }}</h5>
+                    <a class="btn btn-danger btn-sm" href="{{ path('app_fiche_cotation_pdf', {ecole: ecole_selectionnee.id}) }}">
+                        <i class="ti ti-file-type-pdf me-1"></i>Télécharger en PDF
+                    </a>
+                </div>
+                {% include 'fiche_cotation/_styles.html.twig' %}
+                {% include 'fiche_cotation/_sheet.html.twig' with {
+                    ecole: ecole_selectionnee,
+                    structure: structure_selectionnee,
+                    groupes_colonnes: groupes_colonnes,
+                    annee_scolaire: annee_scolaire
+                } %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="addCotationSheet" tabindex="-1" aria-labelledby="addCotationSheetLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="post" action="{{ path('app_fiche_cotation_index') }}" class="modal-content">
+                <input type="hidden" name="_token" value="{{ csrf_token('configurer_fiche_cotation_nouvelle') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCotationSheetLabel">Ajouter une fiche de cotation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label" for="new-cotation-school">École</label>
+                    <select class="form-select mb-3" id="new-cotation-school" name="ecole" required>
+                        <option value="">Sélectionner une école</option>
+                        {% for item in ecoles_disponibles %}<option value="{{ item.id }}">{{ item.nom }}</option>{% endfor %}
+                    </select>
+                    <label class="form-label" for="new-cotation-structure">Type utilisé</label>
+                    <select class="form-select" id="new-cotation-structure" name="structure" required>
+                        <option value="semestre" selected>Semestre</option>
+                        <option value="trimestre">Trimestre</option>
+                    </select>
+                    {% if ecoles_disponibles is empty %}
+                        <div class="form-text text-warning mt-2">Toutes les écoles ont déjà une fiche configurée.</div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" {{ ecoles_disponibles is empty ? 'disabled' : '' }}>Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% for item in configurations %}
+        <div class="modal fade" id="editCotationSheet{{ item.id }}" tabindex="-1" aria-labelledby="editCotationSheetLabel{{ item.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post" action="{{ path('app_fiche_cotation_index') }}" class="modal-content">
+                    <input type="hidden" name="_token" value="{{ csrf_token('configurer_fiche_cotation_' ~ item.id) }}">
+                    <input type="hidden" name="configuration_id" value="{{ item.id }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editCotationSheetLabel{{ item.id }}">Modifier la fiche de cotation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label" for="edit-cotation-school{{ item.id }}">École</label>
+                        <select class="form-select mb-3" id="edit-cotation-school{{ item.id }}" name="ecole" required>
+                            {% for school in ecoles %}
+                                <option value="{{ school.id }}" {{ school.id == item.ecole.id ? 'selected' : '' }}>{{ school.nom }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="form-label" for="edit-cotation-structure{{ item.id }}">Type utilisé</label>
+                        <select class="form-select" id="edit-cotation-structure{{ item.id }}" name="structure" required>
+                            <option value="semestre" {{ item.structure == 'semestre' ? 'selected' : '' }}>Semestre</option>
+                            <option value="trimestre" {{ item.structure == 'trimestre' ? 'selected' : '' }}>Trimestre</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}
