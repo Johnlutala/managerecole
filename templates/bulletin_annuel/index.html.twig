@@ -1,0 +1,221 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace bulletin{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <h4 class="fs-xl fw-bold mb-1">Espace bulletin</h4>
+                    <p class="text-muted mb-0">Les résultats avancent période par période selon les autorisations de cotation.</p>
+                </div>
+            </div>
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : (type == 'info' ? 'info' : 'success')) }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtres et calcul</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ path('app_bulletin_index') }}" class="row g-3 align-items-end mb-3">
+                        <div class="col-md-3">
+                            <label for="bulletin-ecole" class="form-label">École</label>
+                            <select class="form-select" id="bulletin-ecole" name="ecole" required>
+                                <option value="">Choisir une école</option>
+                                {% for candidate in ecoles %}
+                                    <option value="{{ candidate.id }}" {{ ecole and ecole.id == candidate.id ? 'selected' : '' }}>{{ candidate.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="bulletin-annee" class="form-label">Année scolaire</label>
+                            <select class="form-select" id="bulletin-annee" name="annee" required {{ not ecole ? 'disabled' : '' }}>
+                                <option value="">Choisir une année</option>
+                                {% for candidate in annees %}
+                                    <option value="{{ candidate.id }}" {{ annee and annee.id == candidate.id ? 'selected' : '' }}>{{ candidate.libelle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="bulletin-section" class="form-label">Section</label>
+                            <select class="form-select" id="bulletin-section" name="section" {{ not ecole ? 'disabled' : '' }}>
+                                <option value="">Toutes</option>
+                                {% for candidate in sections %}
+                                    <option value="{{ candidate.id }}" {{ section and section.id == candidate.id ? 'selected' : '' }}>{{ candidate.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="bulletin-classe" class="form-label">Classe</label>
+                            <select class="form-select" id="bulletin-classe" name="classe" {{ not ecole ? 'disabled' : '' }}>
+                                <option value="">Toutes</option>
+                                {% for candidate in classes %}
+                                    <option value="{{ candidate.id }}" {{ classe and classe.id == candidate.id ? 'selected' : '' }}>{{ candidate.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="bulletin-option" class="form-label">Option</label>
+                            <select class="form-select" id="bulletin-option" name="option" {{ not classe ? 'disabled' : '' }}>
+                                <option value="">Toutes</option>
+                                {% for candidate in options %}
+                                    <option value="{{ candidate.id }}" {{ option and option.id == candidate.id ? 'selected' : '' }}>{{ candidate.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-outline-primary w-100" type="submit" aria-label="Filtrer">
+                                <i data-lucide="filter"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="border rounded p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <h6 class="mb-0">Cotes validées à intégrer à la période autorisée</h6>
+                            <span class="badge bg-success-subtle text-success">{{ cotes_validees|length }} évaluation(s) avec des cotes validées</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead>
+                                    <tr><th>Cours</th><th>Classe</th><th>Option</th><th>Période</th><th>Cotes validées / attendues</th><th>État</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for ligne in cotes_validees %}
+                                        {% set evaluation = ligne.evaluation %}
+                                        <tr>
+                                            <td>{{ evaluation.cours.nom }}</td>
+                                            <td>{{ evaluation.cours.classe.nom }}</td>
+                                            <td>{{ evaluation.cours.option ? evaluation.cours.option.nom : '—' }}</td>
+                                            <td>{{ evaluation.configurationBulletin.nom }} — {{ evaluation.nom }}</td>
+                                            <td>{{ ligne.validees }} / {{ ligne.attendues }}</td>
+                                            <td>
+                                                {% if ligne.attendues > 0 and ligne.validees >= ligne.attendues %}
+                                                    <span class="badge bg-success-subtle text-success">Cotes complètes</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning-subtle text-warning">Cotes manquantes</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="6" class="text-center text-muted py-3">
+                                            {% if annee %}Aucune cote validée n’est disponible pour ces filtres.{% else %}Choisissez une école et une année scolaire pour afficher les cotes validées.{% endif %}
+                                        </td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ path('app_bulletin_calculer') }}" class="d-flex justify-content-end">
+                        <input type="hidden" name="_token" value="{{ csrf_token('calculer_bulletins_annuels') }}">
+                        <input type="hidden" name="ecole" value="{{ ecole ? ecole.id : '' }}">
+                        <input type="hidden" name="annee" value="{{ annee ? annee.id : '' }}">
+                        <input type="hidden" name="section" value="{{ section ? section.id : '' }}">
+                        <input type="hidden" name="classe" value="{{ classe ? classe.id : '' }}">
+                        <input type="hidden" name="option" value="{{ option ? option.id : '' }}">
+                        <button class="btn btn-primary" type="submit" {{ not ecole or not annee ? 'disabled' : '' }}>
+                            <i data-lucide="calculator" class="me-1"></i>Calculer la période autorisée
+                        </button>
+                    </form>
+                    <p class="small text-muted text-end mt-2 mb-0">Une seule période est calculée par lancement. La période précédente doit d’abord être calculée.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-1">Bulletins progressifs disponibles</h5>
+                        <span class="text-muted small">{{ annee ? annee.libelle : 'Toutes les années scolaires' }}</span>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary">{{ groupes_resultats|length }} classe(s)/option(s)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Classe</th>
+                                <th>Option</th>
+                                <th>Élèves</th>
+                                <th>Moyenne cumulée</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for groupe in groupes_resultats %}
+                                <tr>
+                                    <td class="fw-semibold">{{ groupe.ecole.nom }}</td>
+                                    <td>{{ groupe.classe.nom }}</td>
+                                    <td>{{ groupe.option ? groupe.option.nom : '—' }}</td>
+                                    <td>{{ groupe.eleves }}</td>
+                                    <td>{{ groupe.moyenne }} %</td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <a class="btn btn-sm btn-outline-primary"
+                                               href="{{ path('app_bulletin_classe', {id: groupe.classe.id, annee: groupe.annee.id, option: groupe.option ? groupe.option.id : 0}) }}"
+                                               aria-label="Voir les résultats de {{ groupe.classe.nom }}">
+                                                <i data-lucide="eye"></i> Voir
+                                            </a>
+                                            <a class="btn btn-sm btn-outline-danger"
+                                               href="{{ path('app_bulletin_pdf_classe', {id: groupe.classe.id, annee: groupe.annee.id, option: groupe.option ? groupe.option.id : 0}) }}"
+                                               aria-label="Télécharger les bulletins de {{ groupe.classe.nom }}">
+                                                <i data-lucide="file-down"></i> PDF
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        Aucun résultat disponible pour ces filtres. Choisissez une école et une année, puis lancez le calcul.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const form = document.querySelector('form[action="{{ path('app_bulletin_index') }}"]');
+            const school = document.getElementById('bulletin-ecole');
+            const year = document.getElementById('bulletin-annee');
+            const section = document.getElementById('bulletin-section');
+            const classSelect = document.getElementById('bulletin-classe');
+            const option = document.getElementById('bulletin-option');
+
+            if (!form || !school || !year || !section || !classSelect || !option) {
+                return;
+            }
+
+            school.addEventListener('change', () => {
+                year.value = '';
+                year.disabled = true;
+                section.value = '';
+                classSelect.value = '';
+                option.value = '';
+                form.requestSubmit();
+            });
+            year.addEventListener('change', () => form.requestSubmit());
+            section.addEventListener('change', () => {
+                classSelect.value = '';
+                option.value = '';
+                form.requestSubmit();
+            });
+            classSelect.addEventListener('change', () => {
+                option.value = '';
+                form.requestSubmit();
+            });
+            option.addEventListener('change', () => form.requestSubmit());
+        })();
+    </script>
+{% endblock %}

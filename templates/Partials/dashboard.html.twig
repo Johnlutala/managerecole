@@ -96,9 +96,11 @@
 								{% if is_granted('ROLE_ADMIN') %}
 									<li class="side-nav-item"><a href="{{ path('app_cours_index') }}" class="side-nav-link"><span class="menu-text">Cours et attributions</span></a></li>
 									<li class="side-nav-item"><a href="{{ path('app_validation_notes_index') }}" class="side-nav-link"><span class="menu-text">Validation des notes</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Espace bulletin</span></a></li>
 								{% endif %}
 								{% if is_granted('ROLE_PROFESSEUR') %}
 									<li class="side-nav-item"><a href="{{ path('app_professeur_notes_index') }}" class="side-nav-link"><span class="menu-text">Cotation des élèves</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_professeur_messages_index') }}" class="side-nav-link"><span class="menu-text">Messages de l’administration</span></a></li>
 								{% endif %}
 							</ul>
 						</div>
@@ -142,6 +144,44 @@
 				class="d-flex align-items-center gap-2"
 			>
 				<!-- Notification Dropdown -->
+				{% if is_granted('ROLE_PROFESSEUR') %}
+					{% set boite_messages = professeur_message_notifications() %}
+					<div class="topbar-item">
+						<div class="dropdown">
+							<button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false" aria-label="Notifications des messages">
+								<i data-lucide="bell" class="fs-xxl"></i>
+								{% if boite_messages.non_lus > 0 %}
+									<span class="badge text-bg-danger badge-circle topbar-badge">{{ boite_messages.non_lus }}</span>
+								{% endif %}
+							</button>
+							<div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+								<div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+									<h6 class="m-0 fs-md fw-semibold">Messages reçus</h6>
+									<span class="badge badge-soft-success badge-label py-1">{{ boite_messages.non_lus }} non lu(s)</span>
+								</div>
+								<div style="max-height: 300px;" data-simplebar>
+									{% for message in boite_messages.messages %}
+										<a href="{{ path('app_professeur_messages_show', {id: message.id}) }}" class="dropdown-item notification-item py-2 text-wrap">
+											<span class="d-flex align-items-center gap-3">
+												<span class="avatar-md rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0">
+													<i data-lucide="mail"></i>
+												</span>
+												<span class="flex-grow-1 text-muted">
+													<strong class="text-body">{{ message.expediteurNom }}</strong><br>
+													{{ message.sujet }}<br>
+													<span class="fs-xs">{{ message.envoyeLe|date('d/m/Y H:i') }}</span>
+												</span>
+											</span>
+										</a>
+									{% else %}
+										<div class="dropdown-item text-center text-muted py-4">Aucun nouveau message.</div>
+									{% endfor %}
+								</div>
+								<a href="{{ path('app_professeur_messages_index') }}" class="dropdown-item text-center border-top py-2 fw-semibold">Ouvrir la boîte de réception</a>
+							</div>
+						</div>
+					</div>
+				{% else %}
 				<div class="topbar-item">
 					<div class="dropdown">
 						<button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
@@ -334,6 +374,7 @@
 					<!-- end dropdown-->
 				</div>
 				<!-- end topbar item-->
+				{% endif %}
 
 				<!-- Theme Mode Dropdown -->
 				<div class="topbar-item">

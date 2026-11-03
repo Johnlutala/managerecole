@@ -9,6 +9,7 @@ use App\Entity\Option;
 use App\Entity\Section;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -52,6 +53,19 @@ final class CoursType extends AbstractType
 
             ->add('nom', TextType::class, [
                 'label' => 'Nom du cours',
+            ])
+            ->add('domaine', ChoiceType::class, [
+                'label' => 'Domaine scolaire',
+                'required' => false,
+                'placeholder' => 'Choisir un domaine',
+                'choices' => [
+                    'Domaine des sciences' => 'Domaine des sciences',
+                    'Domaine des langues' => 'Domaine des langues',
+                    'Domaine des sciences humaines' => 'Domaine des sciences humaines',
+                    'Domaine des arts' => 'Domaine des arts',
+                    'Domaine du développement personnel' => 'Domaine du développement personnel',
+                    'Autres cours' => 'Autres cours',
+                ],
             ]);
     }
 

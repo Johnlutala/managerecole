@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ mode == 'modifier' ? 'Modifier la cotation' : 'Noter les élèves' }} — {{ cours.nom }}{% endblock %}
+{% block title %}{{ mode == 'consultation' ? 'Consulter la cotation' : (mode == 'modifier' ? 'Modifier la cotation' : 'Noter les élèves') }} — {{ cours.nom }}{% endblock %}
 
 {% block body %}
     <style>
@@ -68,7 +68,7 @@
         <div class="container-fluid">
             <div class="page-title-head d-flex align-items-center justify-content-between mb-3">
                 <div>
-                    <a href="{{ path('app_professeur_notes_index', {
+                    <a href="{{ path(mode == 'consultation' ? 'app_validation_notes_index' : 'app_professeur_notes_index', mode == 'consultation' ? {} : {
                         ecole: cours.classe.ecole.id,
                         classe: cours.classe.id,
                         option: cours.option ? cours.option.id : 0,
@@ -78,7 +78,7 @@
                     <span class="text-muted">
                         {{ cours.classe.ecole.nom }}
                         {% if cours.option %} · {{ cours.option.nom }}{% else %} · Sans option{% endif %}
-                        · {{ cours.professeur.nom }} {{ cours.professeur.prenom }}
+                        · {% if cours.professeur %}{{ cours.professeur.nom }} {{ cours.professeur.prenom }}{% else %}Aucun titulaire attribué{% endif %}
                     </span>
                 </div>
             </div>
@@ -88,6 +88,10 @@
                     <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }}">{{ message }}</div>
                 {% endfor %}
             {% endfor %}
+
+            {% if mode == 'consultation' and not cours.professeur %}
+                <div class="alert alert-info">Aucun professeur n’est actuellement attribué à ce cours. Les cotes disponibles restent consultables ci-dessous.</div>
+            {% endif %}
 
             {% if semestres is empty %}
                 <div class="alert alert-warning">Aucune configuration de période n’a encore été préparée par l’administration pour ce cours.</div>
@@ -110,7 +114,7 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-wrap justify-content-between gap-2">
-                                <span>Professeur : <strong>{{ cours.professeur.nom }} {{ cours.professeur.prenom }}</strong></span>
+                                <span>Professeur : <strong>{% if cours.professeur %}{{ cours.professeur.nom }} {{ cours.professeur.prenom }}{% else %}Aucun titulaire attribué{% endif %}</strong></span>
                                 <span>Structure : <strong>{{ structure_fiche_cotation == 'semestre' ? 'Semestrielle' : 'Trimestrielle' }}</strong></span>
                             </div>
                         </div>

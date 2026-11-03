@@ -1,0 +1,117 @@
+<article class="bulletin-sheet">
+    <header class="bulletin-heading">
+        <div class="bulletin-country">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
+        <div class="bulletin-ministry">MINISTÈRE DE L’ENSEIGNEMENT PRIMAIRE, SECONDAIRE ET TECHNIQUE</div>
+        <h1>BULLETIN SCOLAIRE — SUIVI PROGRESSIF</h1>
+        <div class="bulletin-school">{{ bulletin.ecole.nom }}</div>
+    </header>
+
+    <section class="bulletin-student">
+        <div><span>Année scolaire</span><strong>{{ bulletin.anneeScolaire.libelle }}</strong></div>
+        <div><span>Classe</span><strong>{{ bulletin.classe.nom }}</strong></div>
+        <div><span>Option</span><strong>{{ bulletin.option ? bulletin.option.nom : '—' }}</strong></div>
+        <div><span>Élève</span><strong>{{ bulletin.eleve.nom }} {{ bulletin.eleve.postnom }} {{ bulletin.eleve.prenom }}</strong></div>
+        <div><span>Matricule</span><strong>{{ bulletin.eleve.matricule }}</strong></div>
+        <div><span>Sexe</span><strong>{{ bulletin.eleve.sexe }}</strong></div>
+        <div><span>Position dans la classe</span><strong>{{ position }} / {{ effectif }}</strong></div>
+    </section>
+
+    <h2 class="bulletin-section-title">RÉSULTATS DES PÉRIODES CALCULÉES PAR COURS</h2>
+    <table class="bulletin-grades">
+        {% set groupes_periodes = {} %}
+        {% for periode in periode_headers %}
+            {% set semestre = groupes_periodes[periode.semestre]|default([])|merge([periode]) %}
+            {% set groupes_periodes = groupes_periodes|merge({(periode.semestre): semestre}) %}
+        {% endfor %}
+        <thead>
+            <tr>
+                <th rowspan="3">Branches / cours</th>
+                {% for semestre, periodes in groupes_periodes %}
+                    <th colspan="{{ periodes|length * 2 }}">{{ semestre }}</th>
+                {% endfor %}
+                <th colspan="3">Cumul calculé</th>
+            </tr>
+            <tr>
+                {% for periodes in groupes_periodes %}
+                    {% for periode in periodes %}
+                        <th colspan="2">{{ periode.libelle }}</th>
+                    {% endfor %}
+                {% endfor %}
+                <th rowspan="2">Points obtenus</th>
+                <th rowspan="2">MAX</th>
+                <th rowspan="2">%</th>
+            </tr>
+            <tr>
+                {% for periode in periode_headers %}
+                    <th>MAX</th>
+                    <th>Obtenu</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% set domaines = {} %}
+            {% set totaux_periodes = {} %}
+            {% for cours in bulletin.details %}
+                {% set domaine = cours.domaine|default('Autres cours') %}
+                {% set lignes_domaine = domaines[domaine]|default([])|merge([cours]) %}
+                {% set domaines = domaines|merge({(domaine): lignes_domaine}) %}
+                {% for evaluation in cours.evaluations %}
+                    {% set total_periode = totaux_periodes[evaluation.periode]|default({cote: 0, bareme: 0}) %}
+                    {% set total_periode = {
+                        cote: total_periode.cote + evaluation.cote,
+                        bareme: total_periode.bareme + evaluation.bareme
+                    } %}
+                    {% set totaux_periodes = totaux_periodes|merge({(evaluation.periode): total_periode}) %}
+                {% endfor %}
+            {% endfor %}
+            {% for domaine, cours_du_domaine in domaines %}
+                <tr class="bulletin-domain">
+                    <th colspan="{{ (periode_headers|length * 2) + 4 }}">{{ domaine|upper }}</th>
+                </tr>
+                {% for cours in cours_du_domaine %}
+                    {% set notes_par_periode = {} %}
+                    {% for evaluation in cours.evaluations %}
+                        {% set notes_par_periode = notes_par_periode|merge({(evaluation.periode): evaluation}) %}
+                    {% endfor %}
+                    <tr>
+                        <td class="bulletin-course">{{ cours.cours }}</td>
+                        {% for periode in periode_headers %}
+                            {% if notes_par_periode[periode.key] is defined %}
+                                <td>{{ notes_par_periode[periode.key].bareme }}</td>
+                                <td>{{ notes_par_periode[periode.key].cote }}{% if notes_par_periode[periode.key].provisoire|default(false) %}*{% endif %}</td>
+                            {% else %}
+                                <td>—</td><td>—</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td>{{ cours.total_cotes }}</td>
+                        <td>{{ cours.total_baremes }}</td>
+                        <td>{{ cours.pourcentage }}%</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+            <tr class="bulletin-total">
+                <th>TOTAL GÉNÉRAL</th>
+                {% for periode in periode_headers %}
+                    <td>{{ totaux_periodes[periode.key].bareme|default('—') }}</td>
+                    <td>{{ totaux_periodes[periode.key].cote|default('—') }}</td>
+                {% endfor %}
+                <th>{{ bulletin.totalCotes }}</th>
+                <th>{{ bulletin.totalBaremes }}</th>
+                <th>{{ bulletin.pourcentage|number_format(2, ',', ' ') }}%</th>
+            </tr>
+        </tbody>
+    </table>
+    <p class="small text-muted">* Cote provisoire de 1 en attendant la validation de l’évaluation.</p>
+
+    <section class="bulletin-result">
+        <div><span>Pourcentage cumulé à ce jour</span><strong>{{ bulletin.pourcentage|number_format(2, ',', ' ') }} %</strong></div>
+        <div><span>Décision</span><strong>{{ bulletin.decision == 'admis' ? 'ADMIS(E)' : 'AJOURNÉ(E)' }}</strong></div>
+        <div><span>Calcul effectué le</span><strong>{{ bulletin.calculeLe|date('d/m/Y H:i') }}</strong></div>
+    </section>
+
+    <footer class="bulletin-signatures">
+        <div>Signature du titulaire</div>
+        <div>Signature du chef d’établissement</div>
+        <div>Signature du parent / tuteur</div>
+    </footer>
+</article>

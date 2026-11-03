@@ -129,6 +129,7 @@
                             <tr class="text-uppercase fs-xxs">
                                 <th>#</th>
                                 <th>Cours</th>
+                                <th>Domaine</th>
                                 <th>Classe</th>
                                 <th>Ecole</th>
                                 <th class="text-center">Actions</th>
@@ -145,6 +146,11 @@
                                             </a>{% if not loop.last %}, {% endif %}
                                         {% endfor %}
                                     </td>
+                                    <td>
+                                        {% for cour in groupe.cours %}
+                                            <span class="badge bg-light text-dark">{{ cour.domaine|default('Autres cours') }}</span>{% if not loop.last %} {% endif %}
+                                        {% endfor %}
+                                    </td>
                                     <td>{{ groupe.classe.nom }}</td>
                                     <td>{{ groupe.classe.ecole.nom }}</td>
                                     <td class="text-center">
@@ -155,14 +161,14 @@
                                 </tr>
                             {% else %}
                                 <tr id="cours-empty-row">
-                                    <td colspan="5" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         Aucun cours trouvé pour ces filtres.
                                     </td>
                                 </tr>
                             {% endfor %}
 
                             <tr id="cours-search-empty-row" class="d-none">
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     Aucun résultat de recherche.
                                 </td>
                             </tr>

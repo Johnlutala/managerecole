@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Messages de l’administration{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">Messages de l’administration</h4>
+                    <p class="text-muted mb-0">Retrouvez les messages envoyés à votre adresse et dans votre espace.</p>
+                </div>
+                <a class="btn btn-outline-secondary" href="{{ path('app_professeur_notes_index') }}">Retour aux cotations</a>
+            </div>
+
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr><th>État</th><th>Expéditeur</th><th>Objet</th><th>Cours</th><th>Date</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for message in messages %}
+                                <tr class="{{ message.luLe is null ? 'table-primary' : '' }}">
+                                    <td>
+                                        {% if message.luLe is null %}
+                                            <span class="badge bg-primary">Nouveau</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">Lu</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ message.expediteurNom }}</td>
+                                    <td class="fw-semibold">{{ message.sujet }}</td>
+                                    <td>{{ message.cours ? message.cours.nom : '—' }}</td>
+                                    <td>{{ message.envoyeLe|date('d/m/Y H:i') }}</td>
+                                    <td><a class="btn btn-sm btn-outline-primary" href="{{ path('app_professeur_messages_show', {id: message.id}) }}">Lire le message</a></td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="6" class="text-center text-muted py-5">Vous n’avez pas encore reçu de message.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

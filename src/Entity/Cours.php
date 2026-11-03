@@ -25,6 +25,9 @@ class Cours
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $domaine = null;
+
     #[ORM\ManyToOne(inversedBy: 'cours')]
     private ?Classe $classe = null;
 
@@ -83,6 +86,18 @@ class Cours
     public function setDescription(?string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getDomaine(): ?string
+    {
+        return $this->domaine;
+    }
+
+    public function setDomaine(?string $domaine): static
+    {
+        $this->domaine = $domaine;
 
         return $this;
     }

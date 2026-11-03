@@ -1,0 +1,325 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi des cotes{% endblock %}
+
+
+{% block body %}
+    <style>
+        /* Conteneur des filtres */
+        .filter-card {
+            border: 1px solid #e9edf3;
+            border-radius: 10px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr)) 110px;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .filter-field {
+            min-width: 0;
+        }
+
+        .filter-field .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667085;
+            margin-bottom: 7px;
+        }
+
+        .filter-field .form-select {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+            border-radius: 7px;
+            border-color: #e2e7ef;
+            font-size: 12px;
+            box-shadow: none;
+        }
+
+        .filter-field .form-select:focus {
+            border-color: #9baac1;
+            box-shadow: 0 0 0 3px rgba(52, 71, 103, 0.07);
+        }
+
+        .filter-actions .btn {
+            height: 42px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Écrans intermédiaires */
+        @media (max-width: 1199px) {
+            .filter-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .filter-actions {
+                grid-column: span 3;
+                max-width: 180px;
+            }
+        }
+
+        /* Mobiles */
+        @media (max-width: 767px) {
+            .filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px 10px;
+            }
+
+            .filter-actions {
+                grid-column: span 2;
+                max-width: 100%;
+            }
+
+            .filter-field .form-select {
+                font-size: 11px;
+            }
+        }
+
+        /* Très petits mobiles */
+        @media (max-width: 400px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                grid-column: span 1;
+            }
+        }
+    </style>
+    
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">Suivi des cotes par école</h4>
+                    <p class="text-muted mb-0">Consultez les cours soumis et contactez leurs titulaires.</p>
+                </div>
+                <a class="btn btn-outline-secondary" href="{{ path('app_validation_notes_index') }}">Retour aux validations</a>
+            </div>
+
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }}">{{ message }}</div>
+                {% endfor %}
+            {% endfor %}
+            <div class="card mb-4 filter-card">
+                <div class="card-body">
+                    <form method="get" class="filter-grid">
+
+                        {# École #}
+                        <div class="filter-field">
+                            <label class="form-label" for="filter-ecole">École</label>
+                            <select
+                                class="form-select"
+                                id="filter-ecole"
+                                name="ecole"
+                                onchange="this.form.submit()"
+                            >
+                                <option value="">Choisir une école</option>
+                                {% for candidate in ecoles %}
+                                    <option
+                                        value="{{ candidate.id }}"
+                                        {{ ecole and ecole.id == candidate.id ? 'selected' : '' }}
+                                    >
+                                        {{ candidate.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {# Section #}
+                        <div class="filter-field">
+                            <label class="form-label" for="filter-section">Section</label>
+                            <select
+                                class="form-select"
+                                id="filter-section"
+                                name="section"
+                                {{ ecole ? '' : 'disabled' }}
+                                onchange="this.form.submit()"
+                            >
+                                <option value="">Toutes les sections</option>
+                                {% for candidate in sections %}
+                                    <option
+                                        value="{{ candidate.id }}"
+                                        {{ section and section.id == candidate.id ? 'selected' : '' }}
+                                    >
+                                        {{ candidate.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {# Classe #}
+                        <div class="filter-field">
+                            <label class="form-label" for="filter-classe">Classe</label>
+                            <select
+                                class="form-select"
+                                id="filter-classe"
+                                name="classe"
+                                {{ ecole ? '' : 'disabled' }}
+                                onchange="this.form.submit()"
+                            >
+                                <option value="">Choisir une classe</option>
+                                {% for candidate in classes %}
+                                    <option
+                                        value="{{ candidate.id }}"
+                                        {{ classe and classe.id == candidate.id ? 'selected' : '' }}
+                                    >
+                                        {{ candidate.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {# Option #}
+                        <div class="filter-field">
+                            <label class="form-label" for="filter-option">Option (facultative)</label>
+                            <select class="form-select" id="filter-option" name="option">
+                                <option value="">Toutes les options</option>
+                                {% for candidate in options %}
+                                    <option
+                                        value="{{ candidate.id }}"
+                                        {{ option and option.id == candidate.id ? 'selected' : '' }}
+                                    >
+                                        {{ candidate.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {# Statut #}
+                        <div class="filter-field">
+                            <label class="form-label" for="filter-statut">Statut des cotes</label>
+                            <select class="form-select" id="filter-statut" name="statut">
+                                <option value="">Tous les statuts</option>
+                                <option
+                                    value="soumise"
+                                    {{ statut == 'soumise' ? 'selected' : '' }}
+                                >
+                                    Cote soumise
+                                </option>
+                                <option
+                                    value="non_soumise"
+                                    {{ statut == 'non_soumise' ? 'selected' : '' }}
+                                >
+                                    Cote non soumise
+                                </option>
+                            </select>
+                        </div>
+
+                        {# Bouton #}
+                        <div class="filter-actions">
+                            <button class="btn btn-primary w-100" type="submit">
+                                <i data-lucide="filter" class="me-1"></i>
+                                Filtrer
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            {% if ecole and classe %}
+                <div class="card mb-3">
+                    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h5 class="mb-1">{{ ecole.nom }} — {{ classe.nom }}{% if option %} — {{ option.nom }}{% endif %}</h5>
+                            <span class="text-muted">Progression des cours</span>
+                        </div>
+                        <span class="badge fs-6 {{ cours_soumises == cours_total ? 'bg-success' : 'bg-warning text-dark' }}">{{ cours_soumises }}/{{ cours_total }} cours soumis</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-custom table-centered table-hover w-100 mb-0">
+                            <thead class="bg-light bg-opacity-25 thead-sm">
+                                <tr class="text-uppercase fs-xxs">
+                                    <th>Nom du cours</th>
+                                    <th>Titulaire</th>
+                                    <th>Option</th>
+                                    <th class="text-center">Statut</th>
+                                    <th class="text-center">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ligne in cours_suivi %}
+                                    {% set cours = ligne.cours %}
+                                    {% set professeur = ligne.professeur %}
+                                    <tr>
+                                        <td>{{ cours.nom }}</td>
+                                        <td>{{ professeur ? professeur.prenom ~ ' ' ~ professeur.nom : 'Non attribué' }}</td>
+                                        <td>{{ cours.option ? cours.option.nom : '—' }}</td>
+                                        <td class="text-center">
+                                            {% if ligne.soumise %}
+                                                <span class="badge bg-success">Soumise</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Non soumise</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if ligne.email_disponible %}
+                                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#message-course-{{ cours.id }}">
+                                                    <i data-lucide="mail"></i> Message
+                                                </button>
+                                            {% else %}
+                                                <span class="text-muted small">E-mail indisponible</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="5" class="text-center py-5 text-muted">Aucun cours ne correspond aux filtres.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% for ligne in cours_suivi %}
+                    {% set cours = ligne.cours %}
+                    {% if ligne.email_disponible %}
+                        <div class="modal fade" id="message-course-{{ cours.id }}" tabindex="-1" aria-labelledby="message-title-{{ cours.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="post" action="{{ path('app_validation_notes_message', {id: cours.id}) }}">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="message-title-{{ cours.id }}">Écrire au titulaire — {{ cours.nom }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('message_cours_' ~ cours.id) }}">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="subject-{{ cours.id }}">Objet</label>
+                                                <input class="form-control" id="subject-{{ cours.id }}" name="subject" maxlength="180" required>
+                                            </div>
+                                            <div>
+                                                <label class="form-label" for="message-{{ cours.id }}">Message</label>
+                                                <textarea class="form-control" id="message-{{ cours.id }}" name="message" rows="5" maxlength="10000" required></textarea>
+                                            </div>
+                                            <small class="text-muted d-block mt-2">Destinataire : {{ ligne.professeur.email }}</small>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Envoyer</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% elseif ecole %}
+                <div class="alert alert-info">Sélectionnez une classe pour consulter le nombre de cours soumis et leur statut.</div>
+            {% else %}
+                <div class="alert alert-info">Sélectionnez une école pour charger ses sections, puis sa classe.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

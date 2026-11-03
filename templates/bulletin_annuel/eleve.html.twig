@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bulletin de {{ bulletin.eleve.nom }} {{ bulletin.eleve.prenom }}{% endblock %}
+
+{% block body %}
+    <style>
+        .bulletin-sheet { background: #fff; border: 1px solid #d7dce1; padding: 1.5rem; color: #17212b; }
+        .bulletin-heading { text-align: center; border-bottom: 2px solid #17212b; padding-bottom: .75rem; margin-bottom: 1rem; }
+        .bulletin-country, .bulletin-ministry { font-size: .75rem; font-weight: 700; }
+        .bulletin-heading h1 { font-size: 1.2rem; font-weight: 800; margin: .6rem 0 .25rem; }
+        .bulletin-school { font-size: 1rem; font-weight: 700; text-transform: uppercase; }
+        .bulletin-student { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: 1.25rem; }
+        .bulletin-student div, .bulletin-result div { border: 1px solid #ced4da; padding: .4rem .55rem; }
+        .bulletin-student span, .bulletin-result span { display: block; color: #5b6570; font-size: .7rem; }
+        .bulletin-student strong, .bulletin-result strong { display: block; font-size: .85rem; }
+        .bulletin-section-title { text-align: center; font-size: .9rem; font-weight: 800; background: #eef1f4; padding: .45rem; }
+        .bulletin-grades { width: 100%; border-collapse: collapse; font-size: .68rem; }
+        .bulletin-grades th, .bulletin-grades td { border: 1px solid #59636a; padding: .25rem; text-align: center; }
+        .bulletin-grades thead th { background: #eef1f4; }
+        .bulletin-grades .bulletin-course { text-align: left; font-weight: 700; min-width: 9rem; }
+        .bulletin-grades .bulletin-domain { background: #dce3e9; text-align: left; }
+        .bulletin-total { background: #e8edf2; }
+        .bulletin-result { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-top: 1rem; }
+        .bulletin-signatures { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; text-align: center; font-size: .75rem; }
+        .bulletin-signatures div { flex: 1; border-top: 1px solid #59636a; padding-top: .5rem; }
+        @media print { .content-page { margin: 0 !important; padding: 0 !important; } .bulletin-sheet { border: 0; } }
+    </style>
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <a class="btn btn-outline-secondary" href="{{ path('app_bulletin_classe', {id: bulletin.classe.id, annee: bulletin.anneeScolaire.id, option: bulletin.option ? bulletin.option.id : 0}) }}">← Retour aux résultats de la classe</a>
+                <button type="button" class="btn btn-primary" onclick="window.print()"><i data-lucide="printer" class="me-1"></i>Imprimer</button>
+            </div>
+            {% include 'bulletin_annuel/_fiche.html.twig' with {bulletin: bulletin, position: position, effectif: effectif, periode_headers: periode_headers} only %}
+        </div>
+    </div>
+{% endblock %}

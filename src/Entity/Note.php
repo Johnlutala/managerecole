@@ -32,6 +32,9 @@ class Note
     #[ORM\Column(length: 30)]
     private string $statut = 'brouillon';
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $dateSoumission = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -93,6 +96,18 @@ class Note
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getDateSoumission(): ?\DateTimeImmutable
+    {
+        return $this->dateSoumission;
+    }
+
+    public function setDateSoumission(?\DateTimeImmutable $dateSoumission): static
+    {
+        $this->dateSoumission = $dateSoumission;
 
         return $this;
     }

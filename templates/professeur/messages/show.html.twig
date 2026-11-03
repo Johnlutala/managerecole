@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ message.sujet }}{% endblock %}
+
+{% block body %}
+    <div class="content-page">
+        <div class="container-fluid">
+            <div class="page-title-head d-flex align-items-center mb-3">
+                <div class="flex-grow-1">
+                    <h4 class="fs-xl fw-bold m-0">{{ message.sujet }}</h4>
+                    <p class="text-muted mb-0">Message de l’administration</p>
+                </div>
+                <a class="btn btn-outline-secondary" href="{{ path('app_professeur_messages_index') }}">Retour à la boîte de réception</a>
+            </div>
+
+            <article class="card">
+                <div class="card-header d-flex justify-content-between flex-wrap gap-2">
+                    <div>
+                        <strong>{{ message.expediteurNom }}</strong>
+                        <span class="text-muted">&lt;{{ message.expediteurEmail }}&gt;</span>
+                        {% if message.cours %}
+                            <div class="small text-muted">Cours : {{ message.cours.nom }}</div>
+                        {% endif %}
+                    </div>
+                    <time class="text-muted" datetime="{{ message.envoyeLe|date('c') }}">{{ message.envoyeLe|date('d/m/Y H:i') }}</time>
+                </div>
+                <div class="card-body">
+                    <div class="message-content">{{ message.contenu|nl2br }}</div>
+                </div>
+            </article>
+        </div>
+    </div>
+{% endblock %}

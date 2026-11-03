@@ -26,10 +26,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\CotationStructure;
 
 #[Route('/professeur/notes', name: 'app_professeur_notes_')]
-#[IsGranted('ROLE_PROFESSEUR')]
 final class ProfesseurNotesController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'], priority: 10)]
+    #[IsGranted('ROLE_PROFESSEUR')]
     public function index(
         Request $request,
         CoursRepository $coursRepository,
@@ -172,6 +172,7 @@ final class ProfesseurNotesController extends AbstractController
     }
 
     #[Route('/filtres/{niveau}', name: 'filtres', methods: ['GET'])]
+    #[IsGranted('ROLE_PROFESSEUR')]
     public function filtres(string $niveau, Request $request, CoursRepository $coursRepository): JsonResponse
     {
         $courses = $this->coursAttribues($coursRepository, $this->professeurConnecte());
@@ -275,16 +276,29 @@ final class ProfesseurNotesController extends AbstractController
         CotationStructure $cotationStructure,
         EntityManagerInterface $entityManager
     ): Response {
-        $professeur = $this->professeurConnecte();
-        $cours = $coursRepository->findOneBy(['id' => $id, 'professeur' => $professeur]);
+        $isAdministrator = $this->isGranted('ROLE_ADMIN');
+        if (!$isAdministrator && !$this->isGranted('ROLE_PROFESSEUR')) {
+            throw $this->createAccessDeniedException();
+        }
+        $professeur = $isAdministrator ? null : $this->professeurConnecte();
+        $cours = $isAdministrator
+            ? $coursRepository->find($id)
+            : $coursRepository->findOneBy(['id' => $id, 'professeur' => $professeur]);
+        if ($isAdministrator && $cours instanceof Cours) {
+            $professeur = $cours->getProfesseur();
+        }
         if (
             !$cours instanceof Cours
+            || (!$isAdministrator && !$professeur instanceof Professeur)
             || $cours->isDeleted()
             || $cours->getClasse() === null
             || $cours->getClasse()->isDeleted()
             || $cours->getClasse()->getEcole() === null
         ) {
             throw $this->createNotFoundException();
+        }
+        if ($isAdministrator && $request->isMethod('POST')) {
+            throw $this->createAccessDeniedException('La direction consulte les cotes en lecture seule.');
         }
 
         $ficheConfiguration = $ficheConfigurationRepository->findOneBy([
@@ -293,12 +307,14 @@ final class ProfesseurNotesController extends AbstractController
         if (!$ficheConfiguration instanceof ConfigurationFicheCotation || $ficheConfiguration->getStructure() === null) {
             $this->addFlash('warning', 'L’administration doit configurer le modèle de cotation de cette école avant la saisie.');
 
-            return $this->redirectToRoute('app_professeur_notes_index', [
-                'ecole' => $cours->getClasse()->getEcole()->getId(),
-                'classe' => $cours->getClasse()->getId(),
-                'option' => $cours->getOption()?->getId() ?? 0,
-                'cours' => $cours->getId(),
-            ]);
+            return $isAdministrator
+                ? $this->redirectToRoute('app_validation_notes_index')
+                : $this->redirectToRoute('app_professeur_notes_index', [
+                    'ecole' => $cours->getClasse()->getEcole()->getId(),
+                    'classe' => $cours->getClasse()->getId(),
+                    'option' => $cours->getOption()?->getId() ?? 0,
+                    'cours' => $cours->getId(),
+                ]);
         }
 
         $modelGroups = $cotationStructure->groupes($ficheConfiguration->getStructure());
@@ -345,7 +361,9 @@ final class ProfesseurNotesController extends AbstractController
             }
         }
 
-        $mode = $request->query->get('mode') === 'modifier' ? 'modifier' : 'noter';
+        $mode = $isAdministrator
+            ? 'consultation'
+            : ($request->query->get('mode') === 'modifier' ? 'modifier' : 'noter');
         $evaluationsSaisissables = [];
         $periodesAvecDoublons = [];
         $anneeScolaire = null;
@@ -508,6 +526,7 @@ final class ProfesseurNotesController extends AbstractController
                 $note->setCote($change['cote']);
                 if ($action === 'soumettre') {
                     $note->setStatut('soumise');
+                    $note->setDateSoumission(new \DateTimeImmutable());
                 }
                 if ($note->getId() === null) {
                     $entityManager->persist($note);
@@ -558,7 +577,7 @@ final class ProfesseurNotesController extends AbstractController
      */
     private function groupesPourCours(
         Cours $cours,
-        Professeur $professeur,
+        ?Professeur $professeur,
         ConfigurationBulletinRepository $configurationRepository,
         array $modelGroups
     ): array {
@@ -742,7 +761,7 @@ final class ProfesseurNotesController extends AbstractController
     private function configurationPourCours(
         ConfigurationBulletin $configuration,
         Cours $cours,
-        Professeur $professeur
+        ?Professeur $professeur
     ): bool {
         $classe = $cours->getClasse();
         $ecole = $classe?->getEcole();
@@ -759,7 +778,7 @@ final class ProfesseurNotesController extends AbstractController
             return false;
         }
 
-        $anneeProfesseur = $professeur->getAnneeScolaire();
+        $anneeProfesseur = $professeur?->getAnneeScolaire();
 
         return $anneeProfesseur === null
             || $anneeProfesseur->getId() === $configuration->getAnneeScolaire()?->getId();

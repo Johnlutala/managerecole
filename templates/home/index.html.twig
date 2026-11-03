@@ -3,19 +3,112 @@
 {% block title %}{% endblock %}
 
 {% block body %}
-    {% if is_granted('ROLE_PROFESSEUR') or is_granted('ROLE_ADMIN') %}
+    {% if is_granted('ROLE_PROFESSEUR') %}
         <div class="content-page">
             <div class="container-fluid">
                 <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
                     <div>
-                        <h4 class="fs-xl fw-bold mb-1">{{ is_granted('ROLE_ADMIN') ? 'Espace administration' : 'Espace professeur' }}</h4>
-                        <p class="text-muted mb-0">
-                            {{ is_granted('ROLE_ADMIN') ? 'Configurez le modèle global des fiches de cotation.' : 'Accédez rapidement à vos fiches de cotation.' }}
-                        </p>
+                        <h4 class="fs-xl fw-bold mb-1">Bienvenue dans votre espace professeur</h4>
+                        <p class="text-muted mb-0">Retrouvez vos cours, suivez vos cotations et consultez les messages de la direction.</p>
                     </div>
-                    <a href="{{ path(is_granted('ROLE_ADMIN') ? 'app_fiche_cotation_index' : 'app_professeur_notes_index') }}" class="btn btn-primary">
-                        <i class="ti ti-clipboard-pen-line me-1"></i>
-                        {{ is_granted('ROLE_ADMIN') ? 'Configurer la fiche de cotation' : 'Ouvrir la cotation des élèves' }}
+                    <a href="{{ path('app_professeur_notes_index') }}" class="btn btn-primary">
+                        <i class="ti ti-clipboard-pen-line me-1"></i>Ouvrir mes cotations
+                    </a>
+                </div>
+
+                {% if not profil_professeur_disponible %}
+                    <div class="alert alert-warning">Aucun profil professeur n’est associé à ce compte. Veuillez contacter l’administration.</div>
+                {% else %}
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+                                <span class="avatar-md rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"><i data-lucide="book-open-check"></i></span>
+                                <div><p class="text-muted mb-1">Cours attribués</p><h3 class="mb-0">{{ cours_professeur|length }}</h3></div>
+                            </div></div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+                                <span class="avatar-md rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"><i data-lucide="file-clock"></i></span>
+                                <div><p class="text-muted mb-1">Cotes en brouillon</p><h3 class="mb-0">{{ statistiques_professeur.brouillon }}</h3></div>
+                            </div></div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+                                <span class="avatar-md rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center"><i data-lucide="send"></i></span>
+                                <div><p class="text-muted mb-1">Cotes soumises</p><h3 class="mb-0">{{ statistiques_professeur.soumise }}</h3><span class="small text-muted">{{ statistiques_professeur.validee }} validée(s)</span></div>
+                            </div></div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <a href="{{ path('app_professeur_messages_index') }}" class="text-reset text-decoration-none">
+                                <div class="card h-100"><div class="card-body d-flex align-items-center gap-3">
+                                    <span class="avatar-md rounded-circle bg-success-subtle text-success d-flex align-items-center justify-content-center"><i data-lucide="mail"></i></span>
+                                    <div><p class="text-muted mb-1">Messages non lus</p><h3 class="mb-0">{{ messages_non_lus }}</h3></div>
+                                </div></div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-xl-7">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Mes cours</h5>
+                                    <a href="{{ path('app_professeur_notes_index') }}" class="btn btn-sm btn-outline-primary">Gérer les cotations</a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead><tr><th>Cours</th><th>Classe</th><th>École</th><th></th></tr></thead>
+                                        <tbody>
+                                            {% for cours in cours_professeur|slice(0, 8) %}
+                                                <tr>
+                                                    <td class="fw-semibold">{{ cours.nom }}{% if cours.option %}<div class="small text-muted">{{ cours.option.nom }}</div>{% endif %}</td>
+                                                    <td>{{ cours.classe.nom }}</td>
+                                                    <td>{{ cours.classe.ecole.nom }}</td>
+                                                    <td><a class="btn btn-sm btn-light" href="{{ path('app_professeur_notes_index', {ecole: cours.classe.ecole.id, classe: cours.classe.id, option: cours.option ? cours.option.id : 0, cours: cours.id}) }}">Voir</a></td>
+                                                </tr>
+                                            {% else %}
+                                                <tr><td colspan="4" class="text-center text-muted py-4">Aucun cours ne vous est attribué pour le moment.</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-5">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Messages de la direction</h5>
+                                    <a href="{{ path('app_professeur_messages_index') }}" class="btn btn-sm btn-outline-primary">Tout voir</a>
+                                </div>
+                                <div class="list-group list-group-flush">
+                                    {% for message in messages_recents %}
+                                        <a href="{{ path('app_professeur_messages_show', {id: message.id}) }}" class="list-group-item list-group-item-action {{ message.luLe is null ? 'bg-primary-subtle' : '' }}">
+                                            <div class="d-flex justify-content-between gap-2">
+                                                <strong>{{ message.sujet }}</strong>
+                                                {% if message.luLe is null %}<span class="badge bg-primary">Nouveau</span>{% endif %}
+                                            </div>
+                                            <div class="small text-muted">{{ message.cours ? message.cours.nom : message.expediteurNom }} · {{ message.envoyeLe|date('d/m/Y H:i') }}</div>
+                                        </a>
+                                    {% else %}
+                                        <div class="text-center text-muted py-5">Vous n’avez pas encore reçu de message.</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% elseif is_granted('ROLE_ADMIN') %}
+        <div class="content-page">
+            <div class="container-fluid">
+                <div class="page-title-head d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                    <div>
+                        <h4 class="fs-xl fw-bold mb-1">Espace administration</h4>
+                        <p class="text-muted mb-0">Configurez le modèle global des fiches de cotation.</p>
+                    </div>
+                    <a href="{{ path('app_fiche_cotation_index') }}" class="btn btn-primary">
+                        <i class="ti ti-clipboard-pen-line me-1"></i>Configurer la fiche de cotation
                     </a>
                 </div>
             </div>

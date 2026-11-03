@@ -1,77 +1,1624 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Validation des notes{% endblock %}
+{% block title %}Validation des notes | Administration{% endblock %}
 
 {% block body %}
-    <div class="content-page">
+    <style>
+        /* =========================================================
+               VALIDATION DES NOTES — INTERFACE ADMINISTRATIVE
+            ========================================================= */
+
+        .vn-page {
+            --vn-primary: #344767;
+            --vn-primary-light: #edf2f8;
+            --vn-success: #23856d;
+            --vn-success-light: #e8f5ef;
+            --vn-warning: #b7791f;
+            --vn-warning-light: #fff5df;
+            --vn-danger: #bd5353;
+            --vn-danger-light: #fff0f0;
+            --vn-text: #293449;
+            --vn-muted: #7b8496;
+            --vn-border: #e9edf3;
+            --vn-surface: #ffffff;
+
+            color: var(--vn-text);
+            padding-bottom: 30px;
+        }
+
+        .vn-page .vn-muted {
+            color: var(--vn-muted) !important;
+        }
+
+        .vn-page .vn-card {
+            background: var(--vn-surface);
+            border: 1px solid var(--vn-border);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(35, 49, 75, 0.025);
+        }
+
+        /* =========================================================
+               1. EN-TÊTE
+            ========================================================= */
+
+        .vn-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 26px;
+        }
+
+        .vn-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .vn-heading-icon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--vn-primary-light);
+            color: var(--vn-primary);
+        }
+
+        .vn-heading-icon svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .vn-eyebrow {
+            display: block;
+            color: var(--vn-muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .vn-title {
+            color: var(--vn-text);
+            font-size: 25px;
+            font-weight: 750;
+            letter-spacing: -0.7px;
+            margin: 0 0 7px;
+        }
+
+        .vn-description {
+            color: var(--vn-muted);
+            font-size: 13px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .vn-header-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            padding: 10px 13px;
+            border: 1px solid var(--vn-border);
+            border-radius: 9px;
+            background: #fff;
+            color: var(--vn-primary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .vn-header-tag svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Messages */
+
+        .vn-page .alert {
+            border-radius: 9px;
+            border-width: 1px;
+            font-size: 13px;
+        }
+
+        /* =========================================================
+               2. SECTIONS
+            ========================================================= */
+
+        .vn-section {
+            margin-top: 29px;
+        }
+
+        .vn-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .vn-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--vn-text);
+            font-size: 16px;
+            font-weight: 750;
+            margin: 0;
+        }
+
+        .vn-section-title svg {
+            width: 19px;
+            height: 19px;
+            color: var(--vn-primary);
+        }
+
+        .vn-section-subtitle {
+            color: var(--vn-muted);
+            font-size: 12px;
+            margin: 5px 0 0;
+        }
+
+        .vn-section-count {
+            padding: 5px 10px;
+            background: var(--vn-primary-light);
+            color: var(--vn-primary);
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* =========================================================
+               3. CARTES STATISTIQUES DES ÉTABLISSEMENTS
+            ========================================================= */
+
+        .vn-stat-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            min-height: 180px;
+            padding: 19px;
+            border: 0 !important;
+            border-radius: 9px !important;
+            color: #fff !important;
+            text-decoration: none !important;
+            overflow: hidden;
+            transition:
+                transform 0.25s ease,
+                box-shadow 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .vn-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 9px 22px rgba(0, 0, 0, 0.18);
+            color: #fff !important;
+        }
+
+        .vn-stat-blue {
+            background: linear-gradient(120deg, #1689f8, #0063d5);
+        }
+
+        .vn-stat-orange {
+            background: linear-gradient(120deg, #ffad32, #ed8500);
+        }
+
+        .vn-stat-purple {
+            background: linear-gradient(120deg, #c52af5, #9c00d9);
+        }
+
+        .vn-stat-indigo {
+            background: linear-gradient(120deg, #7775e9, #4542c9);
+        }
+
+        .vn-stat-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .vn-stat-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .vn-stat-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+            opacity: 0.85;
+            margin-bottom: 8px;
+        }
+
+        .vn-stat-name {
+            color: #fff !important;
+            font-size: 17px;
+            font-weight: 750;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+            margin: 0 0 6px;
+        }
+
+        .vn-stat-detail {
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 11px;
+        }
+
+        .vn-stat-icon {
+            width: 43px;
+            height: 43px;
+            min-width: 43px;
+            border-radius: 11px;
+            background: rgba(255, 255, 255, 0.96);
+            color: #2874dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vn-stat-orange .vn-stat-icon {
+            color: #ed8500;
+        }
+
+        .vn-stat-purple .vn-stat-icon {
+            color: #a600db;
+        }
+
+        .vn-stat-indigo .vn-stat-icon {
+            color: #514dcc;
+        }
+
+        .vn-stat-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2.4;
+        }
+
+        .vn-stat-bottom {
+            margin-top: 20px;
+        }
+
+        .vn-stat-progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .vn-stat-progress-info strong {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .vn-stat-progress {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.28);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .vn-stat-progress-bar {
+            height: 100%;
+            background: #fff;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .vn-stat-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-top: 11px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 10px;
+        }
+
+        .vn-stat-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .vn-stat-action svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* =========================================================
+               4. FILTRES
+            ========================================================= */
+
+        .vn-filter-card {
+            overflow: hidden;
+        }
+
+        .vn-filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 18px 21px;
+            border-bottom: 1px solid var(--vn-border);
+        }
+
+        .vn-filter-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 14px;
+            font-weight: 750;
+            margin: 0;
+        }
+
+        .vn-filter-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--vn-primary);
+        }
+
+        .vn-filter-body {
+            padding: 20px 21px;
+        }
+
+        /* Les cinq filtres sur une seule ligne */
+
+        .vn-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            align-items: end;
+        }
+
+        .vn-filter-field {
+            min-width: 0;
+        }
+
+        .vn-filter-field label {
+            display: block;
+            color: #667085;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .vn-filter-field .form-select,
+        .vn-filter-field .form-control {
+            width: 100%;
+            min-height: 41px;
+            border: 1px solid #e2e7ef;
+            border-radius: 8px;
+            background-color: #fff;
+            color: var(--vn-text);
+            font-size: 12px;
+            box-shadow: none;
+        }
+
+        .vn-filter-field .form-select:focus,
+        .vn-filter-field .form-control:focus {
+            border-color: #9baac1;
+            box-shadow: 0 0 0 3px rgba(52, 71, 103, 0.07);
+        }
+
+        .vn-filter-field .form-select:disabled {
+            background-color: #f5f6f8;
+            cursor: not-allowed;
+        }
+
+        .vn-filter-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 17px;
+            border-top: 1px solid #f0f2f6;
+        }
+
+        .vn-filter-hint {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--vn-muted);
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .vn-filter-hint svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .vn-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .vn-btn {
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 13px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 650;
+            text-decoration: none;
+            white-space: nowrap;
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .vn-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .vn-btn-primary {
+            border: 1px solid var(--vn-primary);
+            background: var(--vn-primary);
+            color: #fff;
+        }
+
+        .vn-btn-primary:hover {
+            background: #263750;
+            border-color: #263750;
+            color: #fff;
+        }
+
+        .vn-btn-light {
+            border: 1px solid var(--vn-border);
+            background: #fff;
+            color: #5c6678;
+        }
+
+        .vn-btn-light:hover {
+            background: #f7f8fb;
+            color: var(--vn-text);
+        }
+
+        /* =========================================================
+               5. TABLEAU DES ÉVALUATIONS
+            ========================================================= */
+
+        .vn-table-card {
+            overflow: hidden;
+        }
+
+        .vn-table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 19px 21px;
+            border-bottom: 1px solid var(--vn-border);
+        }
+
+        .vn-table-heading {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .vn-table-heading-icon {
+            width: 39px;
+            height: 39px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: #f0f3f8;
+            color: var(--vn-primary);
+            border-radius: 10px;
+        }
+
+        .vn-table-heading-icon svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .vn-table-title {
+            font-size: 14px;
+            font-weight: 750;
+            margin: 0 0 4px;
+        }
+
+        .vn-table-subtitle {
+            color: var(--vn-muted);
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .vn-search {
+            position: relative;
+            width: min(100%, 285px);
+        }
+
+        .vn-search svg {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            width: 16px;
+            height: 16px;
+            transform: translateY(-50%);
+            color: #929bad;
+            pointer-events: none;
+        }
+
+        .vn-search input {
+            width: 100%;
+            min-height: 40px;
+            padding: 9px 12px 9px 37px;
+            border: 1px solid #e2e7ef;
+            border-radius: 8px;
+            background: #fff;
+            color: var(--vn-text);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .vn-search input:focus {
+            border-color: #9baac1;
+            box-shadow: 0 0 0 3px rgba(52, 71, 103, 0.06);
+        }
+
+        .vn-table {
+            margin: 0 !important;
+            vertical-align: middle;
+        }
+
+        .vn-table thead th {
+            padding: 14px 16px !important;
+            border-bottom: 1px solid var(--vn-border) !important;
+            background: #fafbfc !important;
+            color: #8790a1 !important;
+            font-size: 10px !important;
+            font-weight: 750 !important;
+            letter-spacing: 0.55px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .vn-table tbody td {
+            padding: 16px !important;
+            border-bottom: 1px solid #f0f2f6 !important;
+            color: #4e586b;
+            font-size: 12px;
+        }
+
+        .vn-table tbody tr:last-child td {
+            border-bottom: 0 !important;
+        }
+
+        .vn-table tbody tr:hover td {
+            background: #fbfcfe;
+        }
+
+        .vn-row-number {
+            color: #9aa2b1 !important;
+            font-size: 11px !important;
+            font-weight: 700;
+        }
+
+        .vn-cell-primary {
+            display: block;
+            color: var(--vn-text);
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .vn-cell-secondary {
+            display: block;
+            color: var(--vn-muted);
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .vn-evaluation {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #f2f4f8;
+            color: #48566c;
+            font-weight: 650;
+        }
+
+        .vn-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 31px;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .vn-badge-submitted {
+            background: var(--vn-warning-light);
+            color: var(--vn-warning);
+        }
+
+        .vn-badge-validated {
+            background: var(--vn-success-light);
+            color: var(--vn-success);
+        }
+
+        .vn-action-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .vn-action {
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 9px;
+            border: 1px solid var(--vn-border);
+            border-radius: 7px;
+            background: #fff;
+            color: #566176;
+            font-size: 11px;
+            font-weight: 650;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .vn-action svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .vn-action-view:hover {
+            border-color: #c5d2e6;
+            background: #f1f5fb;
+            color: var(--vn-primary);
+        }
+
+        .vn-action-return {
+            border-color: #e8d6b5;
+            color: #9b6b23;
+        }
+
+        .vn-action-return:hover {
+            background: var(--vn-warning-light);
+            color: #855918;
+        }
+
+        .vn-action-validate {
+            border-color: var(--vn-success);
+            background: var(--vn-success);
+            color: #fff;
+        }
+
+        .vn-action-validate:hover {
+            border-color: #176d58;
+            background: #176d58;
+            color: #fff;
+        }
+
+        /* =========================================================
+               6. ÉTATS VIDES
+            ========================================================= */
+
+        .vn-empty {
+            padding: 52px 20px !important;
+            text-align: center;
+        }
+
+        .vn-empty-icon {
+            width: 51px;
+            height: 51px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            background: #f1f3f7;
+            color: #7b8496;
+        }
+
+        .vn-empty-icon svg {
+            width: 23px;
+            height: 23px;
+        }
+
+        .vn-empty-title {
+            color: var(--vn-text);
+            font-size: 13px;
+            font-weight: 750;
+            margin-bottom: 5px;
+        }
+
+        .vn-empty-description {
+            color: var(--vn-muted);
+            font-size: 12px;
+            margin: 0;
+        }
+
+        /* =========================================================
+               7. PAGINATION
+            ========================================================= */
+
+        .vn-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 15px 21px;
+            border-top: 1px solid var(--vn-border);
+            color: var(--vn-muted);
+            font-size: 11px;
+        }
+
+        /* =========================================================
+               8. BULLETINS RÉCENTS
+            ========================================================= */
+
+        .vn-bulletin-name {
+            color: var(--vn-text);
+            font-weight: 700;
+        }
+
+        .vn-result {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 9px;
+            border-radius: 6px;
+            background: #f0f3f8;
+            color: var(--vn-primary);
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .vn-result svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .vn-bulletin-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--vn-primary);
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .vn-bulletin-link:hover {
+            color: #1c2b43;
+            text-decoration: underline;
+        }
+
+        .vn-bulletin-link svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* =========================================================
+               9. RESPONSIVE
+            ========================================================= */
+
+        /* Tablettes et écrans intermédiaires */
+
+        @media (max-width: 1199px) {
+            .vn-filter-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .vn-stat-card {
+                min-height: 175px;
+            }
+        }
+
+        /* Mobiles */
+
+        @media (max-width: 767px) {
+            .vn-header {
+                align-items: flex-start;
+            }
+
+            .vn-heading {
+                gap: 11px;
+            }
+
+            .vn-heading-icon {
+                width: 41px;
+                height: 41px;
+            }
+
+            .vn-title {
+                font-size: 21px;
+            }
+
+            .vn-header-tag {
+                display: none;
+            }
+
+            .vn-filter-header,
+            .vn-filter-body,
+            .vn-table-header {
+                padding: 15px;
+            }
+
+            .vn-filter-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .vn-filter-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .vn-filter-actions {
+                width: 100%;
+            }
+
+            .vn-filter-actions .vn-btn {
+                flex: 1;
+            }
+
+            .vn-table-header {
+                align-items: flex-start;
+            }
+
+            .vn-search {
+                width: 100%;
+            }
+
+            .vn-pagination {
+                padding: 14px 15px;
+            }
+
+            .vn-stat-card {
+                min-height: 165px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vn-page *,
+            .vn-page *::before,
+            .vn-page *::after {
+                transition: none !important;
+            }
+        }
+
+        /* validation */
+        .vn-badge-validated,
+        .vn-badge-submitted {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        .vn-badge-validated {
+            background: #e8f5ef;
+            color: #23856d;
+        }
+
+        .vn-badge-submitted {
+            background: #fff0f0;
+            color: #bd5353;
+        }
+
+        .vn-badge svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
+        }
+    </style>
+
+    <div class="content-page vn-page">
         <div class="container-fluid">
-            <div class="page-title-head d-flex align-items-center mb-3">
-                <div class="flex-grow-1">
-                    <h4 class="fs-xl fw-bold m-0">Validation administrative des notes</h4>
-                    <p class="text-muted mb-0">Contrôlez les saisies soumises avant la clôture de la période.</p>
+            <div class="vn-header">
+                <div class="vn-heading mt-1">
+                    <div>
+                        <span class="vn-eyebrow"></span>
+
+                        <h1 class="vn-title">
+                            Validation des notes
+                        </h1>
+
+                        <p class="vn-description">
+                            Contrôlez les évaluations, examinez les soumissions
+                            des professeurs et validez les résultats scolaires.
+                        </p>
+                        <a href="{{ path('app_bulletin_index') }}" class="btn btn-primary btn-sm mt-2">
+                            <i data-lucide="graduation-cap" class="me-1"></i>Ouvrir l’espace bulletin
+                        </a>
+                    </div>
+                </div>
+
+                <div class="vn-header-tag">
+                    <i data-lucide="shield-check"></i>
+                    Contrôle administratif
                 </div>
             </div>
+
+            {# Messages flash Symfony #}
 
             {% for type, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ type == 'warning' ? 'warning' : 'success' }}">{{ message }}</div>
+                    <div
+                        class="alert alert-{{ type }} alert-dismissible fade show"
+                        role="alert"
+                    >
+                        {{ message }}
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Fermer"
+                        ></button>
+                    </div>
                 {% endfor %}
             {% endfor %}
 
-            <div data-table data-table-rows-per-page="8" class="card">
-                <div class="card-header border-light d-flex justify-content-between align-items-center gap-2 flex-wrap">
-                    <div class="app-search">
-                        <input data-table-search type="search" class="form-control" placeholder="Rechercher une note soumise...">
-                        <i data-lucide="search" class="app-search-icon text-muted"></i>
+            {# =====================================================
+           2. SUIVI PAR ÉTABLISSEMENT
+        ===================================================== #}
+
+            <section class="vn-section mt-0">
+
+                <div class="vn-section-header">
+                    <div>
+                        <h2 class="vn-section-title">
+                            <i data-lucide="school"></i>
+                            Suivi par établissement
+                        </h2>
+
+                        <p class="vn-section-subtitle">
+                            Consultez l'avancement des soumissions dans chaque école.
+                        </p>
                     </div>
-                    <span class="text-muted small">Contrôle avant clôture</span>
+
+                    <span class="vn-section-count">
+                        {{ ecoles_stats|length }} établissement(s)
+                    </span>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-custom table-centered table-hover w-100 mb-0">
-                        <thead class="bg-light bg-opacity-25 thead-sm">
-                            <tr class="text-uppercase fs-xxs">
-                                <th>École</th>
-                                <th>Classe</th>
-                                <th>Cours</th>
-                                <th>Évaluation</th>
-                                <th class="text-center">Soumises</th>
-                                <th class="text-center">Validées</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ligne in evaluations %}
-                                {% set evaluation = ligne.evaluation %}
+
+                <div class="row g-3">
+
+                    {% set couleurs = ['blue', 'orange', 'purple', 'indigo'] %}
+
+                    {% for statistique in ecoles_stats %}
+
+                        {% set total = statistique.total %}
+                        {% set soumises = statistique.soumises %}
+
+                        {% set progression = total > 0
+                        ? ((soumises * 100 / total)|round)
+                        : 0
+                    %}
+
+                        {% set progression = min(100, max(0, progression)) %}
+                        {% set couleur = couleurs[loop.index0 % 4] %}
+
+                        <div class="col-xl-3 col-md-6">
+
+                            <a
+                                href="{{ path('app_validation_notes_suivi', {
+                                ecole: statistique.ecole.id
+                            }) }}"
+                                class="vn-stat-card vn-stat-{{ couleur }}"
+                            >
+
+                                <div class="vn-stat-content">
+
+                                    <div class="vn-stat-info">
+
+                                        <span class="vn-stat-label">
+                                            ÉTABLISSEMENT
+                                        </span>
+
+                                        <h3 class="vn-stat-name">
+                                            {{ statistique.ecole.nom }}
+                                        </h3>
+
+                                        <div class="vn-stat-detail">
+                                            {{ statistique.classes }}
+                                            classe(s) enregistrée(s)
+                                        </div>
+
+                                    </div>
+
+                                    <div class="vn-stat-icon">
+                                        <i data-lucide="school"></i>
+                                    </div>
+
+                                </div>
+
+                                <div class="vn-stat-bottom">
+
+                                    <div class="vn-stat-progress-info">
+                                        <span>
+                                            Soumissions
+                                        </span>
+
+                                        <strong>
+                                            {{ progression }}%
+                                        </strong>
+                                    </div>
+
+                                    <div
+                                        class="vn-stat-progress"
+                                        role="progressbar"
+                                        aria-label="Progression des soumissions pour {{ statistique.ecole.nom }}"
+                                        aria-valuenow="{{ progression }}"
+                                        aria-valuemin="0"
+                                        aria-valuemax="100"
+                                    >
+                                        <div
+                                            class="vn-stat-progress-bar"
+                                            style="width: {{ progression }}%"
+                                        ></div>
+                                    </div>
+
+                                    <div class="vn-stat-footer">
+
+                                        <span>
+                                            {{ soumises }} cours soumis sur {{ total }}
+                                        </span>
+
+                                        <span class="vn-stat-action">
+                                            Voir le suivi
+                                            <i data-lucide="arrow-up-right"></i>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </a>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="col-12">
+                            <div class="vn-card vn-empty">
+
+                                <div class="vn-empty-icon">
+                                    <i data-lucide="school"></i>
+                                </div>
+
+                                <div class="vn-empty-title">
+                                    Aucun établissement disponible
+                                </div>
+
+                                <p class="vn-empty-description">
+                                    Les établissements enregistrés apparaîtront ici.
+                                </p>
+
+                            </div>
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+            </section>
+
+            {# =====================================================
+           3. RECHERCHE ET FILTRES
+        ===================================================== #}
+
+            <section class="vn-section">
+
+                <div class="vn-section-header">
+                    <div>
+                        <h2 class="vn-section-title">
+                            <i data-lucide="list-filter"></i>
+                            Recherche et filtres
+                        </h2>
+
+                        <p class="vn-section-subtitle">
+                            Affinez la liste selon l'établissement, la classe
+                            et l'état de validation.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="vn-card vn-filter-card">
+
+                    <div class="vn-filter-header">
+                        <h3 class="vn-filter-title">
+                            <i data-lucide="sliders-horizontal"></i>
+                            Critères de recherche
+                        </h3>
+                    </div>
+
+                    <div class="vn-filter-body">
+
+                        <form
+                            method="get"
+                            action="{{ path('app_validation_notes_index') }}"
+                        >
+
+                            <div class="vn-filter-grid">
+
+                                {# Établissement #}
+
+                                <div class="vn-filter-field">
+
+                                    <label for="vn-ecole">
+                                        Établissement
+                                    </label>
+
+                                    <select
+                                        name="ecole"
+                                        id="vn-ecole"
+                                        class="form-select"
+                                        onchange="this.form.submit()"
+                                    >
+                                        <option value="">
+                                            Toutes les écoles
+                                        </option>
+
+                                        {% for ecole in ecoles %}
+                                            <option
+                                                value="{{ ecole.id }}"
+                                                {{ ecole_selectionnee and ecole_selectionnee.id == ecole.id ? 'selected' : '' }}
+                                            >
+                                                {{ ecole.nom }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                                {# Section #}
+
+                                <div class="vn-filter-field">
+
+                                    <label for="vn-section">
+                                        Section
+                                    </label>
+
+                                    <select
+                                        name="section"
+                                        id="vn-section"
+                                        class="form-select"
+                                        {{ ecole_selectionnee ? '' : 'disabled' }}
+                                        onchange="this.form.submit()"
+                                    >
+                                        <option value="">
+                                            Toutes les sections
+                                        </option>
+
+                                        {% for section in sections %}
+                                            <option
+                                                value="{{ section.id }}"
+                                                {{ section_selectionnee and section_selectionnee.id == section.id ? 'selected' : '' }}
+                                            >
+                                                {{ section.nom }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                                {# Classe #}
+
+                                <div class="vn-filter-field">
+
+                                    <label for="vn-classe">
+                                        Classe
+                                    </label>
+
+                                    <select
+                                        name="classe"
+                                        id="vn-classe"
+                                        class="form-select"
+                                        {{ ecole_selectionnee ? '' : 'disabled' }}
+                                        onchange="this.form.submit()"
+                                    >
+                                        <option value="">
+                                            Toutes les classes
+                                        </option>
+
+                                        {% for classe in classes %}
+                                            <option
+                                                value="{{ classe.id }}"
+                                                {{ classe_selectionnee and classe_selectionnee.id == classe.id ? 'selected' : '' }}
+                                            >
+                                                {{ classe.nom }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                                {# Option #}
+
+                                <div class="vn-filter-field">
+
+                                    <label for="vn-option">
+                                        Option
+                                    </label>
+
+                                    <select
+                                        name="option"
+                                        id="vn-option"
+                                        class="form-select"
+                                        {{ classe_selectionnee ? '' : 'disabled' }}
+                                    >
+                                        <option value="">
+                                            Toutes les options
+                                        </option>
+
+                                        {% for option in options %}
+                                            <option
+                                                value="{{ option.id }}"
+                                                {{ option_selectionnee and option_selectionnee.id == option.id ? 'selected' : '' }}
+                                            >
+                                                {{ option.nom }}
+                                            </option>
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+                                {# Statut #}
+
+                                <div class="vn-filter-field">
+
+                                    <label for="vn-statut">
+                                        État de validation
+                                    </label>
+
+                                    <select
+                                        name="statut"
+                                        id="vn-statut"
+                                        class="form-select"
+                                    >
+                                        <option value="">
+                                            Tous les statuts
+                                        </option>
+
+                                        <option
+                                            value="soumise"
+                                            {{ statut_selectionne == 'soumise' ? 'selected' : '' }}
+                                        >
+                                            En attente de validation
+                                        </option>
+
+                                        <option
+                                            value="validee"
+                                            {{ statut_selectionne == 'validee' ? 'selected' : '' }}
+                                        >
+                                            Validée
+                                        </option>
+
+                                        <option
+                                            value="non_soumise"
+                                            {{ statut_selectionne == 'non_soumise' ? 'selected' : '' }}
+                                        >
+                                            Non soumise
+                                        </option>
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                            <div class="vn-filter-footer">
+
+                                <p class="vn-filter-hint">
+                                    <i data-lucide="info"></i>
+                                    Sélectionnez vos critères puis appliquez les filtres.
+                                </p>
+
+                                <div class="vn-filter-actions">
+
+                                    <a
+                                        href="{{ path('app_validation_notes_index') }}"
+                                        class="vn-btn vn-btn-light"
+                                    >
+                                        <i data-lucide="rotate-ccw"></i>
+                                        Réinitialiser
+                                    </a>
+
+                                    <button
+                                        type="submit"
+                                        class="vn-btn vn-btn-primary"
+                                    >
+                                        <i data-lucide="search"></i>
+                                        Appliquer les filtres
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </section>
+
+            {# =====================================================
+           4. TABLEAU DES ÉVALUATIONS
+        ===================================================== #}
+
+            <section class="vn-section">
+
+                <div class="vn-section-header">
+                    <div>
+                        <h2 class="vn-section-title">
+                            <i data-lucide="clipboard-list"></i>
+                            Évaluations et validation
+                        </h2>
+
+                        <p class="vn-section-subtitle">
+                            Examinez les cotes transmises et effectuez les actions
+                            de validation administrative.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    data-table
+                    data-table-rows-per-page="8"
+                    class="vn-card vn-table-card"
+                >
+
+                    <div class="vn-table-header">
+
+                        <div class="vn-table-heading">
+
+                            <div class="vn-table-heading-icon">
+                                <i data-lucide="file-check-2"></i>
+                            </div>
+
+                            <div>
+                                <h3 class="vn-table-title">
+                                    Liste des évaluations
+                                </h3>
+
+                                <p class="vn-table-subtitle">
+                                    Détails des soumissions par cours et par classe.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <div class="vn-search">
+                            <i data-lucide="search"></i>
+
+                            <input
+                                data-table-search
+                                type="search"
+                                aria-label="Rechercher dans les évaluations"
+                                placeholder="Rechercher un cours, une classe..."
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table vn-table table-hover w-100">
+
+                            <thead>
                                 <tr>
-                                    <td>{{ evaluation.cours.classe.ecole.nom }}</td>
-                                    <td>{{ evaluation.cours.classe.nom }}</td>
-                                    <td>{{ evaluation.cours.nom }}</td>
-                                    <td>{{ evaluation.nom }} <small class="text-muted">/ {{ evaluation.bareme }}</small></td>
-                                    <td class="text-center"><span class="badge bg-warning text-dark">{{ ligne.soumises }}</span></td>
-                                    <td class="text-center"><span class="badge bg-success">{{ ligne.validees }}</span></td>
-                                    <td>
-                                        {% if ligne.soumises > 0 %}
-                                            <form method="post" action="{{ path('app_validation_notes_traiter', {id: evaluation.id}) }}" class="d-flex gap-2 justify-content-center">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('validation_notes_' ~ evaluation.id) }}">
-                                                <button class="btn btn-sm btn-outline-secondary" name="action" value="retourner">Retourner</button>
-                                                <button class="btn btn-sm btn-success" name="action" value="valider">Valider</button>
-                                            </form>
-                                        {% else %}
-                                            <span class="text-muted">Aucune action</span>
-                                        {% endif %}
-                                    </td>
+                                    <th>#</th>
+                                    <th>Établissement</th>
+                                    <th>Classe</th>
+                                    <th>Cours</th>
+                                    <th>Date de soumission</th>
+                                    <th>Période attendue</th>
+                                    <th class="text-center">Soumises</th>
+                                    <th class="text-center">Validées</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
-                            {% else %}
-                                <tr><td colspan="7" class="text-center py-5 text-muted">Aucune note soumise ou validée.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+
+                                {% for ligne in evaluations %}
+
+                                    {% set evaluation = ligne.evaluation %}
+
+                                    <tr>
+
+                                        <td class="vn-row-number">
+                                            {{ loop.index }}
+                                        </td>
+
+                                        <td>
+                                            <span class="vn-cell-primary">
+                                                {{ evaluation.cours.classe.ecole.nom }}
+                                            </span>
+
+                                            <span class="vn-cell-secondary">
+                                                Établissement
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="vn-cell-primary">
+                                                {{ evaluation.cours.classe.nom }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="vn-cell-primary">
+                                                {{ evaluation.cours.nom }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {% if ligne.dateSoumission %}
+                                                {{ ligne.dateSoumission|date('d/m/Y H:i') }}
+                                            {% else %}
+                                                <span class="vn-cell-secondary">Date inconnue</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <span class="vn-evaluation">{{ ligne.periode_attendue }}</span>
+                                        </td>
+
+                                        <td class="text-center">
+                                            {% if ligne.soumises %}
+                                                <span class="vn-badge vn-badge-validated" title="Soumise">
+                                                    <i data-lucide="check"></i>
+                                                </span>
+                                            {% else %}
+                                                <span class="vn-badge vn-badge-submitted" title="Non soumise">
+                                                    <i data-lucide="x"></i>
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td class="text-center">
+                                            <span class="vn-badge vn-badge-validated">
+                                                {{ ligne.validees }}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="vn-action-group">
+
+                                                <a
+                                                    class="vn-action vn-action-view"
+                                                    href="{{ path('app_validation_notes_evaluation_show', {
+                                                    id: evaluation.id }) }}"
+                                                    aria-label="Consulter la fiche de cotation de {{ evaluation.cours.nom }}"
+                                                >
+                                                    <i data-lucide="eye"></i>
+                                                    Consulter
+                                                </a>
+
+                                                {% if ligne.soumises > 0 %}
+
+                                                    <form
+                                                        method="post"
+                                                        action="{{ path('app_validation_notes_traiter', {
+                                                        id: evaluation.id
+                                                    }) }}"
+                                                        class="d-flex align-items-center gap-2"
+                                                    >
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="_token"
+                                                            value="{{ csrf_token('validation_notes_' ~ evaluation.id) }}"
+                                                        >
+
+                                                        <button
+                                                            type="submit"
+                                                            name="action"
+                                                            value="retourner"
+                                                            class="vn-action vn-action-return"
+                                                            onclick="return confirm('Voulez-vous retourner cette soumission pour correction ?');"
+                                                        >
+                                                            <i data-lucide="undo-2"></i>
+                                                            Retourner
+                                                        </button>
+
+                                                        <button
+                                                            type="submit"
+                                                            name="action"
+                                                            value="valider"
+                                                            class="vn-action vn-action-validate"
+                                                            onclick="return confirm('Confirmez-vous la validation administrative de cette évaluation ?');"
+                                                        >
+                                                            <i data-lucide="check"></i>
+                                                            Valider
+                                                        </button>
+
+                                                    </form>
+
+                                                {% endif %}
+
+                                            </div>
+                                        </td>
+
+                                    </tr>
+
+                                {% else %}
+
+                                    <tr>
+                                        <td colspan="11" class="vn-empty">
+
+                                            <div class="vn-empty-icon">
+                                                <i data-lucide="file-search"></i>
+                                            </div>
+
+                                            <div class="vn-empty-title">
+                                                Aucune évaluation trouvée
+                                            </div>
+
+                                            <p class="vn-empty-description">
+                                                Aucune évaluation ne correspond
+                                                aux critères sélectionnés.
+                                                Modifiez les filtres ou réinitialisez
+                                                la recherche.
+                                            </p>
+
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="vn-pagination">
+                        <div data-table-pagination-info></div>
+                        <div data-table-pagination></div>
+                    </div>
+
                 </div>
-                <div class="card-footer border-0 d-flex justify-content-between">
-                    <div data-table-pagination-info></div>
-                    <div data-table-pagination></div>
-                </div>
-            </div>
+            </section>
+
         </div>
     </div>
 {% endblock %}

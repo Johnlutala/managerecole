@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Classe;
 use App\Entity\Eleve;
+use App\Entity\Option;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +16,24 @@ class EleveRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Eleve::class);
+    }
+
+    public function countActiveForClasseAndOption(Classe $classe, ?Option $option = null): int
+    {
+        $queryBuilder = $this->createQueryBuilder('eleve')
+            ->select('COUNT(eleve.id)')
+            ->andWhere('eleve.classe = :classe')
+            ->andWhere('eleve.statut = :active')
+            ->andWhere('eleve.deleted = :notDeleted')
+            ->setParameter('classe', $classe)
+            ->setParameter('active', true)
+            ->setParameter('notDeleted', false);
+
+        if ($option !== null) {
+            $queryBuilder->andWhere('eleve.option = :option')->setParameter('option', $option);
+        }
+
+        return (int) $queryBuilder->getQuery()->getSingleScalarResult();
     }
 
 //    /**

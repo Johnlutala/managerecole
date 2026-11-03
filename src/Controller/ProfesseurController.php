@@ -79,7 +79,7 @@ final class ProfesseurController extends AbstractController
         return $this->render('professeur/new.html.twig', ['professeur' => $professeur, 'form' => $form]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         Professeur $professeur,
         EntityManagerInterface $entityManager

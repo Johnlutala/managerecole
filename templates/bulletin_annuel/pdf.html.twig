@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 10mm; }
+        body { font-family: DejaVu Sans, sans-serif; color: #17212b; font-size: 8px; }
+        .bulletin-sheet { page-break-after: always; }
+        .bulletin-sheet:last-child { page-break-after: auto; }
+        .bulletin-heading { text-align: center; border-bottom: 2px solid #17212b; padding-bottom: 6px; margin-bottom: 8px; }
+        .bulletin-country, .bulletin-ministry { font-size: 8px; font-weight: bold; }
+        .bulletin-heading h1 { font-size: 13px; font-weight: bold; margin: 5px 0 2px; }
+        .bulletin-school { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .bulletin-student { width: 100%; margin-bottom: 10px; }
+        .bulletin-student div, .bulletin-result div { display: inline-block; vertical-align: top; width: 31%; border: 1px solid #ced4da; padding: 4px; margin: 1px; }
+        .bulletin-student span, .bulletin-result span { display: block; color: #5b6570; font-size: 7px; }
+        .bulletin-student strong, .bulletin-result strong { display: block; font-size: 8px; }
+        .bulletin-section-title { text-align: center; font-size: 9px; font-weight: bold; background: #eef1f4; padding: 5px; }
+        .bulletin-grades { width: 100%; border-collapse: collapse; font-size: 6px; table-layout: fixed; }
+        .bulletin-grades th, .bulletin-grades td { border: 1px solid #59636a; padding: 2px 1px; text-align: center; }
+        .bulletin-grades thead th { background: #eef1f4; }
+        .bulletin-grades .bulletin-course { text-align: left; font-weight: bold; width: 18%; }
+        .bulletin-grades .bulletin-domain { background: #dce3e9; text-align: left; }
+        .bulletin-total { background: #e8edf2; }
+        .bulletin-result { margin-top: 8px; }
+        .bulletin-signatures { width: 100%; margin-top: 40px; text-align: center; }
+        .bulletin-signatures div { display: inline-block; width: 31%; border-top: 1px solid #59636a; padding-top: 5px; }
+    </style>
+</head>
+<body>
+    {% for bulletin in bulletins %}
+        {% include 'bulletin_annuel/_fiche.html.twig' with {
+            bulletin: bulletin,
+            position: loop.index,
+            effectif: bulletins|length,
+            periode_headers: periode_headers
+        } only %}
+    {% endfor %}
+</body>
+</html>
