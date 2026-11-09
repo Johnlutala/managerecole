@@ -53,7 +53,7 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         return $this->success([
             'parent' => $this->parentPayload($parent),
-            'enfants' => array_map(fn (Eleve $eleve): array => $this->childPayload($eleve), $parent->getEleve()->toArray()),
+            'enfants' => array_map(fn(Eleve $eleve): array => $this->childPayload($eleve), $parent->getEleve()->toArray()),
         ], 'Profil parent');
     }
 
@@ -79,20 +79,20 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         $presences = array_values(array_filter(
             $eleve->getPresences()->toArray(),
-            static fn ($presence): bool => $presence->getValidatedAt() !== null
+            static fn($presence): bool => $presence->getValidatedAt() !== null
         ));
-        usort($presences, static fn ($a, $b): int => $b->getDate() <=> $a->getDate());
+        usort($presences, static fn($a, $b): int => $b->getDate() <=> $a->getDate());
 
         return $this->success([
             'eleve' => $this->childPayload($eleve),
             'emploiDuTemps' => $this->scheduleForStudent($eleve, $slots),
-            'presences' => array_map(static fn ($presence): array => [
-                    'date' => $presence->getDate()?->format('Y-m-d'),
-                    'statut' => $presence->getStatut(),
-                    'heureArrivee' => $presence->getHeureArrivee()?->format('H:i'),
-                    'heureDepart' => $presence->getHeureDepart()?->format('H:i'),
-                    'observation' => $presence->getObservation(),
-                ], $presences),
+            'presences' => array_map(static fn($presence): array => [
+                'date' => $presence->getDate()?->format('Y-m-d'),
+                'statut' => $presence->getStatut(),
+                'heureArrivee' => $presence->getHeureArrivee()?->format('H:i'),
+                'heureDepart' => $presence->getHeureDepart()?->format('H:i'),
+                'observation' => $presence->getObservation(),
+            ], $presences),
             'notes' => $this->validatedNotesForStudent($eleve),
         ], 'Dossier enfant parent');
     }
@@ -113,15 +113,15 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         $presences = array_values(array_filter(
             $eleve->getPresences()->toArray(),
-            static fn ($presence): bool => $presence->getValidatedAt() !== null
+            static fn($presence): bool => $presence->getValidatedAt() !== null
         ));
-        usort($presences, static fn ($a, $b): int => $b->getDate() <=> $a->getDate());
+        usort($presences, static fn($a, $b): int => $b->getDate() <=> $a->getDate());
 
         return $this->success([
             'eleve' => $this->childPayload($eleve),
             'emploiDuTemps' => $this->scheduleForStudent($eleve, $slots),
             'notes' => $this->validatedNotesForStudent($eleve),
-            'presences' => array_map(static fn ($presence): array => [
+            'presences' => array_map(static fn($presence): array => [
                 'date' => $presence->getDate()?->format('Y-m-d'),
                 'statut' => $presence->getStatut(),
                 'heureArrivee' => $presence->getHeureArrivee()?->format('H:i'),
@@ -131,20 +131,61 @@ final class MobileWorkflowApiController extends AbstractApiController
         ], 'Dossier élève');
     }
 
+
     #[Route('/professeur/cotations', name: 'api_mobile_teacher_grades', methods: ['GET'])]
-    public function teacherGrades(Request $request): JsonResponse
-    {
+    public function teacherGrades(
+        Request $request,
+        CoursRepository $courses
+    ): JsonResponse {
         $auth = $this->checkAuthentication($request);
+
         if (!$auth['status']) {
-            return $this->error($auth['message'], [], 'Cotations professeur', $auth['code']);
+            return $this->error(
+                $auth['message'],
+                [],
+                'Cotations professeur',
+                $auth['code']
+            );
         }
+
         $professeur = $auth['user']->getProfesseur();
-        if (!$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR']) || !$professeur instanceof Professeur) {
-            return $this->error('Cet espace est réservé aux comptes professeurs.', [], 'Cotations professeur', Response::HTTP_FORBIDDEN);
+
+        if (
+            !$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR'])
+            || !$professeur instanceof Professeur
+        ) {
+            return $this->error(
+                'Cet espace est réservé aux comptes professeurs.',
+                [],
+                'Cotations professeur',
+                Response::HTTP_FORBIDDEN
+            );
         }
 
         $limit = min(200, max(1, $request->query->getInt('limit', 100)));
-        $notes = $this->em->getRepository(Note::class)->createQueryBuilder('note')
+
+        // 1. Récupérer tous les cours attribués au professeur.
+        // Cette requête fonctionne même si aucune cotation n'existe.
+        $assignedCourses = $courses->createQueryBuilder('cours')
+            ->leftJoin('cours.classe', 'classe')
+            ->addSelect('classe')
+            ->leftJoin('cours.option', 'opt')
+            ->addSelect('opt')
+            ->andWhere('cours.professeur = :professeur')
+            ->setParameter('professeur', $professeur)
+            ->orderBy('classe.nom', 'ASC')
+            ->addOrderBy('cours.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $assignedCourses = array_values(array_filter(
+            $assignedCourses,
+            static fn(Cours $cours): bool => !$cours->isDeleted()
+        ));
+
+        // 2. Récupérer les cotations déjà enregistrées.
+        $notes = $this->em->getRepository(Note::class)
+            ->createQueryBuilder('note')
             ->addSelect('evaluation', 'cours', 'classe', 'eleve')
             ->innerJoin('note.evaluation', 'evaluation')
             ->innerJoin('evaluation.cours', 'cours')
@@ -160,35 +201,68 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         return $this->success([
             'limite' => $limit,
-            'cotations' => array_map(static fn (Note $note): array => [
-                'id' => $note->getId(),
-                'cote' => $note->getCote(),
-                'observation' => $note->getObservation(),
-                'statut' => $note->getStatut(),
-                'dateSoumission' => $note->getDateSoumission()?->format(DATE_ATOM),
-                'eleve' => [
-                    'id' => $note->getEleve()?->getId(),
-                    'matricule' => $note->getEleve()?->getMatricule(),
-                    'nom' => trim(implode(' ', array_filter([
-                        $note->getEleve()?->getNom(),
-                        $note->getEleve()?->getPostnom(),
-                        $note->getEleve()?->getPrenom(),
-                    ]))),
+
+            // Tous les cours du professeur.
+            'cours' => array_map(
+                static fn(Cours $cours): array => [
+                    'id' => $cours->getId(),
+                    'nom' => $cours->getNom(),
+
+                    'classe' => [
+                        'id' => $cours->getClasse()?->getId(),
+                        'nom' => $cours->getClasse()?->getNom(),
+                    ],
+
+                    'option' => $cours->getOption() ? [
+                        'id' => $cours->getOption()->getId(),
+                        'nom' => $cours->getOption()->getNom(),
+                    ] : null,
+
+                    'ecole' => [
+                        'id' => $cours->getClasse()?->getEcole()?->getId(),
+                        'nom' => $cours->getClasse()?->getEcole()?->getNom(),
+                    ],
                 ],
-                'cours' => [
-                    'id' => $note->getEvaluation()?->getCours()?->getId(),
-                    'nom' => $note->getEvaluation()?->getCours()?->getNom(),
-                    'classe' => $note->getEvaluation()?->getCours()?->getClasse()?->getNom(),
+                $assignedCourses
+            ),
+
+            // Cotations déjà enregistrées.
+            'cotations' => array_map(
+                static fn(Note $note): array => [
+                    'id' => $note->getId(),
+                    'cote' => $note->getCote(),
+                    'observation' => $note->getObservation(),
+                    'statut' => $note->getStatut(),
+                    'dateSoumission' => $note->getDateSoumission()?->format(DATE_ATOM),
+
+                    'eleve' => [
+                        'id' => $note->getEleve()?->getId(),
+                        'matricule' => $note->getEleve()?->getMatricule(),
+                        'nom' => trim(implode(' ', array_filter([
+                            $note->getEleve()?->getNom(),
+                            $note->getEleve()?->getPostnom(),
+                            $note->getEleve()?->getPrenom(),
+                        ]))),
+                    ],
+
+                    'cours' => [
+                        'id' => $note->getEvaluation()?->getCours()?->getId(),
+                        'nom' => $note->getEvaluation()?->getCours()?->getNom(),
+                        'classe' => $note->getEvaluation()?->getCours()?->getClasse()?->getNom(),
+                    ],
+
+                    'evaluation' => [
+                        'id' => $note->getEvaluation()?->getId(),
+                        'nom' => $note->getEvaluation()?->getNom(),
+                        'bareme' => $note->getEvaluation()?->getBareme(),
+                        'date' => $note->getEvaluation()?->getDateEvaluation()?->format('Y-m-d'),
+                    ],
                 ],
-                'evaluation' => [
-                    'id' => $note->getEvaluation()?->getId(),
-                    'nom' => $note->getEvaluation()?->getNom(),
-                    'bareme' => $note->getEvaluation()?->getBareme(),
-                    'date' => $note->getEvaluation()?->getDateEvaluation()?->format('Y-m-d'),
-                ],
-            ], $notes),
+                $notes
+            ),
         ], 'Cotations professeur');
     }
+
 
     #[Route('/professeur/cotations', name: 'api_mobile_teacher_grades_save', methods: ['POST'])]
     public function saveTeacherGrades(
@@ -261,7 +335,7 @@ final class MobileWorkflowApiController extends AbstractApiController
         if ($cours->getOption() !== null) {
             $students = array_values(array_filter(
                 $students,
-                static fn (Eleve $eleve): bool => $eleve->getOption()?->getId() === $cours->getOption()?->getId()
+                static fn(Eleve $eleve): bool => $eleve->getOption()?->getId() === $cours->getOption()?->getId()
             ));
         }
         $studentsById = [];
@@ -293,7 +367,7 @@ final class MobileWorkflowApiController extends AbstractApiController
             }
             $duplicatePeriods = array_filter(
                 $configuration?->getEvaluations()?->toArray() ?? [],
-                static fn (Evaluation $item): bool => $item->getCours()?->getId() === $cours->getId()
+                static fn(Evaluation $item): bool => $item->getCours()?->getId() === $cours->getId()
                     && strcasecmp(trim((string) $item->getNom()), trim((string) $evaluation->getNom())) === 0
             );
             if (count($duplicatePeriods) !== 1 || ($evaluation->getBareme() ?? 0) < 1) {
@@ -319,7 +393,7 @@ final class MobileWorkflowApiController extends AbstractApiController
         }
 
         $existing = $notes->findForEvaluationsAndEleves(
-            array_map(static fn (array $entry): Evaluation => $entry[0], $evaluationGrades),
+            array_map(static fn(array $entry): Evaluation => $entry[0], $evaluationGrades),
             array_values($studentsById)
         );
         $existingByKey = [];
@@ -369,7 +443,7 @@ final class MobileWorkflowApiController extends AbstractApiController
         }
         if (
             $action === 'soumettre'
-            && count(array_filter($changes, static fn (array $change): bool => $change['action'] === 'enregistrer')) === 0
+            && count(array_filter($changes, static fn(array $change): bool => $change['action'] === 'enregistrer')) === 0
         ) {
             return $this->error('Aucune cote à soumettre. Les suppressions de brouillons doivent être enregistrées séparément.', [], 'Enregistrer les cotations', Response::HTTP_CONFLICT);
         }
@@ -412,7 +486,7 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         return $this->success([
             'preparations' => array_map(
-                fn (PreparationCours $preparation): array => $this->preparationPayload($preparation),
+                fn(PreparationCours $preparation): array => $this->preparationPayload($preparation),
                 $preparations->findForProfesseur($professeur)
             ),
         ], 'Préparations professeur');
@@ -550,7 +624,7 @@ final class MobileWorkflowApiController extends AbstractApiController
             ->getResult();
 
         return $this->success([
-            'notesSoumises' => array_map(static fn (Note $note): array => [
+            'notesSoumises' => array_map(static fn(Note $note): array => [
                 'id' => $note->getId(),
                 'cote' => $note->getCote(),
                 'observation' => $note->getObservation(),
@@ -634,7 +708,7 @@ final class MobileWorkflowApiController extends AbstractApiController
 
         return $this->success([
             'preparations' => array_map(
-                fn (PreparationCours $preparation): array => $this->preparationPayload($preparation),
+                fn(PreparationCours $preparation): array => $this->preparationPayload($preparation),
                 $preparations->findSoumises()
             ),
         ], 'Préparations à valider');
@@ -699,7 +773,7 @@ final class MobileWorkflowApiController extends AbstractApiController
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
-            'utilisateurs' => array_map(static fn (User $user): array => [
+            'utilisateurs' => array_map(static fn(User $user): array => [
                 'id' => $user->getId(),
                 'username' => $user->getUsername(),
                 'email' => $user->getEmail(),
@@ -802,7 +876,7 @@ final class MobileWorkflowApiController extends AbstractApiController
         $items = $bulletins->findForFilters($ecole, $annee, $section, $classe, $option);
 
         return $this->success([
-            'bulletins' => array_map(static fn (BulletinAnnuel $bulletin): array => [
+            'bulletins' => array_map(static fn(BulletinAnnuel $bulletin): array => [
                 'id' => $bulletin->getId(),
                 'eleve' => [
                     'id' => $bulletin->getEleve()?->getId(),
@@ -991,10 +1065,10 @@ final class MobileWorkflowApiController extends AbstractApiController
     {
         $validated = array_values(array_filter(
             $eleve->getNotes()->toArray(),
-            static fn (Note $note): bool => $note->getStatut() === 'validee'
+            static fn(Note $note): bool => $note->getStatut() === 'validee'
         ));
 
-        return array_map(static fn (Note $note): array => [
+        return array_map(static fn(Note $note): array => [
             'id' => $note->getId(),
             'cote' => $note->getCote(),
             'observation' => $note->getObservation(),
@@ -1030,7 +1104,7 @@ final class MobileWorkflowApiController extends AbstractApiController
         }
         $items = $queryBuilder->orderBy('jour.ordre', 'ASC')->addOrderBy('heure.ordre', 'ASC')->getQuery()->getResult();
 
-        return array_map(static fn ($slot): array => [
+        return array_map(static fn($slot): array => [
             'jour' => $slot->getJour()?->getNom(),
             'heureDebut' => $slot->getHeure()?->getHeureDebut()?->format('H:i'),
             'heureFin' => $slot->getHeure()?->getHeureFin()?->format('H:i'),
