@@ -20,7 +20,7 @@ final class EleveApiController extends AbstractApiController
             return $this->error($authentication['message'], [], 'Présences élève', $authentication['code']);
 
         $eleve = $authentication['user']->getEleve();
-        if (!$eleve)
+        if (!$this->userHasAnyRole($authentication['user'], ['ROLE_ELEVE']) || !$eleve)
             return $this->error(
                 'Aucun profil élève associé à ce compte.',
                 [],
@@ -42,8 +42,13 @@ final class EleveApiController extends AbstractApiController
             $authentication['code']
         );
         $user = $authentication['user'];
-        $allowed = $user->getEleve()?->getId() === $eleve->getId() ||
-            $user->getParent()?->getEleve()->contains($eleve) ||
+        $allowed = (
+            $this->userHasAnyRole($user, ['ROLE_ELEVE'])
+            && $user->getEleve()?->getId() === $eleve->getId()
+        ) || (
+            $this->userHasAnyRole($user, ['ROLE_PARENT'])
+            && $user->getParent()?->getEleve()->contains($eleve)
+        ) ||
             $this->isAdmin($user);
 
         if (!$allowed) return $this->error(
@@ -86,9 +91,38 @@ final class EleveApiController extends AbstractApiController
             'dateNaissance' => $eleve->getDateNaissance()?->format('Y-m-d'),
             'lieuNaissance' => $eleve->getLieuNaissance(),
             'statut' => $eleve->isStatut(),
-            'ecole' => $eleve->getEcole()?->getNom(),
-            'classe' => $eleve->getClasse()?->getNom(),
-            'notes' => array_map(static fn($note) => ['id' => $note->getId(), 'cote' => $note->getCote(), 'observation' => $note->getObservation()], $eleve->getNotes()->toArray()),
+            'telephone' => $eleve->getPhone(),
+            'email' => $eleve->getEmail(),
+            'adresse' => $eleve->getAdresse(),
+            'dateInscription' => $eleve->getDateInscription()?->format('Y-m-d'),
+            'option' => $eleve->getOption()?->getNom(),
+            'ecole' => $eleve->getEcole() ? [
+                'id' => $eleve->getEcole()->getId(),
+                'nom' => $eleve->getEcole()->getNom(),
+                'adresse' => $eleve->getEcole()->getAdresse(),
+                'telephone' => $eleve->getEcole()->getPhone(),
+                'email' => $eleve->getEcole()->getEmail(),
+            ] : null,
+            'classe' => $eleve->getClasse() ? [
+                'id' => $eleve->getClasse()->getId(),
+                'nom' => $eleve->getClasse()->getNom(),
+                'section' => $eleve->getClasse()->getSection()?->getNom(),
+            ] : null,
+            'notes' => array_values(array_map(
+                static fn ($note): array => [
+                    'id' => $note->getId(),
+                    'cote' => $note->getCote(),
+                    'observation' => $note->getObservation(),
+                    'statut' => $note->getStatut(),
+                    'cours' => $note->getEvaluation()?->getCours()?->getNom(),
+                    'evaluation' => $note->getEvaluation()?->getNom(),
+                    'bareme' => $note->getEvaluation()?->getBareme(),
+                ],
+                array_filter(
+                    $eleve->getNotes()->toArray(),
+                    static fn ($note): bool => $note->getStatut() === 'validee'
+                )
+            )),
             'presences' => $presences
         ];
     }

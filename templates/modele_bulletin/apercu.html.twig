@@ -1,0 +1,763 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Aperçu du bulletin scolaire{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid">
+
+                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                    <div>
+                        <h3 class="mb-1">Aperçu du modèle de bulletin</h3>
+                        <p class="text-muted mb-0">{{ modele.nom }}</p>
+                    </div>
+
+                    <div>
+                        <button type="button" onclick="window.print()" class="btn btn-primary">
+                            <i class="fas fa-print me-1"></i> Imprimer
+                        </button>
+                        <a href="{{ path('app_modele_bulletin_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+                    </div>
+                </div>
+
+                {# DONNEES DU BULLETIN : MAXIMA DE LA 7e ANNEE #}
+                {% set domaines = [
+                {
+                    'type': 'domain',
+                    'nom': 'DOMAINE DES SCIENCES'
+                },
+                {
+                    'type': 'subdomain',
+                    'nom': 'Sous-domaine des mathématiques'
+                },
+                {'type': 'subject', 'nom': 'Algèbre', 'max': [40, 80, 160, 40, 80, 160, 320]},
+                {'type': 'subject', 'nom': 'Arithmétique', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subject', 'nom': 'Géométrie', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subject', 'nom': 'Statistique', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [80, 160, 320, 80, 160, 320, 640]},
+
+                {
+                    'type': 'subdomain',
+                    'nom': 'Sous-domaine des sciences de la vie et de la terre (SVT)'
+                },
+                {'type': 'subject', 'nom': 'Anatomie', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subject', 'nom': 'Botanique', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subject', 'nom': 'Zoologie', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [30, 60, 120, 30, 60, 120, 240]},
+
+                {
+                    'type': 'subdomain',
+                    'nom': 'Sous-domaine des sciences physiques, technologie et TIC'
+                },
+                {'type': 'subject', 'nom': 'Sciences physiques', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subject', 'nom': 'Technologie', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subject', 'nom': 'Techno. d’Info. & Com. (TIC)', 'max': [10, 20, 40, 10, 20, 40, 80]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [30, 60, 120, 30, 60, 120, 240]},
+
+                {'type': 'domain', 'nom': 'DOMAINE DES LANGUES'},
+                {'type': 'subject', 'nom': 'Anglais', 'max': [30, 60, 120, 30, 60, 120, 240]},
+                {'type': 'subject', 'nom': 'Français', 'max': [70, 140, 280, 70, 140, 280, 560]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [100, 200, 400, 100, 200, 400, 800]},
+
+                {'type': 'domain', 'nom': 'DOMAINE DE L’UNIVERS SOCIAL ET ENVIRONNEMENT'},
+                {'type': 'subject', 'nom': 'Éducation à la vie (1)', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subject', 'nom': 'Éducation civique et morale', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subject', 'nom': 'Géographie', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subject', 'nom': 'Histoire', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [80, 160, 320, 80, 160, 320, 640]},
+
+                {'type': 'domain', 'nom': 'DOMAINE DES ARTS'},
+                {'type': 'subject', 'nom': 'Dessin', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subject', 'nom': 'Musique', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [40, 80, 160, 40, 80, 160, 320]},
+
+                {'type': 'domain', 'nom': 'DOMAINE DU DÉVELOPPEMENT PERSONNEL'},
+                {'type': 'subject', 'nom': 'Éducation physique', 'max': [20, 40, 80, 20, 40, 80, 160]},
+                {'type': 'subtotal', 'nom': 'SOUS-TOTAL', 'max': [20, 40, 80, 20, 40, 80, 160]}
+            ] %}
+
+                <div class="bulletin-wrapper">
+                    <div class="bulletin-preview">
+
+                        {# EN-TETE OFFICIEL #}
+                        <div class="official-header">
+                            <div class="country-name">
+                                RÉPUBLIQUE DÉMOCRATIQUE DU CONGO
+                            </div>
+                            <div class="ministry-name">
+                                MINISTÈRE DE L'ENSEIGNEMENT PRIMAIRE, SECONDAIRE<br>
+                                ET PROFESSIONNEL
+                            </div>
+                        </div>
+
+                        {# IDENTIFICATION DE L'ELEVE #}
+                        <table class="student-info">
+                            <tbody>
+                                <tr>
+                                    <td colspan="2"><strong>N° ID</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><strong>PROVINCE :</strong></td>
+                                </tr>
+                                <tr>
+                                    <td style="width:65%">
+                                        <strong>VILLE :</strong>
+                                        ........................................................
+                                    </td>
+                                    <td>
+                                        <strong>ÉLÈVE :</strong>
+                                        ........................................
+                                        <strong>SEXE :</strong> .......
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>COMMUNE / TER (1) :</strong>
+                                        ....................................
+                                    </td>
+                                    <td>
+                                        <strong>NÉ(E) À :</strong>
+                                        ...........................
+                                        <strong>Le :</strong> .... / .... / ....
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>ÉCOLE :</strong>
+                                        ............................................
+                                    </td>
+                                    <td>
+                                        <strong>CLASSE :</strong>
+                                        ........................................
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <strong>CODE N° PERM. :</strong>
+                                        ........................................................................
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {# TITRE #}
+                        <div class="bulletin-main-title">
+                            BULLETIN DE LA 7ème ANNÉE CYCLE TERMINAL DE L'ÉDUCATION DE BASE (CTBE)
+                            <div>ANNÉE SCOLAIRE 20........ / 20........</div>
+                        </div>
+
+                        {# TABLEAU DES COTATIONS #}
+                        <div class="table-scroll">
+                            <table class="grades-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="3" class="branch-col">BRANCHE</th>
+
+                                        <th colspan="4" class="semester-title">PREMIER SEMESTRE</th>
+                                        <th colspan="4" class="semester-title">SECOND SEMESTRE</th>
+
+                                        <th rowspan="3" class="percentage-col">%</th>
+                                        <th rowspan="3" class="signature-col">SIGN.<br>PROF.</th>
+                                        <th rowspan="3" class="grand-total-col">T.G.</th>
+                                        <th rowspan="3" class="repechage-col">EXAMEN DE<br>REPÊCHAGE</th>
+                                    </tr>
+
+                                    <tr>
+                                        <th colspan="2">TRAVAUX JOURNALIERS</th>
+                                        <th rowspan="2">EXAMEN</th>
+                                        <th rowspan="2">TOT.</th>
+
+                                        <th colspan="2">TRAVAUX JOURNALIERS</th>
+                                        <th rowspan="2">EXAMEN</th>
+                                        <th rowspan="2">TOT.</th>
+                                    </tr>
+
+                                    <tr>
+                                        <th>1ère P</th>
+                                        <th>2ème P</th>
+                                        <th>3ème P</th>
+                                        <th>4ème P</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for ligne in domaines %}
+
+                                        {# DOMAINE #}
+                                        {% if ligne.type == 'domain' %}
+                                            <tr class="domain-row">
+                                                <td colspan="13">{{ ligne.nom }}</td>
+                                            </tr>
+
+                                            {# SOUS-DOMAINE #}
+                                        {% elseif ligne.type == 'subdomain' %}
+                                            <tr class="subdomain-row">
+                                                <td colspan="13">{{ ligne.nom }}</td>
+                                            </tr>
+
+                                            {# MATIÈRE #}
+                                        {% elseif ligne.type == 'subject' %}
+                                            <tr class="subject-row">
+                                                <td class="subject-name">{{ ligne.nom }}</td>
+
+                                                {# Premier semestre : P1, P2, Examen #}
+                                                {% for i in 0..2 %}
+                                                    <td class="mark-cell">
+                                                        <span class="max-value">{{ ligne.max[i] }}</span>
+                                                    </td>
+                                                {% endfor %}
+
+                                                {# Total premier semestre #}
+                                                <td class="total-cell"></td>
+
+                                                {# Deuxième semestre : P3, P4, Examen #}
+                                                {% for i in 3..5 %}
+                                                    <td class="mark-cell">
+                                                        <span class="max-value">{{ ligne.max[i] }}</span>
+                                                    </td>
+                                                {% endfor %}
+
+                                                {# Total deuxième semestre #}
+                                                <td class="total-cell"></td>
+
+                                                {# Pourcentage #}
+                                                <td class="percentage-cell"></td>
+
+                                                {# Signature professeur #}
+                                                <td class="signature-cell"></td>
+
+                                                {# Total général #}
+                                                <td class="grand-total-cell">
+                                                    <span class="max-value">{{ ligne.max[6] }}</span>
+                                                </td>
+
+                                                {# Examen de repêchage #}
+                                                <td class="repechage-cell"></td>
+                                            </tr>
+
+                                            {# SOUS-TOTAL #}
+                                        {% elseif ligne.type == 'subtotal' %}
+                                            <tr class="subtotal-row">
+                                                <td>{{ ligne.nom }}</td>
+
+                                                {% for i in 0..2 %}
+                                                    <td>{{ ligne.max[i] }}</td>
+                                                {% endfor %}
+
+                                                <td></td>
+
+                                                {% for i in 3..5 %}
+                                                    <td>{{ ligne.max[i] }}</td>
+                                                {% endfor %}
+
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>{{ ligne.max[6] }}</td>
+                                                <td></td>
+                                            </tr>
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                    {# MAXIMA GÉNÉRAUX #}
+                                    <tr class="general-total-row">
+                                        <td>MAXIMA GÉNÉRAUX</td>
+                                        <td>380</td>
+                                        <td>760</td>
+                                        <td>1520</td>
+                                        <td>—</td>
+                                        <td>380</td>
+                                        <td>760</td>
+                                        <td>1520</td>
+                                        <td>—</td>
+                                        <td>100 %</td>
+                                        <td></td>
+                                        <td>3040</td>
+                                        <td></td>
+                                    </tr>
+
+                                    {# TOTAUX #}
+                                    <tr class="result-row">
+                                        <td>TOTAUX</td>
+                                        {% for i in 1..12 %}
+                                            <td></td>
+                                        {% endfor %}
+                                    </tr>
+
+                                    {# POURCENTAGE #}
+                                    <tr class="result-row">
+                                        <td>POURCENTAGE</td>
+                                        {% for i in 1..12 %}
+                                            <td></td>
+                                        {% endfor %}
+                                    </tr>
+
+                                    {# PLACE #}
+                                    <tr class="result-row">
+                                        <td>PLACE / NBRE D'ÉLÈVES</td>
+                                        {% for i in 1..12 %}
+                                            <td></td>
+                                        {% endfor %}
+                                    </tr>
+
+                                    {# CONDUITE #}
+                                    <tr class="result-row">
+                                        <td>CONDUITE</td>
+                                        {% for i in 1..12 %}
+                                            <td></td>
+                                        {% endfor %}
+                                    </tr>
+
+                                    {# APPLICATION #}
+                                    <tr class="result-row">
+                                        <td>APPLICATION</td>
+                                        <td colspan="12">Le chef d'établissement</td>
+                                    </tr>
+
+                                    {# SIGNATURE #}
+                                    <tr class="result-row">
+                                        <td>SIGNATURE</td>
+                                        <td colspan="12"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {# DECISION ET SIGNATURES #}
+                        <div class="decision-section">
+                            <p>
+                                - L'élève ne pourra passer dans la classe supérieure s'il n'a subi avec succès
+                                un examen de repêchage en :
+                                .........................................................................................................
+                            </p>
+
+                            <p>- L'élève passe dans la classe supérieure (1)</p>
+                            <p>- L'élève double la classe (1)</p>
+
+                            <div class="decision-signatures">
+                                <div>
+                                    Fait à ........................................ le ....... / ....... / 20.......
+                                </div>
+                                <div class="signature-space">
+                                    <strong>LE CHEF D'ÉTABLISSEMENT</strong>
+                                    <br>Sceau de l'école
+                                    <br><br><br>
+                                    Nom et signature
+                                </div>
+                            </div>
+
+                            <div class="student-signature">
+                                Signature de l'élève
+                            </div>
+                        </div>
+
+                        <div class="bulletin-legal">
+                            (1) Biffer la mention inutile.
+                            <br>
+                            Note importante : Le bulletin est sans valeur s'il est raturé ou surchargé.
+                            <span>IGE/P.S./010</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .bulletin-wrapper {
+            width: 100%;
+            padding: 15px;
+            overflow-x: auto;
+            background: #e9ecef;
+        }
+
+        .bulletin-preview {
+            width: 297mm;
+            min-height: 210mm;
+            margin: auto;
+            padding: 7mm;
+            background: #fff;
+            color: #000;
+            border: 1px solid #222;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8px;
+        }
+
+        .official-header {
+            text-align: center;
+            padding: 3px 0 7px;
+            line-height: 1.4;
+        }
+
+        .country-name {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+        }
+
+        .ministry-name {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+
+        .student-info {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 8px;
+        }
+
+        .student-info td {
+            border: 1px solid #000;
+            height: 20px;
+            padding: 3px 5px;
+        }
+
+        .bulletin-main-title {
+            border: 1px solid #000;
+            margin-top: 5px;
+            padding: 6px 3px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .bulletin-main-title div {
+            margin-top: 3px;
+        }
+
+        .table-scroll {
+            width: 100%;
+            overflow: visible;
+        }
+
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-top: 5px;
+            font-size: 7px;
+            color: #000;
+            border: 1.5px solid #000;
+        }
+
+        .grades-table th,
+        .grades-table td {
+            border: 1px solid #000 !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 2px;
+            height: 17px;
+            color: #000;
+            box-sizing: border-box;
+        }
+
+        /* Fermeture renforcée de la dernière colonne */
+        .grades-table th:last-child,
+        .grades-table td:last-child {
+            border-right: 2px solid #000 !important;
+        }
+
+        /* En-tête */
+        .grades-table thead th {
+            background: #e5e5e5 !important;
+            color: #000;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        /* Largeur des colonnes */
+        .grades-table .branch-col {
+            width: 22%;
+        }
+
+        .grades-table .semester-title {
+            font-size: 8px;
+        }
+
+        .grades-table .percentage-col {
+            width: 4%;
+        }
+
+        .grades-table .signature-col {
+            width: 7%;
+        }
+
+        .grades-table .grand-total-col {
+            width: 5%;
+        }
+
+        .grades-table .repechage-col {
+            width: 8%;
+        }
+
+        /* Domaines */
+        .grades-table .domain-row td {
+            background: #d0d0d0 !important;
+            color: #000;
+            text-align: left;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding-left: 5px;
+            height: 19px;
+        }
+
+        /* Sous-domaines */
+        .grades-table .subdomain-row td {
+            background: #ededed !important;
+            color: #000;
+            text-align: left;
+            font-weight: bold;
+            font-style: italic;
+            padding-left: 12px;
+            height: 18px;
+        }
+
+        /* Noms des matières */
+        .grades-table .subject-name {
+            text-align: left;
+            padding-left: 8px;
+            font-weight: 500;
+        }
+
+        /* Cellules des cotations */
+        .grades-table .mark-cell,
+        .grades-table .total-cell,
+        .grades-table .percentage-cell,
+        .grades-table .signature-cell,
+        .grades-table .grand-total-cell,
+        .grades-table .repechage-cell {
+            background: #fff !important;
+        }
+
+        /* Maxima en noir */
+        .grades-table .max-value {
+            color: #000 !important;
+            font-size: 6px;
+            font-weight: bold;
+        }
+
+        /* Sous-totaux */
+        .grades-table .subtotal-row td {
+            background: #e8e8e8 !important;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .grades-table .subtotal-row td:first-child {
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        /* Maxima généraux */
+        .grades-table .general-total-row td {
+            background: #d5d5d5 !important;
+            color: #000;
+            font-weight: 800;
+            height: 21px;
+        }
+
+        .grades-table .general-total-row td:first-child {
+            text-align: left;
+        }
+
+        /* Lignes des résultats */
+        .grades-table .result-row td {
+            height: 20px;
+            background: #fff;
+            color: #000;
+        }
+
+        .grades-table .result-row td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .decision-section {
+            margin-top: 8px;
+            font-size: 8px;
+            line-height: 1.6;
+        }
+
+        .decision-section p {
+            margin: 3px 0;
+        }
+
+        .decision-signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .signature-space {
+            width: 30%;
+            text-align: center;
+        }
+
+        .student-signature {
+            margin-top: 8px;
+            text-align: left;
+        }
+
+        .bulletin-legal {
+            border-top: 1px solid #000;
+            margin-top: 8px;
+            padding-top: 4px;
+            font-size: 7px;
+            font-style: italic;
+            position: relative;
+        }
+
+        .bulletin-legal span {
+            float: right;
+            font-weight: bold;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 297mm !important;
+                height: 210mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+
+            .no-print,
+            .sidebar,
+            .topbar,
+            .navbar,
+            .footer {
+                display: none !important;
+            }
+
+            .wrapper,
+            .content-page,
+            .container-fluid,
+            .bulletin-wrapper {
+                width: 297mm !important;
+                height: 210mm !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: white !important;
+            }
+
+            .bulletin-preview {
+                width: 287mm !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+
+                margin: 5mm !important;
+                padding: 2mm !important;
+
+                box-sizing: border-box !important;
+                overflow: visible !important;
+
+                border: none !important;
+                box-shadow: none !important;
+                color: #000 !important;
+                background: white !important;
+
+                transform: scale(var(--print-scale, 1)) !important;
+                transform-origin: top left !important;
+            }
+
+            .table-scroll {
+                width: 100% !important;
+                overflow: visible !important;
+            }
+
+            .grades-table {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse !important;
+            }
+
+            .grades-table th,
+            .grades-table td {
+                color: #000 !important;
+                border: 1px solid #000 !important;
+            }
+
+            .grades-table th:last-child,
+            .grades-table td:last-child {
+                border-right: 2px solid #000 !important;
+            }
+
+            .grades-table tr > :first-child {
+                border-left: 2px solid #000 !important;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+
+    <script>
+        function imprimerBulletin() {
+            const bulletin = document.querySelector(".bulletin-preview");
+
+            if (!bulletin) {
+                window.print();
+                return;
+            }
+
+            bulletin.style.setProperty("--print-scale", "1");
+
+            requestAnimationFrame(() => {
+                const pxParMm = 96 / 25.4;
+
+                // Dimensions disponibles sur une feuille A4 paysage
+                const largeurDisponible = 287 * pxParMm;
+                const hauteurDisponible = 200 * pxParMm;
+
+                const largeur = Math.max(
+                    bulletin.scrollWidth,
+                    bulletin.getBoundingClientRect().width,
+                );
+
+                const hauteur = Math.max(
+                    bulletin.scrollHeight,
+                    bulletin.getBoundingClientRect().height,
+                );
+
+                // Calcul automatique selon la largeur ET la hauteur
+                const echelle = Math.min(
+                    largeurDisponible / largeur,
+                    hauteurDisponible / hauteur,
+                );
+
+                bulletin.style.setProperty("--print-scale", echelle);
+
+                requestAnimationFrame(() => {
+                    window.print();
+                });
+            });
+        }
+
+        window.addEventListener("afterprint", () => {
+            const bulletin = document.querySelector(".bulletin-preview");
+
+            if (bulletin) {
+                bulletin.style.removeProperty("--print-scale");
+            }
+        });
+    </script> 
+{% endblock %}

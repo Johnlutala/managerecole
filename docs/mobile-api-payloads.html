@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>API mobile — Guide d’intégration Flutter</title>
+<style>
+@page { margin: 18mm 15mm 17mm; }
+body { font-family: "DejaVu Sans", sans-serif; font-size: 9pt; color: #172033; line-height: 1.4; }
+h1 { color: #12355b; font-size: 23pt; margin: 0 0 5mm; }
+h2 { color: #12355b; font-size: 15pt; border-bottom: 1px solid #d5deeb; padding-bottom: 2mm; margin-top: 8mm; }
+h3 { color: #145c88; font-size: 11pt; margin: 5mm 0 2mm; }
+p { margin: 2mm 0; }
+code { color: #0e4b75; }
+pre { background: #f2f5f9; border: 1px solid #d7dfeb; padding: 3mm; font-size: 7.3pt; white-space: pre-wrap; overflow-wrap: anywhere; }
+table { width: 100%; border-collapse: collapse; margin: 3mm 0 5mm; }
+th, td { border: 1px solid #cbd5e1; padding: 2.2mm; text-align: left; vertical-align: top; }
+th { background: #eaf0f7; }
+.note { background: #fff7df; border-left: 3px solid #d39b00; padding: 3mm; margin: 3mm 0; }
+.route { color: #0f766e; font-weight: bold; }
+.page { page-break-before: always; }
+.small { font-size: 8pt; color: #536176; }
+</style>
+</head>
+<body>
+<h1>API mobile — guide Flutter</h1>
+<p><strong>Contrats JSON et exemples de payloads</strong><br>Gestionecole · API REST v1 · 8 novembre 2026</p>
+<p>Les exemples utilisent <code>https://votre-domaine</code> comme URL de base. Toutes les routes listées sous <code>/api/rest/v1</code> demandent un JWT, sauf la connexion.</p>
+
+<h2>1. Connexion et format commun</h2>
+<h3>Connexion</h3>
+<p><span class="route">POST /api/login</span> — sans token. Les identifiants peuvent être un matricule, un nom d’utilisateur ou une adresse e-mail.</p>
+<pre>{
+  "matricule": "PROF2026000123",
+  "password": "mot-de-passe"
+}</pre>
+<p>Alias acceptés : <code>username</code> ou <code>email</code> à la place de <code>matricule</code>.</p>
+<pre>{
+  "code": "0",
+  "message": "Succès",
+  "data": {
+    "token": "eyJ...JWT",
+    "expiresIn": 1800,
+    "user": {
+      "id": 8, "username": "john", "firstname": "John",
+      "lastname": "JK", "roles": ["ROLE_PROFESSEUR", "ROLE_USER"],
+      "espace": "professeur"
+    }
+  }
+}</pre>
+<p>Pour les appels authentifiés : <code>Authorization: Bearer &lt;token&gt;</code> et <code>Content-Type: application/json</code>. Le token expire après 30 minutes.</p>
+<p>Réponse normale : <code>{"code":"0","message":"Succès","data":{...}}</code>. Erreur : <code>{"code":"1","message":"...","errors":[]}</code>. Codes HTTP usuels : 400 payload incorrect, 401 token absent/expiré, 403 rôle/propriété refusé, 404 ressource absente, 409 conflit d’état, 422 données métier invalides.</p>
+<div class="note"><strong>Important :</strong> les données sont filtrées par le compte authentifié. Ne demandez pas au mobile de transmettre l’identifiant d’un élève, parent ou professeur pour choisir son propre profil. Les opérations admin exigent <code>ROLE_ADMIN</code> ou <code>ROLE_SUPER_ADMIN</code>.</div>
+
+<h2>2. Élève</h2>
+<table><thead><tr><th>Méthode / route</th><th>Accès</th><th>Usage</th></tr></thead><tbody>
+<tr><td>GET <code>/api/rest/v1/mobile/me</code></td><td>Tout compte connecté</td><td>Identité du compte et profil associé.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/eleve/profil</code></td><td>Élève</td><td>Dossier complet : identité, école/classe, horaire, notes validées, présences validées.</td></tr>
+<tr><td>GET <code>/api/rest/v1/eleves/me/presences</code></td><td>Élève</td><td>Présences validées uniquement.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/eleve/emploi-du-temps</code></td><td>Élève</td><td>Charge horaire de sa classe et de son option.</td></tr>
+<tr><td>GET <code>/api/rest/v1/eleves/{id}</code></td><td>Élève lui-même, parent lié, admin</td><td>Consulter un dossier autorisé.</td></tr>
+</tbody></table>
+<p>Exemple dossier (les champs absents peuvent être <code>null</code>; les listes vides sont <code>[]</code>) :</p>
+<pre>{
+  "code": "0", "message": "Succès", "data": {
+    "eleve": {
+      "id": 42, "matricule": "202600123", "nom": "Jean",
+      "postnom": "K.", "prenom": "Paul", "sexe": "M",
+      "dateNaissance": "2012-05-04", "telephone": null,
+      "classe": {"id": 3, "nom": "7e A", "section": "Primaire"},
+      "option": null,
+      "ecole": {"id": 1, "nom": "École Exemple", "adresse": "Kinshasa",
+        "telephone": null, "email": null}
+    },
+    "emploiDuTemps": [
+      {"jour":"Lundi","heureDebut":"08:15","heureFin":"09:45",
+       "cours":"Mathématique","professeur":"John JK"}
+    ],
+    "notes": [
+      {"id":18,"cote":"14","observation":null,
+       "cours":"Mathématique","evaluation":"Période 1","bareme":20}
+    ],
+    "presences": [
+      {"date":"2026-11-06","statut":"present",
+       "heureArrivee":"08:02","heureDepart":"15:00","observation":null}
+    ]
+  }
+}</pre>
+
+<div class="page"></div>
+<h2>3. Parent</h2>
+<table><thead><tr><th>Méthode / route</th><th>Accès</th><th>Usage</th></tr></thead><tbody>
+<tr><td>GET <code>/api/rest/v1/mobile/parent/profil</code></td><td>Parent</td><td>Identité du parent et liste de ses enfants liés.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/parent/enfants</code></td><td>Parent</td><td>Liste des enfants (route existante).</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/parent/enfants/{id}</code></td><td>Parent lié à cet enfant</td><td>Dossier : identité, horaire, notes et présences validées.</td></tr>
+<tr><td>GET <code>/api/rest/v1/parent/presences?from=2026-11-01&amp;to=2026-11-30</code></td><td>Parent</td><td>Présences validées de tous ses enfants. Dates ISO; période max. 366 jours.</td></tr>
+</tbody></table>
+<pre>{
+  "code":"0","message":"Succès","data":{
+    "parent":{"id":12,"nom":"KABESA","postnom":null,"prenom":"Marie",
+      "telephone":"+243000000000","email":"parent@example.cd",
+      "adresse":"Kinshasa","profession":"Commerçante","type":"Mère"},
+    "enfants":[
+      {"id":42,"matricule":"202600123","nom":"Jean","postnom":"K.",
+       "prenom":"Paul","sexe":"M","dateNaissance":"2012-05-04",
+       "lieuNaissance":"Kinshasa","classe":{"id":3,"nom":"7e A"},
+       "option":null,"ecole":{"id":1,"nom":"École Exemple","adresse":"Kinshasa",
+         "telephone":null,"email":null}}
+    ]
+  }
+}</pre>
+<p>Le endpoint détail renvoie une enveloppe identique à celle du dossier élève, limitée aux enfants liés au parent connecté. Les notes et présences non validées ne sont pas publiées au parent.</p>
+
+<h2>4. Professeur — profil, cotations et fiches de leçon</h2>
+<table><thead><tr><th>Méthode / route</th><th>Accès</th><th>Usage</th></tr></thead><tbody>
+<tr><td>GET <code>/api/rest/v1/mobile/me</code></td><td>Professeur</td><td>Identité complète, spécialité, école, section, grade et année.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/professeur/tableau-de-bord</code></td><td>Professeur</td><td>Profil et charge horaire attribuée.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/professeur/cotations?limit=100</code></td><td>Professeur</td><td>Ses cotations (brouillon, soumises ou validées); limite max. 200.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/professeur/cotations</code></td><td>Professeur propriétaire du cours</td><td>Enregistrer/soumettre en lot; périodes ouvertes, élèves de la classe et barème sont vérifiés.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/professeur/preparations</code></td><td>Professeur</td><td>Historique de ses fiches.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/professeur/preparations</code></td><td>Professeur propriétaire du cours</td><td>Créer une fiche en brouillon.</td></tr>
+<tr><td>PATCH <code>/api/rest/v1/mobile/professeur/preparations/{id}</code></td><td>Propriétaire, brouillon/à corriger</td><td>Modifier la fiche.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/professeur/preparations/{id}/soumettre</code></td><td>Propriétaire, brouillon/à corriger</td><td>Soumettre à la direction.</td></tr>
+</tbody></table>
+<h3>Enregistrer ou soumettre les cotations</h3>
+<pre>{
+  "coursId": 15,
+  "mode": "noter",
+  "action": "soumettre",
+  "notes": {"81": {"42": "14", "43": "17"}}
+}</pre>
+<p>Chaque clé du sous-objet représente l’ID d’un élève et sa cote. <code>mode</code> : <code>noter</code> pour créer, <code>modifier</code> pour modifier/supprimer des brouillons. <code>action</code> : <code>enregistrer</code> garde en brouillon, <code>soumettre</code> transmet. Cote entière de 0 au barème, max. 50 évaluations et 1000 cotes par requête. Une cote soumise/validée est verrouillée.</p>
+<h3>Créer une fiche de préparation</h3>
+<pre>{
+  "coursId": 15, "dateCours": "2026-11-08", "jour": "Lundi",
+  "heureDebut": "08:15", "heureFin": "09:45",
+  "sujet": "Le complément circonstanciel de temps",
+  "reference": "Grammaire — phrase",
+  "objectifGeneral": "Identifier le complément de temps.",
+  "objectifsSpecifiques": "Repérer et employer un complément de temps.",
+  "matiere": "Définition, exemples, exercices.",
+  "methode": "Interrogative et participative",
+  "materielDidactique": "Tableau, cahier",
+  "activitesInitialesEnseignant": "Rappel de la leçon précédente.",
+  "activitesInitialesEleves": "Répondent aux questions.",
+  "activitesPrincipalesEnseignant": "Présente la règle et les exemples.",
+  "activitesPrincipalesEleves": "Analysent et proposent des exemples.",
+  "activitesFinalesEnseignant": "Fait la synthèse.",
+  "activitesFinalesEleves": "Résolvent un exercice.",
+  "evaluation": "Identifier le complément dans trois phrases.",
+  "devoir": "Composer deux phrases."
+}</pre>
+
+<div class="page"></div>
+<p>Réponse de création : enveloppe standard avec <code>data.id</code>, <code>data.numero</code>, <code>data.statut</code> (<code>brouillon</code>), les champs de la fiche et les objets <code>cours</code> / <code>professeur</code>. <code>PATCH</code> accepte les champs à modifier seulement. Pour soumettre, corps vide; réponse renvoie la fiche avec <code>statut: "soumise"</code> et <code>soumiseLe</code>.</p>
+<h3>Exemples de réponses de cotation et préparation</h3>
+<pre>{
+  "code":"0","message":"Succès","data":{
+    "limite":100,
+    "cotations":[
+      {"id":18,"cote":"14","observation":null,"statut":"validee",
+       "dateSoumission":"2026-11-07T10:30:00+00:00",
+       "eleve":{"id":42,"matricule":"202600123","nom":"Jean K. Paul"},
+       "cours":{"id":15,"nom":"Mathématique","classe":"7e A"},
+       "evaluation":{"id":81,"nom":"Période 1","bareme":20,"date":"2026-10-30"}}
+    ]
+  }
+}</pre>
+<pre>{
+  "code":"0","message":"Succès","data":{
+    "preparations":[
+      {"id":27,"numero":1,"statut":"soumise","dateCours":"2026-11-08",
+       "jour":"Lundi","heureDebut":"08:15","heureFin":"09:45",
+       "sujet":"Le complément circonstanciel de temps",
+       "cours":{"id":15,"nom":"Français","classe":"7e A","ecole":"École Exemple"},
+       "professeur":{"id":6,"nom":"John JK"},
+       "soumiseLe":"2026-11-07T15:00:00+00:00","traiteeLe":null}
+    ]
+  }
+}</pre>
+
+<h2>5. Direction / administrateur</h2>
+<table><thead><tr><th>Méthode / route</th><th>Usage</th></tr></thead><tbody>
+<tr><td>GET <code>/api/rest/v1/mobile/admin/tableau-de-bord</code></td><td>Indicateurs généraux, utilisateurs actifs et files de notes/fiches à valider.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/admin/notes?limit=100</code></td><td>Notes soumises à traiter; limite max. 200.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/admin/evaluations/{id}/notes/valider</code></td><td>Valider toutes les notes soumises de l’évaluation; corps vide.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/admin/evaluations/{id}/notes/retourner</code></td><td>Renvoyer en brouillon; corps vide.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/admin/preparations</code></td><td>Fiches en attente de décision.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/admin/preparations/{id}/valider</code></td><td>Valider une fiche; commentaire facultatif.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/admin/preparations/{id}/corriger</code></td><td>Demander une correction; commentaire obligatoire.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/admin/utilisateurs?page=1&amp;limit=25</code></td><td>Liste paginée (toutes écoles), jamais de mot de passe.</td></tr>
+<tr><td>POST <code>/api/rest/v1/users/{id}/reset-password</code></td><td>Réinitialiser et envoyer par e-mail; le mot de passe n’est pas renvoyé dans l’API.</td></tr>
+<tr><td>POST <code>/api/rest/v1/mobile/admin/bulletins/calculer</code></td><td>Calculer les bulletins annuels via le calculateur métier existant.</td></tr>
+<tr><td>GET <code>/api/rest/v1/mobile/admin/bulletins?ecole=1&amp;anneeScolaire=4</code></td><td>Consulter les bulletins calculés; filtres optionnels classe, section, option.</td></tr>
+</tbody></table>
+<h3>Décisions sur les fiches</h3>
+<pre>{"commentaire":"Veuillez préciser le support utilisé."}</pre>
+<p>Pour valider, le corps peut être <code>{}</code>. Pour <code>corriger</code>, un commentaire non vide est nécessaire.</p>
+<h3>Liste des notes à valider</h3>
+<pre>{
+  "code":"0","message":"Succès","data":{
+    "notesSoumises":[
+      {"id":18,"cote":"14","observation":null,
+       "eleve":{"id":42,"nom":"Jean K. Paul"},
+       "cours":{"id":15,"nom":"Mathématique","classe":"7e A","ecole":"École Exemple"},
+       "evaluation":{"id":81,"nom":"Période 1","bareme":20},
+       "dateSoumission":"2026-11-07T10:30:00+00:00"}
+    ]
+  }
+}</pre>
+<h3>Calcul annuel</h3>
+<pre>{
+  "ecoleId": 1, "anneeScolaireId": 4,
+  "sectionId": 2, "classeId": 3, "optionId": 5
+}</pre>
+<p><code>sectionId</code>, <code>classeId</code> et <code>optionId</code> sont facultatifs (omettre ou envoyer <code>null</code>). L’école doit correspondre à l’année et aux filtres. Réponse : <code>{"calcules":12,"bloques":[]}</code> ou les raisons de blocage. Le GET bulletins requiert école et année; il ne déclenche aucun recalcul.</p>
+<p>La liste utilisateurs renvoie <code>data.page</code>, <code>data.limit</code>, <code>data.total</code> et <code>data.utilisateurs[]</code> (id, username, email, nom, prénom, rôles, actif, profil). Les bulletins renvoient <code>data.bulletins[]</code> avec élève, classe, année scolaire, totaux, pourcentage, décision et détails de cotation.</p>
+<h3>Réinitialisation de mot de passe</h3>
+<pre>{
+  "code":"0", "message":"Succès",
+  "data":{"username":"john","mailSent":true,
+    "message":"Le nouveau mot de passe a été envoyé par e-mail."}
+}</pre>
+<div class="note">Si l’e-mail échoue après renouvellement, l’API renvoie HTTP 503 avec <code>mailSent:false</code>; le mot de passe n’est volontairement jamais inclus dans la réponse JSON.</div>
+
+<h2>6. Recommandations Flutter</h2>
+<ul>
+<li>Stocker le JWT dans un stockage sécurisé de l’appareil, jamais dans les préférences en clair.</li>
+<li>Ajouter automatiquement <code>Authorization: Bearer ...</code>; à HTTP 401, effacer le token et demander une nouvelle connexion.</li>
+<li>Traiter <code>data</code> comme nullable/liste vide si l’enveloppe répond sans éléments; mapper les dates ISO en <code>DateTime</code>.</li>
+<li>Ne pas afficher les brouillons de notes aux élèves/parents : leurs endpoints ne retournent que des notes validées.</li>
+<li>Utiliser le certificat HTTPS en production. La connexion et l’API ne doivent pas être exposées sur HTTP public.</li>
+</ul>
+<p class="small">Les payloads représentent le contrat de l’API et des données d’exemple, pas des enregistrements réels. La réinitialisation de mot de passe nécessite un serveur de messagerie configuré.</p>
+</body>
+</html>

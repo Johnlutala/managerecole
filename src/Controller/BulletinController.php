@@ -41,7 +41,8 @@ final class BulletinController extends AbstractController
         AnneeScolaireRepository $annees,
         BulletinAnnuelRepository $bulletins,
         NoteRepository $notes,
-        EleveRepository $students
+        EleveRepository $students,
+        BulletinAnnuelCalculator $calculator
     ): Response {
         $filters = $this->resolveFilters($request, $ecoles, $sections, $classes, $options, $annees);
         $validatedGrades = [];
@@ -111,6 +112,9 @@ final class BulletinController extends AbstractController
             )),
             'cotes_validees' => $validatedGrades,
             'groupes_resultats' => array_values($groups),
+            'periodes' => $filters['ecole'] instanceof Ecole
+                ? $calculator->periodsForSchool($filters['ecole'])
+                : [],
         ]);
     }
 
@@ -151,12 +155,32 @@ final class BulletinController extends AbstractController
             return $this->redirectToRoute('app_bulletin_index');
         }
 
+        $requestedPeriod = $request->request->get('periode');
+        if (!is_string($requestedPeriod) || trim($requestedPeriod) === '') {
+            $this->addFlash('warning', 'Cochez la période à calculer.');
+
+            return $this->redirectToRoute('app_bulletin_index', $this->filterRouteParameters($filters));
+        }
+        $periodIsAuthorized = false;
+        foreach ($calculator->periodsForSchool($filters['ecole']) as $period) {
+            if ($period['nom'] === $requestedPeriod && $period['autorisee']) {
+                $periodIsAuthorized = true;
+                break;
+            }
+        }
+        if (!$periodIsAuthorized) {
+            $this->addFlash('warning', 'La période sélectionnée n’existe pas pour cette école ou n’est pas autorisée.');
+
+            return $this->redirectToRoute('app_bulletin_index', $this->filterRouteParameters($filters));
+        }
+
         $result = $calculator->calculate(
             $filters['ecole'],
             $filters['annee'],
             $filters['section'],
             $filters['classe'],
-            $filters['option']
+            $filters['option'],
+            $requestedPeriod
         );
 
         if ($result['calcules'] > 0) {
@@ -461,7 +485,7 @@ final class BulletinController extends AbstractController
 
     /**
      * @param BulletinAnnuel[] $bulletins
-     * @return array<int, array{key: string, semestre: string, libelle: string}>
+     * @return array<int, array{key: string, semestre: string, libelle: string, ordre: int}>
      */
     private function periodHeaders(array $bulletins): array
     {
@@ -469,38 +493,31 @@ final class BulletinController extends AbstractController
         foreach ($bulletins as $bulletin) {
             foreach ($bulletin->getDetails() as $course) {
                 foreach ($course['evaluations'] as $evaluation) {
-                    $key = trim((string) $evaluation['periode']);
+                    $storedKey = trim((string) $evaluation['periode']);
+                    $key = $this->normalizedPeriodKey($storedKey);
                     $semester = trim((string) ($evaluation['semestre'] ?? ''));
                     $label = trim((string) ($evaluation['libelle'] ?? ''));
+                    if ($semester === '' && $storedKey !== $key && str_contains($storedKey, ' — ')) {
+                        [$semester] = explode(' — ', $storedKey, 2);
+                    }
                     if ($semester === '' && str_contains($key, ' — ')) {
                         [$semester, $legacyLabel] = explode(' — ', $key, 2);
                         $label = $label !== '' ? $label : $legacyLabel;
                     }
                     $semester = $this->normalizeSemesterHeader($semester);
+                    $order = (int) ($evaluation['ordre'] ?? $this->periodOrder($key));
                     $headers[$key] = [
                         'key' => $key,
                         'semestre' => $semester !== '' ? $semester : 'Périodes autorisées',
                         'libelle' => $label !== '' ? $label : $key,
+                        'ordre' => min($order, $headers[$key]['ordre'] ?? PHP_INT_MAX),
                     ];
                 }
             }
         }
         $periods = array_values($headers);
         usort($periods, static function (array $first, array $second): int {
-            $rank = static function (string $period): int {
-                if (preg_match('/Période\s*(\d+)/iu', $period, $matches)) {
-                    $number = (int) $matches[1];
-
-                    return $number + intdiv(max(0, $number - 1), 2);
-                }
-                if (preg_match('/Examen\s*(\d+)/iu', $period, $matches)) {
-                    return (int) $matches[1] * 3;
-                }
-
-                return 100;
-            };
-
-            return $rank($first['key']) <=> $rank($second['key']);
+            return ($first['ordre'] <=> $second['ordre']) ?: strnatcasecmp($first['key'], $second['key']);
         });
 
         return $periods;
@@ -523,6 +540,17 @@ final class BulletinController extends AbstractController
                     $course['evaluations'] ?? [],
                     static fn (array $evaluation): bool => ($evaluation['autorisee'] ?? false) === true
                 ));
+                foreach ($evaluations as &$evaluation) {
+                    $storedPeriod = trim((string) ($evaluation['periode'] ?? ''));
+                    if (
+                        trim((string) ($evaluation['semestre'] ?? '')) === ''
+                        && preg_match('/^(?<semester>.+?)\s+[—–-]\s*(?:Période|Examen)\s*\d+\s*$/iu', $storedPeriod, $matches)
+                    ) {
+                        $evaluation['semestre'] = $this->normalizeSemesterHeader($matches['semester']);
+                    }
+                    $evaluation['periode'] = $this->normalizedPeriodKey($storedPeriod);
+                }
+                unset($evaluation);
                 $course['evaluations'] = $evaluations;
                 [$courseCotes, $courseBaremes] = $this->totalsForEvaluations($evaluations);
                 $course['total_cotes'] = $courseCotes;
@@ -578,5 +606,28 @@ final class BulletinController extends AbstractController
             'trimestre iii', '3ème trimestre', '3eme trimestre' => '3ÈME TRIMESTRE',
             default => $semester,
         };
+    }
+
+    private function normalizedPeriodKey(string $period): string
+    {
+        if (preg_match('/(?<period>(?:Période|Examen)\s*\d+)\s*$/iu', $period, $matches)) {
+            return trim($matches['period']);
+        }
+
+        return trim($period);
+    }
+
+    private function periodOrder(string $period): int
+    {
+        if (preg_match('/Période\s*(\d+)/iu', $period, $matches)) {
+            $number = (int) $matches[1];
+
+            return $number + intdiv(max(0, $number - 1), 2);
+        }
+        if (preg_match('/Examen\s*(\d+)/iu', $period, $matches)) {
+            return (int) $matches[1] * 3;
+        }
+
+        return PHP_INT_MAX;
     }
 }

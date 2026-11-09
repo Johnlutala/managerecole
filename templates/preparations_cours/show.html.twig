@@ -1,0 +1,632 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Préparation n°{{ preparation.numero }} — {{ preparation.cours.nom }}{% endblock %}
+
+{% block body %}
+    {% set isDirection = direction|default(false) %}
+    {% set couleurs = {
+    'brouillon': 'secondary',
+    'soumise': 'info',
+    'validee': 'success',
+    'a_corriger': 'warning'
+} %}
+    {% set libelles = {
+    'brouillon': 'Brouillon',
+    'soumise': 'Soumise à la direction',
+    'validee': 'Validée',
+    'a_corriger': 'À corriger'
+} %}
+    {% set couleur = couleurs[preparation.statut]|default('secondary') %}
+    {% set libelle = libelles[preparation.statut]|default(preparation.statut|default('Statut inconnu')) %}
+
+    <style>
+        .prep-detail {
+            --prep-primary: #253b60;
+            --prep-border: #d9dee7;
+            --prep-muted: #64748b;
+            color: #334155;
+        }
+
+        .prep-detail .page-title {
+            color: var(--prep-primary);
+            font-size: 23px;
+            font-weight: 700;
+        }
+
+        .prep-detail .page-subtitle {
+            color: var(--prep-muted);
+            font-size: 13px;
+        }
+
+        .prep-detail .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .prep-detail .status-brouillon {
+            background: #edf0f3;
+            color: #64748b;
+        }
+        .prep-detail .status-soumise {
+            background: #e7f1ff;
+            color: #2863a6;
+        }
+        .prep-detail .status-validee {
+            background: #e5f6ed;
+            color: #218653;
+        }
+        .prep-detail .status-a_corriger {
+            background: #fff3dc;
+            color: #9a670e;
+        }
+
+        .prep-detail .sheet-title {
+            margin: 25px 0 12px;
+            color: var(--prep-primary);
+            font-size: 16px;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .prep-detail .sheet-table {
+            width: 100%;
+            margin-bottom: 0;
+            border: 1px solid var(--prep-border);
+            table-layout: fixed;
+        }
+
+        .prep-detail .sheet-table th,
+        .prep-detail .sheet-table td {
+            border: 1px solid var(--prep-border);
+            padding: 10px 12px;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+
+        .prep-detail .sheet-table th {
+            background: #f1f4f8;
+            color: #334b6b;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .prep-detail .sheet-table td {
+            color: #334155;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: normal;
+        }
+
+        .prep-detail .identity-table th {
+            width: 19%;
+        }
+
+        .prep-detail .identity-table td {
+            width: 31%;
+            font-weight: 600;
+        }
+
+        .prep-detail .lesson-table {
+            min-width: 720px;
+        }
+
+        .prep-detail .lesson-table thead th {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .prep-detail .lesson-table tbody th {
+            width: 17%;
+            background: #f8fafc;
+            text-align: left;
+        }
+
+        .prep-detail .phase-name {
+            display: block;
+            color: var(--prep-primary);
+            font-weight: 800;
+        }
+
+        .prep-detail .phase-detail {
+            display: block;
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: none;
+        }
+
+        .prep-detail .objective-row th {
+            width: 19%;
+        }
+
+        .prep-detail .review-alert {
+            margin: 18px 0;
+            padding: 14px 17px;
+            border: 1px solid #f4dfb4;
+            border-radius: 7px;
+            background: #fffaf0;
+            color: #795a20;
+        }
+
+        .prep-detail .footer-note {
+            color: #94a0ae;
+            font-size: 11px;
+        }
+
+        .prep-detail .btn-primary {
+            background: var(--prep-primary);
+            border-color: var(--prep-primary);
+        }
+
+        .prep-detail .btn-primary:hover {
+            background: #1c2d49;
+            border-color: #1c2d49;
+        }
+
+        @media (max-width: 767px) {
+            .prep-detail .page-title {
+                font-size: 19px;
+            }
+            .prep-detail .identity-table th {
+                width: 32%;
+            }
+            .prep-detail .identity-table td {
+                width: 68%;
+            }
+            .prep-detail .sheet-table th,
+            .prep-detail .sheet-table td {
+                padding: 8px;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm;
+            }
+
+            body {
+                background: #fff !important;
+            }
+            .prep-detail .no-print {
+                display: none !important;
+            }
+            .prep-detail .container-fluid {
+                padding: 0 !important;
+            }
+            .prep-detail .page-title {
+                font-size: 18px;
+            }
+            .prep-detail .sheet-title {
+                margin-top: 15px;
+            }
+            .prep-detail .sheet-table {
+                page-break-inside: auto;
+            }
+            .prep-detail .sheet-table tr {
+                page-break-inside: avoid;
+            }
+            .prep-detail .sheet-table th,
+            .prep-detail .sheet-table td {
+                padding: 7px;
+                font-size: 10px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Cadre extérieur de la fiche */
+            .prep-detail .fiche-cadre {
+                margin: 25px auto;
+                padding: 9px;
+                border: 2px solid #253b60;
+                background: #fff;
+                border-radius: 3px;
+                box-shadow: 0 3px 12px rgba(37, 59, 96, 0.08);
+            }
+
+            /* Cadre intérieur */
+            .prep-detail .fiche-cadre-interieur {
+                padding: 22px;
+                border: 1px solid #9ba9bb;
+                background: #fff;
+            }
+
+            /* En-tête de la fiche */
+            .prep-detail .fiche-entete {
+                text-align: center;
+                padding: 8px 10px 18px;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #253b60;
+            }
+
+            .prep-detail .fiche-entete h3 {
+                margin: 0 0 7px;
+                color: #253b60;
+                font-size: 19px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .prep-detail .fiche-entete p {
+                margin: 0;
+                color: #64748b;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .prep-detail .fiche-entete .numero-fiche {
+                display: inline-block;
+                margin-top: 10px;
+                padding: 5px 15px;
+                border: 1px solid #253b60;
+                color: #253b60;
+                font-size: 11px;
+                font-weight: 800;
+            }
+
+            /* Espacement des titres dans le cadre */
+            .prep-detail .fiche-cadre .sheet-title {
+                margin-top: 23px;
+                margin-bottom: 12px;
+            }
+
+            /* Adaptation mobile */
+            @media (max-width: 767px) {
+                .prep-detail .fiche-cadre {
+                    padding: 5px;
+                    margin: 15px -5px;
+                }
+
+                .prep-detail .fiche-cadre-interieur {
+                    padding: 12px 8px;
+                }
+
+                .prep-detail .fiche-entete h3 {
+                    font-size: 15px;
+                }
+            }
+
+            /* Impression PDF */
+            @media print {
+                .prep-detail .fiche-cadre {
+                    margin: 0;
+                    padding: 6px;
+                    border: 2px solid #253b60 !important;
+                    border-radius: 0;
+                    box-shadow: none;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                .prep-detail .fiche-cadre-interieur {
+                    padding: 15px;
+                    border: 1px solid #9ba9bb !important;
+                }
+
+                .prep-detail .fiche-entete {
+                    border-bottom: 2px solid #253b60 !important;
+                }
+
+                .prep-detail .fiche-entete h3,
+                .prep-detail .fiche-entete p,
+                .prep-detail .fiche-entete .numero-fiche {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+        }
+    </style>
+
+    <div class="wrapper">
+        <div class="content-page">
+            <div class="container-fluid py-4 prep-detail">
+
+                {# En-tête de la page #}
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4 no-print">
+                    <div>
+                        <div class="mb-2">
+                            <a
+                                href="{{ isDirection
+                            ? path('app_preparation_cours_direction')
+                            : path('app_preparation_cours_index')
+                        }}"
+                                class="btn btn-sm btn-outline-secondary"
+                            >
+                                <i class="fas fa-arrow-left me-1"></i>
+                                {{ isDirection ? 'Retour aux soumissions' : 'Retour à mes préparations' }}
+                            </a>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fas fa-graduation-cap text-primary"></i>
+                            <small class="text-muted fw-semibold text-uppercase">Espace pédagogique</small>
+                        </div>
+
+                        <h2 class="page-title mb-1">Préparation n°{{ preparation.numero }}</h2>
+                        <p class="page-subtitle mb-0">
+                            {{ preparation.cours.nom }}
+                            · {{ preparation.cours.classe.nom }}
+                            · {{ preparation.cours.classe.ecole.nom }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="status-pill status-{{ preparation.statut }}">
+                            <i class="fas fa-circle" style="font-size:7px"></i>
+                            {{ libelle }}
+                        </span>
+
+                        <a
+                            class="btn btn-outline-secondary"
+                            href="{{ path('app_preparation_cours_pdf', {id: preparation.id}) }}"
+                        >
+                            <i class="fas fa-file-pdf me-1"></i> Télécharger PDF
+                        </a>
+
+                        {% if not isDirection and preparation.statut in ['brouillon', 'a_corriger'] %}
+                            <a
+                                class="btn btn-primary"
+                                href="{{ path('app_preparation_cours_edit', {id: preparation.id}) }}"
+                            >
+                                <i class="fas fa-edit me-1"></i> Modifier
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Retour de la direction #}
+                {% if preparation.commentaireDirection %}
+                    <div class="review-alert">
+                        <strong class="d-block mb-1">
+                            <i class="fas fa-comment-dots me-1"></i> Retour de la direction
+                        </strong>
+                        <div class="small">{{ preparation.commentaireDirection|nl2br }}</div>
+                    </div>
+                {% endif %}
+
+                {# Soumission de la fiche #}
+                {% if not isDirection and preparation.statut in ['brouillon', 'a_corriger'] %}
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 p-3 border rounded no-print">
+                        <div>
+                            <strong class="d-block text-dark mb-1">
+                                <i class="fas fa-paper-plane text-primary me-1"></i>
+                                Votre préparation est prête ?
+                            </strong>
+                            <small class="text-muted">
+                                Transmettez cette fiche à la direction pour examen et validation.
+                            </small>
+                        </div>
+
+                        <form
+                            method="post"
+                            action="{{ path('app_preparation_cours_submit', {id: preparation.id}) }}"
+                            onsubmit="return confirm('Voulez-vous vraiment soumettre cette préparation à la direction ?');"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('preparation-submit-' ~ preparation.id) }}"
+                            >
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane me-1"></i> Soumettre à la direction
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                {# Fiche de préparation : identification #}
+                <h4 class="sheet-title">Fiche de préparation de leçon n°{{ preparation.numero }}</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered sheet-table identity-table">
+                        <tbody>
+                            <tr>
+                                <th>Nom de l'école</th>
+                                <td>{{ preparation.cours.classe.ecole.nom }}</td>
+                                <th>Nom de l'enseignant</th>
+                                <td>
+                                    {{ preparation.professeur.prenom }}
+                                    {{ preparation.professeur.nom }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Classe</th>
+                                <td>
+                                    {{ preparation.cours.classe.nom }}
+                                    {% if preparation.cours.option %}
+                                        — {{ preparation.cours.option.nom }}
+                                    {% endif %}
+                                </td>
+                                <th>Date</th>
+                                <td>{{ preparation.dateCours ? preparation.dateCours|date('d/m/Y') : '—' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Jour</th>
+                                <td>{{ preparation.jour ?: '—' }}</td>
+                                <th>Heure</th>
+                                <td>
+                                    {{ preparation.heureDebut ? preparation.heureDebut|date('H:i') : '—' }}
+                                    à
+                                    {{ preparation.heureFin ? preparation.heureFin|date('H:i') : '—' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Branche</th>
+                                <td>{{ preparation.cours.nom }}</td>
+                                <th>Sujet du jour</th>
+                                <td><strong>{{ preparation.sujet ?: '—' }}</strong></td>
+                            </tr>
+                            {% if preparation.reference %}
+                                <tr>
+                                    <th>Référence / Sous-branche</th>
+                                    <td colspan="3">{{ preparation.reference|nl2br }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if preparation.matiere %}
+                                <tr>
+                                    <th>Matière</th>
+                                    <td colspan="3">{{ preparation.matiere|nl2br }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if preparation.methode %}
+                                <tr>
+                                    <th>Méthode</th>
+                                    <td colspan="3">{{ preparation.methode|nl2br }}</td>
+                                </tr>
+                            {% endif %}
+                            {% if preparation.materielDidactique %}
+                                <tr>
+                                    <th>Matériel didactique</th>
+                                    <td colspan="3">{{ preparation.materielDidactique|nl2br }}</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Objectifs pédagogiques #}
+                {% if preparation.objectifGeneral or preparation.objectifsSpecifiques %}
+                    <h4 class="sheet-title">Objectifs de la leçon</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered sheet-table">
+                            <tbody>
+                                {% if preparation.objectifGeneral %}
+                                    <tr class="objective-row">
+                                        <th>Objectif général</th>
+                                        <td>{{ preparation.objectifGeneral|nl2br }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if preparation.objectifsSpecifiques %}
+                                    <tr class="objective-row">
+                                        <th>Objectif opérationnel / spécifique</th>
+                                        <td>{{ preparation.objectifsSpecifiques|nl2br }}</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
+                {# Déroulement de la leçon : tableau fidèle à la fiche #}
+                <h4 class="sheet-title">Déroulement de la leçon</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered sheet-table lesson-table">
+                        <thead>
+                            <tr>
+                                <th>Étapes</th>
+                                <th>Activités de l'enseignant</th>
+                                <th>Activités de l'élève</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>
+                                    <span class="phase-name">I. Activités initiales</span>
+                                    <span class="phase-detail">Rappel · Motivation · Annonce du sujet</span>
+                                </th>
+                                <td>
+                                    {{ preparation.activitesInitialesEnseignant
+                                    ? preparation.activitesInitialesEnseignant|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                                <td>
+                                    {{ preparation.activitesInitialesEleves
+                                    ? preparation.activitesInitialesEleves|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <span class="phase-name">II. Activités principales</span>
+                                    <span class="phase-detail">Analyse · Synthèse</span>
+                                </th>
+                                <td>
+                                    {{ preparation.activitesPrincipalesEnseignant
+                                    ? preparation.activitesPrincipalesEnseignant|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                                <td>
+                                    {{ preparation.activitesPrincipalesEleves
+                                    ? preparation.activitesPrincipalesEleves|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <span class="phase-name">III. Activités finales</span>
+                                    <span class="phase-detail">Application</span>
+                                </th>
+                                <td>
+                                    {{ preparation.activitesFinalesEnseignant
+                                    ? preparation.activitesFinalesEnseignant|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                                <td>
+                                    {{ preparation.activitesFinalesEleves
+                                    ? preparation.activitesFinalesEleves|nl2br
+                                    : 'Non renseigné' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Évaluation et devoir #}
+                {% if preparation.evaluation or preparation.devoir %}
+                    <h4 class="sheet-title">Évaluation et prolongement</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered sheet-table">
+                            <tbody>
+                                {% if preparation.evaluation %}
+                                    <tr>
+                                        <th style="width:19%">Évaluation</th>
+                                        <td>{{ preparation.evaluation|nl2br }}</td>
+                                    </tr>
+                                {% endif %}
+                                {% if preparation.devoir %}
+                                    <tr>
+                                        <th style="width:19%">Devoir / Prolongement</th>
+                                        <td>{{ preparation.devoir|nl2br }}</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+
+                {# Pied de fiche #}
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 pb-3">
+                    <div class="footer-note">
+                        Document pédagogique — Gestionecole
+                        {% if preparation.createdAt %}
+                            · Fiche créée le {{ preparation.createdAt|date('d/m/Y à H:i') }}
+                        {% endif %}
+                    </div>
+
+                    <a
+                        href="{{ isDirection
+                    ? path('app_preparation_cours_direction')
+                    : path('app_preparation_cours_index')
+                }}"
+                        class="btn btn-outline-secondary btn-sm no-print"
+                    >
+                        <i class="fas fa-arrow-left me-1"></i> Retour
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

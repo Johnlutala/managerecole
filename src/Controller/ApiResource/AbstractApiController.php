@@ -79,12 +79,19 @@ abstract class AbstractApiController extends AbstractController
     
             $payload = $this->jwt->validateAndDecode($token);
     
-            if (count($payload) === 1 || isset($payload['error'])) {
+            if (
+                isset($payload['error'])
+                || !isset($payload['username'], $payload['shortcode'])
+                || !is_string($payload['username'])
+                || $payload['username'] === ''
+                || !is_string($payload['shortcode'])
+                || $payload['shortcode'] === ''
+            ) {
                 
                 return [
                     "status" => false,
-                    "code" => Response::HTTP_FORBIDDEN,
-                    "message" => $payload['error']
+                    "code" => Response::HTTP_UNAUTHORIZED,
+                    "message" => $payload['error'] ?? "Token invalide"
                 ];
             }
     
@@ -97,7 +104,7 @@ abstract class AbstractApiController extends AbstractController
             if (!$user) {
                 return [
                     "status" => false,
-                    "code" => Response::HTTP_FORBIDDEN,
+                    "code" => Response::HTTP_UNAUTHORIZED,
                     "message" => "Utilisateur non autorisé"
                 ];
             }
@@ -135,8 +142,8 @@ abstract class AbstractApiController extends AbstractController
     {
 
         $this->logger->info(
-            "tag : " . $operation,
-            $data
+            "API : " . $operation,
+            ['status' => $status]
         );
 
         return $this->json([
@@ -151,7 +158,7 @@ abstract class AbstractApiController extends AbstractController
     {
         $this->logger->error(
             "tag : " . $operation,
-            $data
+            ['status' => $status, 'message' => $message]
         );
         
         return $this->json([
@@ -163,7 +170,14 @@ abstract class AbstractApiController extends AbstractController
 
     public function getJsonData(Request $request): array
     {
-        return json_decode($request->getContent(), true) ?? [];
+        $data = json_decode($request->getContent(), true);
+
+        return is_array($data) ? $data : [];
+    }
+
+    protected function userHasAnyRole(User $user, array $roles): bool
+    {
+        return array_intersect($roles, $user->getRoles()) !== [];
     }
 
 }

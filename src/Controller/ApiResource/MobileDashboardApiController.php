@@ -13,6 +13,9 @@ use App\Repository\CreneauHoraireRepository;
 use App\Repository\EleveRepository;
 use App\Repository\PresenceRepository;
 use App\Repository\ProfesseurRepository;
+use App\Repository\NoteRepository;
+use App\Repository\PreparationCoursRepository;
+use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +45,7 @@ final class MobileDashboardApiController extends AbstractApiController
             'email' => $user->getEmail(),
             'roles' => $user->getRoles(),
             'espace' => $this->space($user),
-            'profil' => $this->profile($user)
+            'profil' => $this->profile($user),
         ], 'Profil mobile');
     }
 
@@ -60,7 +63,7 @@ final class MobileDashboardApiController extends AbstractApiController
 
         $parent = $auth['user']->getParent();
 
-        if (!$parent)
+        if (!$this->userHasAnyRole($auth['user'], ['ROLE_PARENT']) || !$parent)
             return $this->error(
                 'Cet espace est réservé aux comptes parents.',
                 [],
@@ -68,7 +71,17 @@ final class MobileDashboardApiController extends AbstractApiController
                 Response::HTTP_FORBIDDEN
             );
         return $this->success([
-            'parent' => trim($parent->getNom() . ' ' . $parent->getPostnom() . ' ' . $parent->getPrenom()),
+            'parent' => [
+                'id' => $parent->getId(),
+                'nom' => $parent->getNom(),
+                'postnom' => $parent->getPostnom(),
+                'prenom' => $parent->getPrenom(),
+                'telephone' => $parent->getTelephone(),
+                'email' => $parent->getEmail(),
+                'adresse' => $parent->getAdresse(),
+                'profession' => $parent->getProfession(),
+                'type' => $parent->getType(),
+            ],
             'nombreEnfants' => $parent->getEleve()->count(),
             'enfants' => array_map(fn(Eleve $e) => $this->child($e), $parent->getEleve()->toArray())
         ], 'Enfants du parent');
@@ -93,7 +106,7 @@ final class MobileDashboardApiController extends AbstractApiController
 
         $eleve = $auth['user']->getEleve();
 
-        if (!$eleve) {
+        if (!$this->userHasAnyRole($auth['user'], ['ROLE_ELEVE']) || !$eleve) {
             return $this->error(
                 'Cet espace est réservé aux comptes élèves.',
                 [],
@@ -172,7 +185,7 @@ final class MobileDashboardApiController extends AbstractApiController
             );
         $prof = $auth['user']->getProfesseur();
 
-        if (!$prof)
+        if (!$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR']) || !$prof)
             return $this->error(
                 'Cet espace est réservé aux comptes professeurs.',
                 [],
@@ -186,10 +199,26 @@ final class MobileDashboardApiController extends AbstractApiController
                 'professeur' => [
                     'id' => $prof->getId(),
                     'matricule' => $prof->getMatricule(),
-                    'nom' => trim($prof->getNom() . ' ' . $prof->getPostnom() . ' ' . $prof->getPrenom()),
-                    'ecole' => $prof->getEcole()?->getNom(),
+                    'nom' => $prof->getNom(),
+                    'postnom' => $prof->getPostnom(),
+                    'prenom' => $prof->getPrenom(),
+                    'sexe' => $prof->getSexe(),
+                    'telephone' => $prof->getPhone(),
+                    'email' => $prof->getEmail(),
+                    'adresse' => $prof->getAdresse(),
+                    'dateEmbauche' => $prof->getDateEmbauche()?->format('Y-m-d'),
+                    'grade' => $prof->getGrade(),
+                    'statut' => $prof->getStatut(),
+                    'specialite' => $prof->getSpecialite(),
+                    'ecole' => $prof->getEcole() ? [
+                        'id' => $prof->getEcole()->getId(),
+                        'nom' => $prof->getEcole()->getNom(),
+                        'adresse' => $prof->getEcole()->getAdresse(),
+                        'telephone' => $prof->getEcole()->getPhone(),
+                        'email' => $prof->getEcole()->getEmail(),
+                    ] : null,
                     'section' => $prof->getSection()?->getNom(),
-                    'specialite' => $prof->getSpecialite()
+                    'anneeScolaire' => $prof->getAnneeScolaire()?->getLibelle(),
                 ],
                 'chargeHoraire' => array_map(fn(CreneauHoraire $c) => $this->slot($c), $items)
             ],
@@ -203,7 +232,10 @@ final class MobileDashboardApiController extends AbstractApiController
         EleveRepository $eleves,
         ProfesseurRepository $professeurs,
         ClasseRepository $classes,
-        PresenceRepository $presences
+        PresenceRepository $presences,
+        NoteRepository $notes,
+        PreparationCoursRepository $preparations,
+        UserRepository $users
     ): JsonResponse {
 
         $auth = $this->checkAuthentication($request);
@@ -234,6 +266,9 @@ final class MobileDashboardApiController extends AbstractApiController
                 'elevesActifs' => $eleves->count(['statut' => true, 'deleted' => false]),
                 'professeursActifs' => $professeurs->count(['deleted' => false]),
                 'classesActives' => $classes->count(['deleted' => false]),
+                'utilisateursActifs' => $users->count(['enabled' => true, 'deleted' => false]),
+                'notesAValider' => $notes->countByStatus('soumise'),
+                'preparationsAValider' => $preparations->countSoumises(),
                 'presencesElevesAujourdhui' => $presences->count(['date' => $today, 'deleted' => false]),
                 'presencesValideesAujourdhui' => $presences->createQueryBuilder('p')
                     ->select('COUNT(p.id)')
@@ -266,12 +301,39 @@ final class MobileDashboardApiController extends AbstractApiController
         return $u->getEleve() ?
             $this->child($u->getEleve()) : ($u->getParent() ? [
                 'id' => $u->getParent()->getId(),
+                'nom' => $u->getParent()->getNom(),
+                'postnom' => $u->getParent()->getPostnom(),
+                'prenom' => $u->getParent()->getPrenom(),
                 'telephone' => $u->getParent()->getTelephone(),
+                'email' => $u->getParent()->getEmail(),
+                'adresse' => $u->getParent()->getAdresse(),
+                'profession' => $u->getParent()->getProfession(),
+                'type' => $u->getParent()->getType(),
                 'nombreEnfants' => $u->getParent()->getEleve()->count()
             ] : ($u->getProfesseur() ? [
                 'id' => $u->getProfesseur()->getId(),
                 'matricule' => $u->getProfesseur()->getMatricule(),
-                'ecole' => $u->getProfesseur()->getEcole()?->getNom()
+                'nom' => $u->getProfesseur()->getNom(),
+                'postnom' => $u->getProfesseur()->getPostnom(),
+                'prenom' => $u->getProfesseur()->getPrenom(),
+                'sexe' => $u->getProfesseur()->getSexe(),
+                'dateNaissance' => $u->getProfesseur()->getDateNaissance()?->format('Y-m-d'),
+                'telephone' => $u->getProfesseur()->getPhone(),
+                'email' => $u->getProfesseur()->getEmail(),
+                'adresse' => $u->getProfesseur()->getAdresse(),
+                'dateEmbauche' => $u->getProfesseur()->getDateEmbauche()?->format('Y-m-d'),
+                'specialite' => $u->getProfesseur()->getSpecialite(),
+                'grade' => $u->getProfesseur()->getGrade(),
+                'statut' => $u->getProfesseur()->getStatut(),
+                'ecole' => $u->getProfesseur()->getEcole() ? [
+                    'id' => $u->getProfesseur()->getEcole()->getId(),
+                    'nom' => $u->getProfesseur()->getEcole()->getNom(),
+                    'adresse' => $u->getProfesseur()->getEcole()->getAdresse(),
+                    'telephone' => $u->getProfesseur()->getEcole()->getPhone(),
+                    'email' => $u->getProfesseur()->getEcole()->getEmail(),
+                ] : null,
+                'section' => $u->getProfesseur()->getSection()?->getNom(),
+                'anneeScolaire' => $u->getProfesseur()->getAnneeScolaire()?->getLibelle(),
             ] : []));
     }
 
@@ -282,7 +344,19 @@ final class MobileDashboardApiController extends AbstractApiController
             'matricule' => $e->getMatricule(),
             'nom' => trim($e->getNom() . ' ' . $e->getPostnom() . ' ' . $e->getPrenom()),
             'classe' => $e->getClasse()?->getNom(),
-            'ecole' => $e->getEcole()?->getNom()
+            'option' => $e->getOption()?->getNom(),
+            'sexe' => $e->getSexe(),
+            'dateNaissance' => $e->getDateNaissance()?->format('Y-m-d'),
+            'lieuNaissance' => $e->getLieuNaissance(),
+            'telephone' => $e->getPhone(),
+            'email' => $e->getEmail(),
+            'ecole' => $e->getEcole() ? [
+                'id' => $e->getEcole()->getId(),
+                'nom' => $e->getEcole()->getNom(),
+                'adresse' => $e->getEcole()->getAdresse(),
+                'telephone' => $e->getEcole()->getPhone(),
+                'email' => $e->getEcole()->getEmail(),
+            ] : null
         ];
     }
 

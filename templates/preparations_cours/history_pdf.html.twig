@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 22mm 15mm 18mm; }
+        body { font-family: "DejaVu Sans", sans-serif; font-size: 10px; color: #222; }
+        h1 { font-size: 17px; text-align: center; margin: 0 0 14px; }
+        h2 { font-size: 12px; margin: 14px 0 7px; }
+        .fiche { page-break-after: always; }
+        .fiche:last-child { page-break-after: auto; }
+        .meta, .facts, .steps { border-collapse: collapse; width: 100%; }
+        .meta { margin-bottom: 12px; }
+        .meta td { padding: 4px; border: 1px solid #777; width: 50%; }
+        .facts td, .steps th, .steps td { border: 1px solid #666; padding: 6px; vertical-align: top; white-space: pre-line; }
+        .facts .label, .steps th { background: #eee; font-weight: bold; }
+        .facts .label { width: 25%; }
+        .steps { table-layout: fixed; }
+        .steps .stage { width: 16%; }
+    </style>
+</head>
+<body>
+{% set statuts = {'brouillon': 'Brouillon', 'soumise': 'Soumise à la direction', 'validee': 'Validée', 'a_corriger': 'À corriger'} %}
+{% for preparation in preparations %}
+    <section class="fiche">
+        <h1>FICHE DE PRÉPARATION N°{{ preparation.numero }}</h1>
+        <table class="meta">
+            <tr><td><strong>École :</strong> {{ preparation.cours.classe.ecole.nom }}</td><td><strong>Enseignant :</strong> {{ preparation.professeur.prenom }} {{ preparation.professeur.nom }} {{ preparation.professeur.postnom }}</td></tr>
+            <tr><td><strong>Classe :</strong> {{ preparation.cours.classe.nom }}</td><td><strong>Cours :</strong> {{ preparation.cours.nom }}</td></tr>
+            <tr><td><strong>Date de la leçon :</strong> {{ preparation.dateCours|date('d/m/Y') }}{% if preparation.createdAt %}<br><strong>Préparée le :</strong> {{ preparation.createdAt|date('d/m/Y') }}{% endif %}</td><td><strong>Jour / heure :</strong> {{ preparation.jour }}{% if preparation.heureDebut %} {{ preparation.heureDebut|date('H:i') }}–{{ preparation.heureFin|date('H:i') }}{% endif %}</td></tr>
+            <tr><td colspan="2"><strong>Sujet :</strong> {{ preparation.sujet }}</td></tr>
+        </table>
+        <table class="facts">
+            {% for label, value in {
+                'Référence / sous-branche': preparation.reference,
+                'Objectif général': preparation.objectifGeneral,
+                'Objectifs spécifiques': preparation.objectifsSpecifiques,
+                'Matière à enseigner': preparation.matiere,
+                'Méthode / procédé': preparation.methode,
+                'Matériel didactique': preparation.materielDidactique
+            } %}
+                {% if value %}<tr><td class="label">{{ label }}</td><td>{{ value|nl2br }}</td></tr>{% endif %}
+            {% endfor %}
+        </table>
+        <h2>DÉROULEMENT DE LA LEÇON</h2>
+        <table class="steps">
+            <thead><tr><th class="stage">Étapes</th><th>Activités de l’enseignant</th><th>Activités des élèves</th></tr></thead>
+            <tbody>
+                <tr><th>Activités initiales</th><td>{{ preparation.activitesInitialesEnseignant|nl2br }}</td><td>{{ preparation.activitesInitialesEleves|nl2br }}</td></tr>
+                <tr><th>Activités principales</th><td>{{ preparation.activitesPrincipalesEnseignant|nl2br }}</td><td>{{ preparation.activitesPrincipalesEleves|nl2br }}</td></tr>
+                <tr><th>Activités finales</th><td>{{ preparation.activitesFinalesEnseignant|nl2br }}</td><td>{{ preparation.activitesFinalesEleves|nl2br }}</td></tr>
+            </tbody>
+        </table>
+        <table class="facts" style="margin-top: 12px">
+            {% if preparation.evaluation %}<tr><td class="label">Évaluation</td><td>{{ preparation.evaluation|nl2br }}</td></tr>{% endif %}
+            {% if preparation.devoir %}<tr><td class="label">Devoir / prolongement</td><td>{{ preparation.devoir|nl2br }}</td></tr>{% endif %}
+        </table>
+        <p><strong>État :</strong> {{ statuts[preparation.statut] ?? preparation.statut }}{% if preparation.commentaireDirection %} — <strong>Commentaire de la direction :</strong> {{ preparation.commentaireDirection }}{% endif %}</p>
+    </section>
+{% endfor %}
+</body>
+</html>

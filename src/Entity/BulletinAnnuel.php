@@ -57,7 +57,7 @@ class BulletinAnnuel
      *     cours_id?: int|null,
      *     cours: string,
      *     domaine: ?string,
-     *     evaluations: array<int, array{periode: string, libelle?: string, semestre?: string, cote: int, bareme: int, provisoire?: bool, autorisee?: bool}>,
+     *     evaluations: array<int, array{periode: string, ordre?: int, libelle?: string, semestre?: string, cote: int, bareme: int, provisoire?: bool, autorisee?: bool}>,
      *     total_cotes: int,
      *     total_baremes: int,
      *     pourcentage: string
@@ -206,7 +206,7 @@ class BulletinAnnuel
      * @param array<int, array{
      *     cours_id?: int|null,
      *     cours: string,
-     *     evaluations: array<int, array{periode: string, libelle?: string, semestre?: string, cote: int, bareme: int, provisoire?: bool, autorisee?: bool}>,
+     *     evaluations: array<int, array{periode: string, ordre?: int, libelle?: string, semestre?: string, cote: int, bareme: int, provisoire?: bool, autorisee?: bool}>,
      *     total_cotes: int,
      *     total_baremes: int,
      *     pourcentage: string

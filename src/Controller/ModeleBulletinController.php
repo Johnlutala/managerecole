@@ -65,7 +65,7 @@ final class ModeleBulletinController extends AbstractController
 
         $sections = array_values(array_filter(
             $sectionRepository->findBy(['deleted' => false], ['nom' => 'ASC']),
-            static fn ($section): bool => !$section->isDeleted()
+            static fn($section): bool => !$section->isDeleted()
         ));
         $sectionId = $request->query->getInt('section') ?: null;
         $selectedSection = null;
@@ -80,7 +80,7 @@ final class ModeleBulletinController extends AbstractController
             ? []
             : array_values(array_filter(
                 $classeRepository->findBy(['section' => $selectedSection], ['nom' => 'ASC']),
-                static fn ($classe): bool => !$classe->isDeleted()
+                static fn($classe): bool => !$classe->isDeleted()
             ));
         $classId = $request->query->getInt('classe') ?: null;
         $selectedClass = null;
@@ -95,7 +95,7 @@ final class ModeleBulletinController extends AbstractController
             ? []
             : array_values(array_filter(
                 $optionRepository->findBy(['classe' => $selectedClass], ['nom' => 'ASC']),
-                static fn ($option): bool => !$option->isDeleted()
+                static fn($option): bool => !$option->isDeleted()
             ));
         $optionId = $request->query->getInt('option') ?: null;
         $selectedOption = null;
@@ -123,6 +123,14 @@ final class ModeleBulletinController extends AbstractController
             'contexte_selectionne' => $selectedSection !== null
                 && $selectedClass !== null
                 && $selectedOption !== null,
+        ]);
+    }
+
+    #[Route('/{id}/apercu', name: 'app_modele_bulletin_apercu', methods: ['GET'])]
+    public function apercu(ModeleBulletin $modeleBulletin): Response
+    {
+        return $this->render('modele_bulletin/apercu.html.twig', [
+            'modele' => $modeleBulletin,
         ]);
     }
 

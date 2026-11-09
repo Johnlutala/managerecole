@@ -1,0 +1,786 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Fiche de préparation pédagogique{% endblock %}
+
+{% block body %}
+
+<style>
+    .lesson-form {
+        --lf-primary: #253b60;
+        --lf-border: #e5eaf0;
+        --lf-muted: #718096;
+    }
+
+    .lesson-form .page-title {
+        color: var(--lf-primary);
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .lesson-form .form-card {
+        background: #fff;
+        border: 1px solid var(--lf-border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 22px;
+        box-shadow: 0 3px 12px rgba(31,45,61,.035);
+    }
+
+    .lesson-form .form-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--lf-border);
+        background: #fff;
+    }
+
+    .lesson-form .header-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #edf3fc;
+        color: #3568a8;
+    }
+
+    .lesson-form .form-card-header h5 {
+        color: var(--lf-primary);
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .lesson-form .form-card-header small {
+        display: block;
+        color: #8995a5;
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .lesson-form .form-card-body {
+        padding: 22px;
+    }
+
+    .lesson-form .school-info {
+        background: #f7f9fc;
+        border: 1px solid var(--lf-border);
+        border-radius: 9px;
+        padding: 15px 18px;
+        margin-bottom: 20px;
+    }
+
+    .lesson-form .school-info .info-label {
+        color: #8b98a9;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .lesson-form .school-info .info-value {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .lesson-form label {
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 7px;
+    }
+
+    .lesson-form .form-control,
+    .lesson-form .form-select {
+        border-color: #dfe5ed;
+        border-radius: 7px;
+        font-size: 13px;
+        min-height: 40px;
+    }
+
+    .lesson-form textarea.form-control {
+        min-height: 110px;
+        line-height: 1.7;
+        resize: vertical;
+    }
+
+    .lesson-form .form-control:focus,
+    .lesson-form .form-select:focus {
+        border-color: #7698c4;
+        box-shadow: 0 0 0 3px rgba(53,104,168,.09);
+    }
+
+    .lesson-form .phase-title {
+        color: var(--lf-primary);
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .lesson-form .phase-description {
+        color: #8a96a6;
+        font-size: 11px;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .lesson-form .phase-number {
+        display: inline-flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #edf3fc;
+        color: #3568a8;
+        font-weight: 700;
+        font-size: 12px;
+        margin-right: 8px;
+    }
+
+    .lesson-form .phase-row {
+        background: #fafbfd;
+        border: 1px solid #edf0f4;
+        border-radius: 9px;
+        padding: 17px;
+        margin-bottom: 15px;
+    }
+
+    .lesson-form .phase-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .lesson-form .activity-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #52647b;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .lesson-form .activity-label i {
+        color: #5479a5;
+    }
+
+    .lesson-form .section-intro {
+        background: #f0f5fc;
+        border-left: 3px solid #3568a8;
+        border-radius: 5px;
+        padding: 12px 15px;
+        color: #52647b;
+        font-size: 12px;
+        line-height: 1.7;
+        margin-bottom: 18px;
+    }
+
+    .lesson-form .btn-primary {
+        background: var(--lf-primary);
+        border-color: var(--lf-primary);
+    }
+
+    .lesson-form .btn-primary:hover {
+        background: #1c2d49;
+    }
+
+    .lesson-form .required-mark {
+        color: #dc3545;
+    }
+
+    @media(max-width:767px) {
+        .lesson-form .form-card-body {
+            padding: 15px;
+        }
+
+        .lesson-form .page-title {
+            font-size: 19px;
+        }
+
+        .lesson-form .phase-row {
+            padding: 13px;
+        }
+    }
+</style>
+
+<div class="wrapper">
+    <div class="content-page">
+        <div class="container-fluid py-4 lesson-form">
+
+            {# ================================================= #}
+            {# EN-TÊTE #}
+            {# ================================================= #}
+
+            <div class="mb-4">
+
+                <a href="{{ preparation.id
+                    ? path('app_preparation_cours_show', {id: preparation.id})
+                    : path('app_preparation_cours_index')
+                }}" class="btn btn-sm btn-outline-secondary mb-3">
+
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Retour
+
+                </a>
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fas fa-graduation-cap text-primary"></i>
+                    <small class="text-muted fw-semibold text-uppercase">
+                        Espace pédagogique
+                    </small>
+                </div>
+
+                <h2 class="page-title mb-1">
+                    {{ preparation.id
+                        ? 'Modifier la préparation n°' ~ preparation.numero
+                        : 'Nouvelle fiche de préparation'
+                    }}
+                </h2>
+
+                <p class="text-muted small mb-0">
+                    Complétez les différentes rubriques de votre fiche pédagogique.
+                </p>
+
+            </div>
+
+            {{ form_start(form) }}
+
+            {{ form_errors(form) }}
+
+            {# ================================================= #}
+            {# 01 - IDENTIFICATION #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+
+                    <div>
+                        <h5>Identification de la leçon</h5>
+                        <small>Informations relatives à l'établissement et à la séance.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    {# Informations récupérées automatiquement #}
+
+                    <div class="school-info">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <div class="info-label">Nom de l'école</div>
+                                <div class="info-value">
+                                    <i class="fas fa-school text-primary me-1"></i>
+                                    {{ cours.classe.ecole.nom }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="info-label">Nom de l'enseignant</div>
+                                <div class="info-value">
+                                    <i class="fas fa-user-tie text-primary me-1"></i>
+                                    {{ preparation.professeur.prenom }}
+                                    {{ preparation.professeur.nom }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="info-label">Branche / Cours</div>
+                                <div class="info-value">
+                                    <i class="fas fa-book text-primary me-1"></i>
+                                    {{ cours.nom }}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="info-label">Classe</div>
+                                <div class="info-value">
+                                    <i class="fas fa-users text-primary me-1"></i>
+                                    {{ cours.classe.nom }}
+                                    {% if cours.option %}
+                                        — {{ cours.option.nom }}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            {{ form_row(form.dateCours, {
+                                label: 'Date de la leçon'
+                            }) }}
+                        </div>
+
+                        <div class="col-md-3">
+                            {{ form_row(form.jour, {
+                                label: 'Jour'
+                            }) }}
+                        </div>
+
+                        <div class="col-md-3">
+                            {{ form_row(form.heureDebut, {
+                                label: 'Heure de début'
+                            }) }}
+                        </div>
+
+                        <div class="col-md-3">
+                            {{ form_row(form.heureFin, {
+                                label: 'Heure de fin'
+                            }) }}
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 02 - MATIERE ET SUJET #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+
+                    <div>
+                        <h5>Matière et sujet de la leçon</h5>
+                        <small>Définition du contenu à enseigner.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            {{ form_row(form.reference, {
+                                label: 'Sujet de rappel / Référence / Sous-branche',
+                                attr: {
+                                    placeholder: 'Ex. : Le complément d’objet direct...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ form_row(form.sujet, {
+                                label: 'Sujet du jour',
+                                attr: {
+                                    placeholder: 'Ex. : Le complément circonstanciel de temps...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-4">
+                            {{ form_row(form.matiere, {
+                                label: 'Matière à enseigner',
+                                attr: {
+                                    placeholder: 'Contenu ou notions à enseigner...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-4">
+                            {{ form_row(form.methode, {
+                                label: 'Méthode / Procédé',
+                                attr: {
+                                    placeholder: 'Ex. : Active et participative...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-4">
+                            {{ form_row(form.materielDidactique, {
+                                label: 'Matériel didactique',
+                                attr: {
+                                    placeholder: 'Ex. : Tableau, craie, images...'
+                                }
+                            }) }}
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 03 - OBJECTIF OPERATIONNEL #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+
+                    <div>
+                        <h5>Objectif opérationnel</h5>
+                        <small>Compétences et capacités attendues à la fin de la leçon.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="section-intro">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Formulez l'objectif en commençant idéalement par :
+                        « À la fin de la leçon, l'élève sera capable de... »
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            {{ form_row(form.objectifGeneral, {
+                                label: 'Objectif opérationnel',
+                                attr: {
+                                    rows: 4,
+                                    placeholder: 'À la fin de la leçon, l’élève sera capable de...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ form_row(form.objectifsSpecifiques, {
+                                label: 'Objectifs spécifiques / Indicateurs de réussite',
+                                attr: {
+                                    rows: 4,
+                                    placeholder: 'Précisez les différentes capacités attendues...'
+                                }
+                            }) }}
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 04 - ACTIVITES INITIALES #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+
+                    <div>
+                        <h5>I. Activités initiales</h5>
+                        <small>Rappel, motivation et introduction de la nouvelle leçon.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="section-intro">
+                        Cette phase comprend généralement le rappel de la leçon précédente,
+                        la motivation des élèves, l'annonce du sujet et celle de l'objectif opérationnel.
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">01</span>
+                            Activités de l'enseignant
+                        </div>
+
+                        <p class="phase-description">
+                            Décrivez les questions de rappel, les situations de motivation,
+                            l'annonce du sujet et de l'objectif.
+                        </p>
+
+                        {{ form_widget(form.activitesInitialesEnseignant, {
+                            attr: {
+                                rows: 7,
+                                placeholder: 'RAPPEL : ...\nMOTIVATION : ...\nANNONCE DU SUJET : ...\nANNONCE DE L’OBJECTIF : ...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesInitialesEnseignant) }}
+
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">02</span>
+                            Activités des élèves
+                        </div>
+
+                        <p class="phase-description">
+                            Décrivez les réponses, les observations, les réactions
+                            et les interventions attendues des élèves.
+                        </p>
+
+                        {{ form_widget(form.activitesInitialesEleves, {
+                            attr: {
+                                rows: 7,
+                                placeholder: 'Réponses aux questions de rappel...\nObservations...\nParticipation à la motivation...\nRépétition du sujet et de l’objectif...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesInitialesEleves) }}
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 05 - ACTIVITES PRINCIPALES #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+
+                    <div>
+                        <h5>II. Activités principales</h5>
+                        <small>Développement, analyse et synthèse de la matière.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="section-intro">
+                        Cette phase constitue le cœur de la leçon.
+                        L'enseignant développe la matière, guide les apprentissages,
+                        pose des questions et conduit les élèves vers la synthèse.
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">01</span>
+                            Activités de l'enseignant
+                        </div>
+
+                        <p class="phase-description">
+                            Présentez les explications, les démonstrations,
+                            les questions d'analyse et la synthèse.
+                        </p>
+
+                        {{ form_widget(form.activitesPrincipalesEnseignant, {
+                            attr: {
+                                rows: 9,
+                                placeholder: 'ANALYSE : ...\n\nDéveloppement de la matière...\nQuestions posées aux élèves...\nExplications et exemples...\n\nSYNTHÈSE : ...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesPrincipalesEnseignant) }}
+
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">02</span>
+                            Activités des élèves
+                        </div>
+
+                        <p class="phase-description">
+                            Décrivez les observations, les réponses,
+                            les exercices et la formulation de la synthèse par les élèves.
+                        </p>
+
+                        {{ form_widget(form.activitesPrincipalesEleves, {
+                            attr: {
+                                rows: 9,
+                                placeholder: 'Observations et participation...\nRéponses aux questions...\nExécution des exercices...\nFormulation de la synthèse...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesPrincipalesEleves) }}
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 06 - ACTIVITES FINALES #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+
+                    <div>
+                        <h5>III. Activités finales</h5>
+                        <small>Application et vérification des acquis.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="section-intro">
+                        Cette dernière phase permet de vérifier si les élèves
+                        ont effectivement atteint l'objectif opérationnel fixé.
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">01</span>
+                            Activités de l'enseignant
+                        </div>
+
+                        <p class="phase-description">
+                            Présentez les exercices d'application,
+                            les consignes et les questions d'évaluation.
+                        </p>
+
+                        {{ form_widget(form.activitesFinalesEnseignant, {
+                            attr: {
+                                rows: 6,
+                                placeholder: 'APPLICATION : ...\nExercices proposés...\nQuestions de vérification...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesFinalesEnseignant) }}
+
+                    </div>
+
+                    <div class="phase-row">
+
+                        <div class="phase-title">
+                            <span class="phase-number">02</span>
+                            Activités des élèves
+                        </div>
+
+                        <p class="phase-description">
+                            Décrivez la manière dont les élèves exécutent les exercices
+                            et démontrent les connaissances acquises.
+                        </p>
+
+                        {{ form_widget(form.activitesFinalesEleves, {
+                            attr: {
+                                rows: 6,
+                                placeholder: 'Réponses des élèves...\nRésolution des exercices...\nDémonstration des acquis...'
+                            }
+                        }) }}
+
+                        {{ form_errors(form.activitesFinalesEleves) }}
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# 07 - EVALUATION ET PROLONGEMENT #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-header">
+                    <div class="header-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+
+                    <div>
+                        <h5>Évaluation et prolongement</h5>
+                        <small>Vérification des acquis et travail à poursuivre.</small>
+                    </div>
+                </div>
+
+                <div class="form-card-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            {{ form_row(form.evaluation, {
+                                label: 'Évaluation',
+                                attr: {
+                                    rows: 5,
+                                    placeholder: 'Questions ou exercices permettant de vérifier les acquis...'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ form_row(form.devoir, {
+                                label: 'Devoir / Prolongement',
+                                attr: {
+                                    rows: 5,
+                                    placeholder: 'Travail à domicile ou activité de prolongement...'
+                                }
+                            }) }}
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {# ================================================= #}
+            {# ACTIONS #}
+            {# ================================================= #}
+
+            <div class="form-card">
+
+                <div class="form-card-body">
+
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <div>
+                            <div class="fw-bold text-dark mb-1">
+                                <i class="fas fa-save text-primary me-1"></i>
+                                Enregistrement de la préparation
+                            </div>
+
+                            <small class="text-muted">
+                                Votre fiche sera enregistrée comme brouillon.
+                                Vous pourrez ensuite la soumettre à la direction.
+                            </small>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+
+                            <a href="{{ preparation.id
+                                ? path('app_preparation_cours_show', {id: preparation.id})
+                                : path('app_preparation_cours_index')
+                            }}" class="btn btn-outline-secondary">
+                                Annuler
+                            </a>
+
+                            <button class="btn btn-primary px-4" type="submit">
+                                <i class="fas fa-save me-1"></i>
+                                Enregistrer le brouillon
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

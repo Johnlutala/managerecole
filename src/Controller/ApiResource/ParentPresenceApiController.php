@@ -30,7 +30,7 @@ final class ParentPresenceApiController extends AbstractApiController
         $parent = $this->em->getRepository(Parents::class)
             ->findOneBy(['user' => $authentication['user']]);
 
-        if (!$parent)
+        if (!$this->userHasAnyRole($authentication['user'], ['ROLE_PARENT']) || !$parent)
             return $this->error(
                 'Aucun profil parent associé à ce compte.',
                 [],
@@ -38,8 +38,27 @@ final class ParentPresenceApiController extends AbstractApiController
                 Response::HTTP_FORBIDDEN
             );
 
-        $from = new \DateTime($request->query->get('from', 'first day of this month'));
-        $to = new \DateTime($request->query->get('to', 'today'));
+        $fromValue = $request->query->get('from', (new \DateTimeImmutable('first day of this month'))->format('Y-m-d'));
+        $toValue = $request->query->get('to', (new \DateTimeImmutable('today'))->format('Y-m-d'));
+        $from = is_string($fromValue) ? \DateTime::createFromFormat('!Y-m-d', $fromValue) : false;
+        $to = is_string($toValue) ? \DateTime::createFromFormat('!Y-m-d', $toValue) : false;
+        $fromErrors = \DateTime::getLastErrors();
+        $toErrors = \DateTime::getLastErrors();
+        if (
+            $from === false
+            || $to === false
+            || ($fromErrors !== false && ($fromErrors['warning_count'] > 0 || $fromErrors['error_count'] > 0))
+            || ($toErrors !== false && ($toErrors['warning_count'] > 0 || $toErrors['error_count'] > 0))
+            || $from > $to
+            || $from->diff($to)->days > 366
+        ) {
+            return $this->error(
+                'La période doit utiliser le format AAAA-MM-JJ, être cohérente et ne pas dépasser un an.',
+                [],
+                'Rapport parent',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
         $to->setTime(23, 59, 59);
         $children = [];
         foreach ($parent->getEleve() as $eleve) {

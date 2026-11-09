@@ -77,8 +77,39 @@
                     </form>
 
                     <div class="border rounded p-3 mb-3">
+                        <h6 class="mb-1">Période à calculer</h6>
+                        {% if ecole %}
+                            <p class="small text-muted mb-2">Choisissez une seule période. Une période ne peut être calculée qu’après les périodes précédentes.</p>
+                            <div class="d-flex flex-wrap gap-3">
+                                {% for periode in periodes %}
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input bulletin-period-choice"
+                                            type="checkbox"
+                                            name="periode"
+                                            id="bulletin-periode-{{ loop.index }}"
+                                            value="{{ periode.nom }}"
+                                            {{ not periode.autorisee ? 'disabled' : '' }}
+                                        >
+                                        <label class="form-check-label" for="bulletin-periode-{{ loop.index }}">
+                                            {{ periode.libelle }} <span class="text-muted">({{ periode.semestre }})</span>
+                                            {% if not periode.autorisee %}
+                                                <span class="badge bg-secondary-subtle text-secondary">Non autorisée</span>
+                                            {% endif %}
+                                        </label>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Aucune période n’est configurée pour cette école.</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="small text-muted mb-0">Choisissez une école pour afficher ses périodes.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="border rounded p-3 mb-3">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                            <h6 class="mb-0">Cotes validées à intégrer à la période autorisée</h6>
+                            <h6 class="mb-0">Cotes validées disponibles pour le calcul</h6>
                             <span class="badge bg-success-subtle text-success">{{ cotes_validees|length }} évaluation(s) avec des cotes validées</span>
                         </div>
                         <div class="table-responsive">
@@ -113,18 +144,19 @@
                         </div>
                     </div>
 
-                    <form method="post" action="{{ path('app_bulletin_calculer') }}" class="d-flex justify-content-end">
+                    <form id="bulletin-calculation-form" method="post" action="{{ path('app_bulletin_calculer') }}" class="d-flex justify-content-end">
                         <input type="hidden" name="_token" value="{{ csrf_token('calculer_bulletins_annuels') }}">
                         <input type="hidden" name="ecole" value="{{ ecole ? ecole.id : '' }}">
                         <input type="hidden" name="annee" value="{{ annee ? annee.id : '' }}">
                         <input type="hidden" name="section" value="{{ section ? section.id : '' }}">
                         <input type="hidden" name="classe" value="{{ classe ? classe.id : '' }}">
                         <input type="hidden" name="option" value="{{ option ? option.id : '' }}">
-                        <button class="btn btn-primary" type="submit" {{ not ecole or not annee ? 'disabled' : '' }}>
-                            <i data-lucide="calculator" class="me-1"></i>Calculer la période autorisée
+                        <input type="hidden" id="bulletin-selected-period" name="periode" value="">
+                        <button class="btn btn-primary" type="submit" {{ not ecole or not annee or (periodes|filter(periode => periode.autorisee)|length == 0) ? 'disabled' : '' }}>
+                            <i data-lucide="calculator" class="me-1"></i>Calculer la période sélectionnée
                         </button>
                     </form>
-                    <p class="small text-muted text-end mt-2 mb-0">Une seule période est calculée par lancement. La période précédente doit d’abord être calculée.</p>
+                    <p class="small text-muted text-end mt-2 mb-0">Les périodes précédentes doivent d’abord être calculées.</p>
                 </div>
             </div>
 
@@ -192,10 +224,39 @@
             const section = document.getElementById('bulletin-section');
             const classSelect = document.getElementById('bulletin-classe');
             const option = document.getElementById('bulletin-option');
+            const calculationForm = document.getElementById('bulletin-calculation-form');
+            const selectedPeriod = document.getElementById('bulletin-selected-period');
+            const periodChoices = document.querySelectorAll('.bulletin-period-choice');
 
-            if (!form || !school || !year || !section || !classSelect || !option) {
+            if (!form || !school || !year || !section || !classSelect || !option || !calculationForm || !selectedPeriod) {
                 return;
             }
+
+            periodChoices.forEach((choice) => {
+                choice.addEventListener('change', () => {
+                    if (choice.checked) {
+                        periodChoices.forEach((otherChoice) => {
+                            if (otherChoice !== choice) {
+                                otherChoice.checked = false;
+                            }
+                        });
+                    }
+                    selectedPeriod.value = choice.checked ? choice.value : '';
+                });
+            });
+            calculationForm.addEventListener('submit', (event) => {
+                if (!selectedPeriod.value) {
+                    event.preventDefault();
+                    const firstAvailable = Array.from(periodChoices).find((choice) => !choice.disabled);
+                    if (firstAvailable) {
+                        firstAvailable.setCustomValidity('Cochez la période à calculer.');
+                        firstAvailable.reportValidity();
+                    }
+                }
+            });
+            periodChoices.forEach((choice) => {
+                choice.addEventListener('change', () => choice.setCustomValidity(''));
+            });
 
             school.addEventListener('change', () => {
                 year.value = '';

@@ -58,31 +58,62 @@
 
 				{% if is_granted('ROLE_ADMIN') %}
 					<li class="side-nav-title">MODÈLES</li>
+
 					<li class="side-nav-item">
-						<a data-bs-toggle="collapse" href="#sidebarModeles" class="side-nav-link" aria-expanded="false">
+						<a
+							data-bs-toggle="collapse"
+							href="#sidebarModeles"
+							class="side-nav-link"
+							aria-expanded="false"
+						>
 							<span class="menu-icon"><i data-lucide="files"></i></span>
-							<span class="menu-text">Modèle</span>
+							<span class="menu-text">Modèles</span>
 						</a>
+
 						<div class="collapse" id="sidebarModeles">
 							<ul class="sub-menu">
-								<li class="side-nav-item"><a href="{{ path('app_modele_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Bulletin</span></a></li>
-								<li class="side-nav-item"><a href="{{ path('app_fiche_cotation_index') }}" class="side-nav-link"><span class="menu-text">Fiche de cotation</span></a></li>
+
 								<li class="side-nav-item">
-									<a data-bs-toggle="collapse" href="#sidebarModelesAutres" class="side-nav-link" aria-expanded="false">
-										<span class="menu-text">Autres</span>
+									<a
+										href="{{ path('app_fiche_cotation_index') }}"
+										class="side-nav-link"
+									>
+										<span class="menu-text">Fiche de cotation</span>
 									</a>
-									<div class="collapse" id="sidebarModelesAutres">
-										<ul class="sub-menu">
-											<li class="side-nav-item"><a href="{{ path('app_eleve_index') }}" class="side-nav-link"><span class="menu-text">Carte / fiche élève</span></a></li>
-											<li class="side-nav-item"><a href="{{ path('app_configuration_bulletin_index') }}" class="side-nav-link"><span class="menu-text">Configuration des semestres</span></a></li>
-											<li class="side-nav-item"><a href="{{ path('app_evaluation_index') }}" class="side-nav-link"><span class="menu-text">Cotations des cours</span></a></li>
-										</ul>
-									</div>
 								</li>
+
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_modele_bulletin_index') }}"
+										class="side-nav-link"
+									>
+										<span class="menu-text">Modèles de bulletins</span>
+									</a>
+								</li>
+
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_configuration_bulletin_index') }}"
+										class="side-nav-link"
+									>
+										<span class="menu-text">Configuration des semestres</span>
+									</a>
+								</li>
+
+								<li class="side-nav-item">
+									<a
+										href="{{ path('app_evaluation_index') }}"
+										class="side-nav-link"
+									>
+										<span class="menu-text">Cotations des cours</span>
+									</a>
+								</li>
+
 							</ul>
 						</div>
 					</li>
 				{% endif %}
+
 
 				{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_PROFESSEUR') %}
 					<li class="side-nav-title">ESPACE MATIÈRE</li>
@@ -100,7 +131,11 @@
 								{% endif %}
 								{% if is_granted('ROLE_PROFESSEUR') %}
 									<li class="side-nav-item"><a href="{{ path('app_professeur_notes_index') }}" class="side-nav-link"><span class="menu-text">Cotation des élèves</span></a></li>
+									<li class="side-nav-item"><a href="{{ path('app_preparation_cours_index') }}" class="side-nav-link"><span class="menu-text">Préparations de cours</span></a></li>
 									<li class="side-nav-item"><a href="{{ path('app_professeur_messages_index') }}" class="side-nav-link"><span class="menu-text">Messages de l’administration</span></a></li>
+								{% endif %}
+								{% if is_granted('ROLE_ADMIN') %}
+									<li class="side-nav-item"><a href="{{ path('app_preparation_cours_direction') }}" class="side-nav-link"><span class="menu-text">Validation des préparations</span></a></li>
 								{% endif %}
 							</ul>
 						</div>
@@ -182,198 +217,198 @@
 						</div>
 					</div>
 				{% else %}
-				<div class="topbar-item">
-					<div class="dropdown">
-						<button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
-							<i data-lucide="bell" class="fs-xxl"></i>
-							<span class="badge text-bg-danger badge-circle topbar-badge">5</span>
-						</button>
+					<div class="topbar-item">
+						<div class="dropdown">
+							<button class="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
+								<i data-lucide="bell" class="fs-xxl"></i>
+								<span class="badge text-bg-danger badge-circle topbar-badge">5</span>
+							</button>
 
-						<div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
-							<div class="px-3 py-2 border-bottom">
-								<div class="row align-items-center">
-									<div class="col">
-										<h6 class="m-0 fs-md fw-semibold">Notifications</h6>
+							<div class="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+								<div class="px-3 py-2 border-bottom">
+									<div class="row align-items-center">
+										<div class="col">
+											<h6 class="m-0 fs-md fw-semibold">Notifications</h6>
+										</div>
+										<div class="col text-end">
+											<a href="#!" class="badge badge-soft-success badge-label py-1">07 Notifications</a>
+										</div>
 									</div>
-									<div class="col text-end">
-										<a href="#!" class="badge badge-soft-success badge-label py-1">07 Notifications</a>
+								</div>
+
+								<div
+									style="max-height: 300px;"
+									data-simplebar
+								>
+									<!-- Notification 1 -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<img src="assets/images/users/user-4.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+												<span class="position-absolute rounded-pill bg-success notification-badge">
+													<i class="ti ti-bell align-middle"></i>
+													<span class="visually-hidden">unread notification</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Emily Johnson</span>
+												commented on a task in
+												<span class="fw-medium text-body">Design Sprint</span><br>
+												<span class="fs-xs">12 minutes ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-1">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 2 -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<img src="assets/images/users/user-5.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+												<span class="position-absolute rounded-pill bg-info notification-badge">
+													<i class="ti ti-cloud-upload align-middle"></i>
+													<span class="visually-hidden">upload notification</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Michael Lee</span>
+												uploaded files to
+												<span class="fw-medium text-body">Marketing Assets</span><br>
+												<span class="fs-xs">25 minutes ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-2">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 3 -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<img src="assets/images/users/user-6.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+												<span class="position-absolute rounded-pill bg-warning notification-badge">
+													<i class="ti ti-alert-triangle align-middle"></i>
+													<span class="visually-hidden">alert</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Sophia Ray</span>
+												flagged an issue in
+												<span class="fw-medium text-body">Bug Tracker</span><br>
+												<span class="fs-xs">40 minutes ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-3">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 4 -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<img src="assets/images/users/user-7.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+												<span class="position-absolute rounded-pill bg-primary notification-badge">
+													<i class="ti ti-calendar-event align-middle"></i>
+													<span class="visually-hidden">event notification</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">David Kim</span>
+												scheduled a meeting for
+												<span class="fw-medium text-body">UX Review</span><br>
+												<span class="fs-xs">1 hour ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-4">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 5 -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<img src="assets/images/users/user-8.jpg" class="avatar-md rounded-circle" alt="User Avatar">
+												<span class="position-absolute rounded-pill bg-secondary notification-badge">
+													<i class="ti ti-edit-circle align-middle"></i>
+													<span class="visually-hidden">edit</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Isabella White</span>
+												updated the document in
+												<span class="fw-medium text-body">Product Specs</span><br>
+												<span class="fs-xs">2 hours ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-5">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 6 - Server CPU Alert -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
+													<i class="ti ti-server-bolt fs-4 text-danger"></i>
+												</span>
+												<span class="position-absolute rounded-pill bg-danger notification-badge">
+													<i class="ti ti-alert-circle align-middle"></i>
+													<span class="visually-hidden">server alert</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Server #3</span>
+												CPU usage exceeded 90%<br>
+												<span class="fs-xs">Just now</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-6">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
+									</div>
+
+									<!-- Notification 7 - Deployment Success -->
+									<div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
+										<span class="d-flex align-items-center gap-3">
+											<span class="flex-shrink-0 position-relative">
+												<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
+													<i class="ti ti-rocket fs-4 text-success"></i>
+												</span>
+												<span class="position-absolute rounded-pill bg-success notification-badge">
+													<i class="ti ti-check align-middle"></i>
+													<span class="visually-hidden">deployment</span>
+												</span>
+											</span>
+											<span class="flex-grow-1 text-muted">
+												<span class="fw-medium text-body">Production Server</span>
+												deployment completed successfully<br>
+												<span class="fs-xs">30 minutes ago</span>
+											</span>
+											<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-7">
+												<i class="ti ti-xbox-x-filled fs-xxl"></i>
+											</button>
+										</span>
 									</div>
 								</div>
+
+
+								<!-- All-->
+								<a href="javascript:void(0);" class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
+									Read All Messages
+								</a>
+
 							</div>
-
-							<div
-								style="max-height: 300px;"
-								data-simplebar
-							>
-								<!-- Notification 1 -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-1">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<img src="assets/images/users/user-4.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-											<span class="position-absolute rounded-pill bg-success notification-badge">
-												<i class="ti ti-bell align-middle"></i>
-												<span class="visually-hidden">unread notification</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Emily Johnson</span>
-											commented on a task in
-											<span class="fw-medium text-body">Design Sprint</span><br>
-											<span class="fs-xs">12 minutes ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-1">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 2 -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-2">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<img src="assets/images/users/user-5.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-											<span class="position-absolute rounded-pill bg-info notification-badge">
-												<i class="ti ti-cloud-upload align-middle"></i>
-												<span class="visually-hidden">upload notification</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Michael Lee</span>
-											uploaded files to
-											<span class="fw-medium text-body">Marketing Assets</span><br>
-											<span class="fs-xs">25 minutes ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-2">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 3 -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-3">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<img src="assets/images/users/user-6.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-											<span class="position-absolute rounded-pill bg-warning notification-badge">
-												<i class="ti ti-alert-triangle align-middle"></i>
-												<span class="visually-hidden">alert</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Sophia Ray</span>
-											flagged an issue in
-											<span class="fw-medium text-body">Bug Tracker</span><br>
-											<span class="fs-xs">40 minutes ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-3">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 4 -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-4">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<img src="assets/images/users/user-7.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-											<span class="position-absolute rounded-pill bg-primary notification-badge">
-												<i class="ti ti-calendar-event align-middle"></i>
-												<span class="visually-hidden">event notification</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">David Kim</span>
-											scheduled a meeting for
-											<span class="fw-medium text-body">UX Review</span><br>
-											<span class="fs-xs">1 hour ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-4">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 5 -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-5">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<img src="assets/images/users/user-8.jpg" class="avatar-md rounded-circle" alt="User Avatar">
-											<span class="position-absolute rounded-pill bg-secondary notification-badge">
-												<i class="ti ti-edit-circle align-middle"></i>
-												<span class="visually-hidden">edit</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Isabella White</span>
-											updated the document in
-											<span class="fw-medium text-body">Product Specs</span><br>
-											<span class="fs-xs">2 hours ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-5">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 6 - Server CPU Alert -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-6">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-												<i class="ti ti-server-bolt fs-4 text-danger"></i>
-											</span>
-											<span class="position-absolute rounded-pill bg-danger notification-badge">
-												<i class="ti ti-alert-circle align-middle"></i>
-												<span class="visually-hidden">server alert</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Server #3</span>
-											CPU usage exceeded 90%<br>
-											<span class="fs-xs">Just now</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-6">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-
-								<!-- Notification 7 - Deployment Success -->
-								<div class="dropdown-item notification-item py-2 text-wrap" id="message-7">
-									<span class="d-flex align-items-center gap-3">
-										<span class="flex-shrink-0 position-relative">
-											<span class="avatar-md rounded-circle bg-light d-flex align-items-center justify-content-center">
-												<i class="ti ti-rocket fs-4 text-success"></i>
-											</span>
-											<span class="position-absolute rounded-pill bg-success notification-badge">
-												<i class="ti ti-check align-middle"></i>
-												<span class="visually-hidden">deployment</span>
-											</span>
-										</span>
-										<span class="flex-grow-1 text-muted">
-											<span class="fw-medium text-body">Production Server</span>
-											deployment completed successfully<br>
-											<span class="fs-xs">30 minutes ago</span>
-										</span>
-										<button type="button" class="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible="#message-7">
-											<i class="ti ti-xbox-x-filled fs-xxl"></i>
-										</button>
-									</span>
-								</div>
-							</div>
-
-
-							<!-- All-->
-							<a href="javascript:void(0);" class="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
-								Read All Messages
-							</a>
-
+							<!-- End dropdown-menu -->
 						</div>
-						<!-- End dropdown-menu -->
+						<!-- end dropdown-->
 					</div>
-					<!-- end dropdown-->
-				</div>
-				<!-- end topbar item-->
+					<!-- end topbar item-->
 				{% endif %}
 
 				<!-- Theme Mode Dropdown -->

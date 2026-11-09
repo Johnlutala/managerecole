@@ -207,6 +207,16 @@ class NoteRepository extends ServiceEntityRepository
         return $counts;
     }
 
+    public function countByStatus(string $status): int
+    {
+        return (int) $this->createQueryBuilder('note')
+            ->select('COUNT(note.id)')
+            ->andWhere('note.statut = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 
 
     //    /**

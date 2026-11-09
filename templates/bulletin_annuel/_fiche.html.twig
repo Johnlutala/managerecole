@@ -1,117 +1,470 @@
+
 <article class="bulletin-sheet">
-    <header class="bulletin-heading">
-        <div class="bulletin-country">RÉPUBLIQUE DÉMOCRATIQUE DU CONGO</div>
-        <div class="bulletin-ministry">MINISTÈRE DE L’ENSEIGNEMENT PRIMAIRE, SECONDAIRE ET TECHNIQUE</div>
-        <h1>BULLETIN SCOLAIRE — SUIVI PROGRESSIF</h1>
-        <div class="bulletin-school">{{ bulletin.ecole.nom }}</div>
-    </header>
 
-    <section class="bulletin-student">
-        <div><span>Année scolaire</span><strong>{{ bulletin.anneeScolaire.libelle }}</strong></div>
-        <div><span>Classe</span><strong>{{ bulletin.classe.nom }}</strong></div>
-        <div><span>Option</span><strong>{{ bulletin.option ? bulletin.option.nom : '—' }}</strong></div>
-        <div><span>Élève</span><strong>{{ bulletin.eleve.nom }} {{ bulletin.eleve.postnom }} {{ bulletin.eleve.prenom }}</strong></div>
-        <div><span>Matricule</span><strong>{{ bulletin.eleve.matricule }}</strong></div>
-        <div><span>Sexe</span><strong>{{ bulletin.eleve.sexe }}</strong></div>
-        <div><span>Position dans la classe</span><strong>{{ position }} / {{ effectif }}</strong></div>
-    </section>
+    {# =====================================================
+       EN-TÊTE OFFICIEL
+    ====================================================== #}
 
-    <h2 class="bulletin-section-title">RÉSULTATS DES PÉRIODES CALCULÉES PAR COURS</h2>
+    <table class="official-header">
+        <tr>
+            <td class="header-logo">
+                <img
+                    src="https://img.magnific.com/vecteurs-premium/drapeau-du-pays-republique-democratique-congo-illustration-vectorielle_769373-148.jpg?semt=ais_hybrid&amp;w=740&amp;q=80"
+                    alt="Drapeau de la RDC"
+                >
+            </td>
+
+            <td class="header-text">
+                <div class="country-name">
+                    RÉPUBLIQUE DÉMOCRATIQUE DU CONGO
+                </div>
+                <div class="ministry-name">
+                    MINISTÈRE DE L'ENSEIGNEMENT PRIMAIRE,
+                    SECONDAIRE ET TECHNIQUE
+                </div>
+                <div class="education-name">
+                    ENSEIGNEMENT NATIONAL
+                </div>
+            </td>
+
+            <td class="header-right">
+                BULLETIN<br>SCOLAIRE
+            </td>
+        </tr>
+    </table>
+
+    <div class="document-title">
+        BULLETIN SCOLAIRE — ANNÉE
+        {{ bulletin.anneeScolaire.libelle }}
+    </div>
+
+    <div class="school-name">
+        {{ bulletin.ecole.nom }}
+    </div>
+
+
+    {# =====================================================
+       IDENTIFICATION DE L'ÉLÈVE
+    ====================================================== #}
+
+    <table class="student-info">
+        <tr>
+            <td colspan="2">
+                <span class="student-label">NOM :</span>
+                <strong>{{ bulletin.eleve.nom }}</strong>
+            </td>
+            <td colspan="2">
+                <span class="student-label">POSTNOM :</span>
+                <strong>{{ bulletin.eleve.postnom }}</strong>
+            </td>
+            <td colspan="2">
+                <span class="student-label">PRÉNOM :</span>
+                <strong>{{ bulletin.eleve.prenom }}</strong>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <span class="student-label">MATRICULE :</span>
+                {{ bulletin.eleve.matricule|default('—') }}
+            </td>
+            <td colspan="2">
+                <span class="student-label">SEXE :</span>
+                {{ bulletin.eleve.sexe|default('—') }}
+            </td>
+            <td colspan="2">
+                <span class="student-label">CLASSE :</span>
+                <strong>{{ bulletin.classe.nom }}</strong>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3">
+                <span class="student-label">OPTION :</span>
+                {{ bulletin.option ? bulletin.option.nom : '—' }}
+            </td>
+            <td colspan="3">
+                <span class="student-label">POSITION :</span>
+                {{ position }} / {{ effectif }}
+            </td>
+        </tr>
+    </table>
+
+
+    <div class="results-title">
+        TABLEAU DES RÉSULTATS SCOLAIRES
+    </div>
+
+
+    {# =====================================================
+       REGROUPEMENT DES PÉRIODES PAR SEMESTRE
+    ====================================================== #}
+
+    {% set groupes_periodes = {} %}
+
+    {% for periode in periode_headers %}
+        {% set semestre = periode.semestre|default('ANNÉE SCOLAIRE') %}
+
+        {% set liste = groupes_periodes[semestre]|default([])|merge([periode]) %}
+
+        {% set groupes_periodes = groupes_periodes|merge({
+            (semestre): liste
+        }) %}
+    {% endfor %}
+
+
+    {# =====================================================
+       REGROUPEMENT DES COURS PAR DOMAINE
+    ====================================================== #}
+
+    {% set domaines = {} %}
+
+    {% for cours in bulletin.details %}
+        {% set domaine = cours.domaine|default('AUTRES COURS') %}
+
+        {% set lignes = domaines[domaine]|default([])|merge([cours]) %}
+
+        {% set domaines = domaines|merge({
+            (domaine): lignes
+        }) %}
+    {% endfor %}
+
+
+    {# Nombre de colonnes :
+       1 branche + 2 colonnes par période
+       + 3 colonnes cumul + 2 colonnes repêchage
+    #}
+
+    {% set nombre_colonnes = 1 + (periode_headers|length * 2) + 3 + 2 %}
+
+
+    {# =====================================================
+       TABLEAU PRINCIPAL
+    ====================================================== #}
+
     <table class="bulletin-grades">
-        {% set groupes_periodes = {} %}
-        {% for periode in periode_headers %}
-            {% set semestre = groupes_periodes[periode.semestre]|default([])|merge([periode]) %}
-            {% set groupes_periodes = groupes_periodes|merge({(periode.semestre): semestre}) %}
-        {% endfor %}
+
         <thead>
+            {# Première ligne : semestres #}
             <tr>
-                <th rowspan="3">Branches / cours</th>
+                <th rowspan="3" class="course-column">
+                    BRANCHES / COURS
+                </th>
+
                 {% for semestre, periodes in groupes_periodes %}
-                    <th colspan="{{ periodes|length * 2 }}">{{ semestre }}</th>
+                    <th colspan="{{ periodes|length * 2 }}">
+                        {{ semestre|upper }}
+                    </th>
                 {% endfor %}
-                <th colspan="3">Cumul calculé</th>
+
+                <th colspan="3" class="cumul-column">
+                    CUMUL GÉNÉRAL
+                </th>
+
+                <th colspan="2" class="rep-heading">
+                    EXAMEN DE REPÊCHAGE
+                </th>
             </tr>
+
+            {# Deuxième ligne : périodes #}
             <tr>
-                {% for periodes in groupes_periodes %}
+                {% for semestre, periodes in groupes_periodes %}
                     {% for periode in periodes %}
-                        <th colspan="2">{{ periode.libelle }}</th>
+                        <th colspan="2">
+                            {{ periode.libelle }}
+                        </th>
                     {% endfor %}
                 {% endfor %}
-                <th rowspan="2">Points obtenus</th>
-                <th rowspan="2">MAX</th>
-                <th rowspan="2">%</th>
+
+                <th rowspan="2" class="cumul-column">PTS</th>
+                <th rowspan="2" class="cumul-column">MAX</th>
+                <th rowspan="2" class="cumul-column">%</th>
+
+                <th rowspan="2" class="rep-subtitle">COTE</th>
+                <th rowspan="2" class="rep-subtitle">SIGNATURE</th>
             </tr>
+
+            {# Troisième ligne : maximum et obtenu #}
             <tr>
                 {% for periode in periode_headers %}
                     <th>MAX</th>
-                    <th>Obtenu</th>
+                    <th>OBT.</th>
                 {% endfor %}
             </tr>
         </thead>
+
+
         <tbody>
-            {% set domaines = {} %}
+
+            {# Totaux généraux par période #}
             {% set totaux_periodes = {} %}
+
             {% for cours in bulletin.details %}
-                {% set domaine = cours.domaine|default('Autres cours') %}
-                {% set lignes_domaine = domaines[domaine]|default([])|merge([cours]) %}
-                {% set domaines = domaines|merge({(domaine): lignes_domaine}) %}
                 {% for evaluation in cours.evaluations %}
-                    {% set total_periode = totaux_periodes[evaluation.periode]|default({cote: 0, bareme: 0}) %}
-                    {% set total_periode = {
-                        cote: total_periode.cote + evaluation.cote,
-                        bareme: total_periode.bareme + evaluation.bareme
+
+                    {% set cle = evaluation.periode %}
+
+                    {% set ancien = totaux_periodes[cle]|default({
+                        cote: 0,
+                        bareme: 0
+                    }) %}
+
+                    {% set nouveau = {
+                        cote: ancien.cote + evaluation.cote,
+                        bareme: ancien.bareme + evaluation.bareme
                     } %}
-                    {% set totaux_periodes = totaux_periodes|merge({(evaluation.periode): total_periode}) %}
+
+                    {% set totaux_periodes = totaux_periodes|merge({
+                        (cle): nouveau
+                    }) %}
+
                 {% endfor %}
             {% endfor %}
+
+
+            {# =================================================
+               AFFICHAGE DES DOMAINES ET DES COURS
+            ================================================== #}
+
             {% for domaine, cours_du_domaine in domaines %}
-                <tr class="bulletin-domain">
-                    <th colspan="{{ (periode_headers|length * 2) + 4 }}">{{ domaine|upper }}</th>
+
+                {# Ligne de séparation du domaine #}
+                <tr class="domain-row">
+                    <th colspan="{{ nombre_colonnes }}">
+                        {{ domaine|upper }}
+                    </th>
                 </tr>
+
+                {# Initialisation des sous-totaux du domaine #}
+                {% set sous_total = {
+                    cotes: 0,
+                    baremes: 0,
+                    periodes: {}
+                } %}
+
+
                 {% for cours in cours_du_domaine %}
+
                     {% set notes_par_periode = {} %}
+
                     {% for evaluation in cours.evaluations %}
-                        {% set notes_par_periode = notes_par_periode|merge({(evaluation.periode): evaluation}) %}
+
+                        {% set notes_par_periode = notes_par_periode|merge({
+                            (evaluation.periode): evaluation
+                        }) %}
+
+                        {% set cle = evaluation.periode %}
+
+                        {% set ancien = sous_total.periodes[cle]|default({
+                            cote: 0,
+                            bareme: 0
+                        }) %}
+
+                        {% set nouveau = {
+                            cote: ancien.cote + evaluation.cote,
+                            bareme: ancien.bareme + evaluation.bareme
+                        } %}
+
+                        {% set sous_total = sous_total|merge({
+                            periodes: sous_total.periodes|merge({
+                                (cle): nouveau
+                            })
+                        }) %}
+
                     {% endfor %}
+
+
+                    {% set sous_total = sous_total|merge({
+                        cotes: sous_total.cotes + cours.total_cotes,
+                        baremes: sous_total.baremes + cours.total_baremes
+                    }) %}
+
+
+                    {# LIGNE DU COURS #}
                     <tr>
-                        <td class="bulletin-course">{{ cours.cours }}</td>
+                        <td class="course-column">
+                            {{ cours.cours }}
+                        </td>
+
                         {% for periode in periode_headers %}
+
                             {% if notes_par_periode[periode.key] is defined %}
-                                <td>{{ notes_par_periode[periode.key].bareme }}</td>
-                                <td>{{ notes_par_periode[periode.key].cote }}{% if notes_par_periode[periode.key].provisoire|default(false) %}*{% endif %}</td>
+
+                                <td>
+                                    {{ notes_par_periode[periode.key].bareme }}
+                                </td>
+
+                                <td>
+                                    {{ notes_par_periode[periode.key].cote }}
+                                    {% if notes_par_periode[periode.key].provisoire|default(false) %}
+                                        *
+                                    {% endif %}
+                                </td>
+
                             {% else %}
-                                <td>—</td><td>—</td>
+
+                                <td>—</td>
+                                <td>—</td>
+
                             {% endif %}
+
                         {% endfor %}
-                        <td>{{ cours.total_cotes }}</td>
-                        <td>{{ cours.total_baremes }}</td>
-                        <td>{{ cours.pourcentage }}%</td>
+
+                        <td class="cumul-column">
+                            {{ cours.total_cotes }}
+                        </td>
+
+                        <td class="cumul-column">
+                            {{ cours.total_baremes }}
+                        </td>
+
+                        <td class="cumul-column">
+                            {{ cours.pourcentage|number_format(2, ',', ' ') }}%
+                        </td>
+
+                        <td class="rep-cell"></td>
+                        <td class="rep-cell"></td>
                     </tr>
+
                 {% endfor %}
+
+
+                {# =================================================
+                   SOUS-TOTAL DU DOMAINE
+                ================================================== #}
+
+                <tr class="subtotal-row">
+
+                    <th class="course-column">
+                        SOUS-TOTAL {{ domaine|upper }}
+                    </th>
+
+                    {% for periode in periode_headers %}
+
+                        <td>
+                            {{ sous_total.periodes[periode.key].bareme|default('—') }}
+                        </td>
+
+                        <td>
+                            {{ sous_total.periodes[periode.key].cote|default('—') }}
+                        </td>
+
+                    {% endfor %}
+
+                    <td>{{ sous_total.cotes }}</td>
+
+                    <td>{{ sous_total.baremes }}</td>
+
+                    <td>
+                        {% if sous_total.baremes > 0 %}
+                            {{ (sous_total.cotes / sous_total.baremes * 100)|number_format(2, ',', ' ') }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+
+                    <td class="rep-cell"></td>
+                    <td class="rep-cell"></td>
+
+                </tr>
+
             {% endfor %}
-            <tr class="bulletin-total">
-                <th>TOTAL GÉNÉRAL</th>
+
+
+            {# =================================================
+               TOTAL GÉNÉRAL
+            ================================================== #}
+
+            <tr class="total-row">
+
+                <th class="course-column">
+                    TOTAL GÉNÉRAL
+                </th>
+
                 {% for periode in periode_headers %}
-                    <td>{{ totaux_periodes[periode.key].bareme|default('—') }}</td>
-                    <td>{{ totaux_periodes[periode.key].cote|default('—') }}</td>
+
+                    <td>
+                        {{ totaux_periodes[periode.key].bareme|default('—') }}
+                    </td>
+
+                    <td>
+                        {{ totaux_periodes[periode.key].cote|default('—') }}
+                    </td>
+
                 {% endfor %}
+
                 <th>{{ bulletin.totalCotes }}</th>
                 <th>{{ bulletin.totalBaremes }}</th>
-                <th>{{ bulletin.pourcentage|number_format(2, ',', ' ') }}%</th>
+
+                <th>
+                    {{ bulletin.pourcentage|number_format(2, ',', ' ') }}%
+                </th>
+
+                <td class="rep-cell"></td>
+                <td class="rep-cell"></td>
+
             </tr>
+
         </tbody>
     </table>
-    <p class="small text-muted">* Cote provisoire de 1 en attendant la validation de l’évaluation.</p>
 
-    <section class="bulletin-result">
-        <div><span>Pourcentage cumulé à ce jour</span><strong>{{ bulletin.pourcentage|number_format(2, ',', ' ') }} %</strong></div>
-        <div><span>Décision</span><strong>{{ bulletin.decision == 'admis' ? 'ADMIS(E)' : 'AJOURNÉ(E)' }}</strong></div>
-        <div><span>Calcul effectué le</span><strong>{{ bulletin.calculeLe|date('d/m/Y H:i') }}</strong></div>
-    </section>
 
-    <footer class="bulletin-signatures">
-        <div>Signature du titulaire</div>
-        <div>Signature du chef d’établissement</div>
-        <div>Signature du parent / tuteur</div>
-    </footer>
+    <p class="footer-note">
+        * Cote provisoire en attente de validation.
+    </p>
+
+    <table class="bulletin-result">
+        <tr>
+            <td>
+                POURCENTAGE CUMULÉ
+                <strong>
+                    {{ bulletin.pourcentage|number_format(2, ',', ' ') }}%
+                </strong>
+            </td>
+
+            <td>
+                DÉCISION
+                <strong class="decision">
+                    {{ bulletin.decision == 'admis' ? 'ADMIS(E)' : 'AJOURNÉ(E)' }}
+                </strong>
+            </td>
+
+            <td>
+                POSITION
+                <strong>
+                    {{ position }} / {{ effectif }}
+                </strong>
+            </td>
+
+            <td>
+                DATE DE CALCUL
+                <strong>
+                    {{ bulletin.calculeLe|date('d/m/Y') }}
+                </strong>
+            </td>
+        </tr>
+    </table>
+
+    <table class="signatures">
+        <tr>
+            <td>
+                LE TITULAIRE
+                <div class="signature-space"></div>
+                Signature
+            </td>
+
+            <td>
+                LE CHEF D'ÉTABLISSEMENT
+                <div class="signature-space"></div>
+                Signature et cachet
+            </td>
+
+            <td>
+                LE PARENT / TUTEUR
+                <div class="signature-space"></div>
+                Signature
+            </td>
+        </tr>
+    </table>
+
 </article>

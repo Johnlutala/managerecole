@@ -38,6 +38,35 @@ final class BulletinAnnuelCalculator
     }
 
     /**
+     * @return array<int, array{nom: string, libelle: string, semestre: string, ordre: int, autorisee: bool}>
+     */
+    public function periodsForSchool(Ecole $school): array
+    {
+        $structure = $this->ficheConfigurations->findOneBy(['ecole' => $school])?->getStructure();
+        if ($structure === null) {
+            return [];
+        }
+
+        $enabledPeriods = $this->authorizations->autorisationsPourStructure($structure);
+        $periods = [];
+        $order = 0;
+        foreach ($this->cotationStructure->groupes($structure) as $group) {
+            foreach ($group['periodes'] as $period) {
+                ++$order;
+                $periods[] = [
+                    'nom' => $period['nom'],
+                    'libelle' => $period['libelle'],
+                    'semestre' => $group['nom'],
+                    'ordre' => $order,
+                    'autorisee' => $enabledPeriods[$period['nom']] ?? false,
+                ];
+            }
+        }
+
+        return $periods;
+    }
+
+    /**
      * @return array{calcules: int, bloques: array<int, array{classe: string, option: string, raisons: string[]}>, sans_periode_autorisee?: bool}
      */
     public function calculate(
@@ -45,14 +74,16 @@ final class BulletinAnnuelCalculator
         AnneeScolaire $schoolYear,
         ?Section $section = null,
         ?Classe $selectedClass = null,
-        ?Option $selectedOption = null
+        ?Option $selectedOption = null,
+        ?string $requestedPeriod = null
     ): array {
         return $this->entityManager->wrapInTransaction(function () use (
             $school,
             $schoolYear,
             $section,
             $selectedClass,
-            $selectedOption
+            $selectedOption,
+            $requestedPeriod
         ): array {
             $ficheConfiguration = $this->ficheConfigurations->findOneBy(['ecole' => $school]);
             $structure = $ficheConfiguration?->getStructure();
@@ -188,29 +219,65 @@ final class BulletinAnnuelCalculator
                     foreach ($coursesForOption as $course) {
                         $courseNamesById[$course->getId()] = (string) $course->getNom();
                     }
-                    $periodToCalculate = $this->nextPeriodToCalculate(
-                        $periodsForGroup,
-                        $authorizedPeriods,
-                        $allCourseEvaluations,
-                        $courseNamesById,
-                        $groupStudents,
-                        $existingByStudent
-                    );
-                    if ($periodToCalculate === null) {
-                        $pendingPeriod = $this->firstIncompletePeriod(
+                    if ($requestedPeriod === null) {
+                        $periodToCalculate = $this->nextPeriodToCalculate(
                             $periodsForGroup,
+                            $authorizedPeriods,
                             $allCourseEvaluations,
                             $courseNamesById,
                             $groupStudents,
                             $existingByStudent
                         );
-                        if ($pendingPeriod !== null) {
+                    } else {
+                        $periodToCalculate = $periodsForGroup[$requestedPeriod] ?? null;
+                        if ($periodToCalculate === null) {
                             $reasons[] = sprintf(
-                                'La période « %s » doit être autorisée et calculée avant de passer à la suite.',
-                                $pendingPeriod['periodLabel']
+                                'Aucune évaluation n’est configurée pour la période « %s » dans cette classe-option.',
+                                $requestedPeriod
                             );
                         } else {
-                            $reasons[] = 'Aucune évaluation configurée ne correspond à une période autorisée pour cette classe-option.';
+                            if (!isset($authorizedPeriods[$periodToCalculate['configuration']][$requestedPeriod])) {
+                                $reasons[] = sprintf('La période « %s » n’est pas autorisée.', $periodToCalculate['periodLabel']);
+                                $periodToCalculate = null;
+                            } else {
+                                $pendingPeriod = $this->firstIncompletePeriod(
+                                    $periodsForGroup,
+                                    $allCourseEvaluations,
+                                    $courseNamesById,
+                                    $groupStudents,
+                                    $existingByStudent
+                                );
+                                if ($pendingPeriod === null || $pendingPeriod['ordre'] > $periodToCalculate['ordre']) {
+                                    $reasons[] = sprintf('La période « %s » a déjà été calculée.', $periodToCalculate['periodLabel']);
+                                    $periodToCalculate = null;
+                                } elseif ($pendingPeriod['periode'] !== $requestedPeriod) {
+                                    $reasons[] = sprintf(
+                                        'La période précédente « %s » doit être calculée avant « %s ».',
+                                        $pendingPeriod['periodLabel'],
+                                        $periodToCalculate['periodLabel']
+                                    );
+                                    $periodToCalculate = null;
+                                }
+                            }
+                        }
+                    }
+                    if ($periodToCalculate === null) {
+                        if ($reasons === []) {
+                            $pendingPeriod = $this->firstIncompletePeriod(
+                                $periodsForGroup,
+                                $allCourseEvaluations,
+                                $courseNamesById,
+                                $groupStudents,
+                                $existingByStudent
+                            );
+                            if ($pendingPeriod !== null) {
+                                $reasons[] = sprintf(
+                                    'La période « %s » doit être autorisée et calculée avant de passer à la suite.',
+                                    $pendingPeriod['periodLabel']
+                                );
+                            } else {
+                                $reasons[] = 'Aucune évaluation configurée ne correspond à une période autorisée pour cette classe-option.';
+                            }
                         }
                     }
 
@@ -264,6 +331,7 @@ final class BulletinAnnuelCalculator
                                 $totalBaremes += $bareme;
                                 $courseGrades[] = [
                                     'periode' => $entry['periode'],
+                                    'ordre' => $entry['ordre'],
                                     'libelle' => $entry['periodLabel'],
                                     'semestre' => $entry['semester'],
                                     'cote' => $cote,

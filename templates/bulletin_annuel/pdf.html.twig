@@ -1,32 +1,259 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>Bulletins scolaires</title>
+
     <style>
-        @page { margin: 10mm; }
-        body { font-family: DejaVu Sans, sans-serif; color: #17212b; font-size: 8px; }
-        .bulletin-sheet { page-break-after: always; }
-        .bulletin-sheet:last-child { page-break-after: auto; }
-        .bulletin-heading { text-align: center; border-bottom: 2px solid #17212b; padding-bottom: 6px; margin-bottom: 8px; }
-        .bulletin-country, .bulletin-ministry { font-size: 8px; font-weight: bold; }
-        .bulletin-heading h1 { font-size: 13px; font-weight: bold; margin: 5px 0 2px; }
-        .bulletin-school { font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        .bulletin-student { width: 100%; margin-bottom: 10px; }
-        .bulletin-student div, .bulletin-result div { display: inline-block; vertical-align: top; width: 31%; border: 1px solid #ced4da; padding: 4px; margin: 1px; }
-        .bulletin-student span, .bulletin-result span { display: block; color: #5b6570; font-size: 7px; }
-        .bulletin-student strong, .bulletin-result strong { display: block; font-size: 8px; }
-        .bulletin-section-title { text-align: center; font-size: 9px; font-weight: bold; background: #eef1f4; padding: 5px; }
-        .bulletin-grades { width: 100%; border-collapse: collapse; font-size: 6px; table-layout: fixed; }
-        .bulletin-grades th, .bulletin-grades td { border: 1px solid #59636a; padding: 2px 1px; text-align: center; }
-        .bulletin-grades thead th { background: #eef1f4; }
-        .bulletin-grades .bulletin-course { text-align: left; font-weight: bold; width: 18%; }
-        .bulletin-grades .bulletin-domain { background: #dce3e9; text-align: left; }
-        .bulletin-total { background: #e8edf2; }
-        .bulletin-result { margin-top: 8px; }
-        .bulletin-signatures { width: 100%; margin-top: 40px; text-align: center; }
-        .bulletin-signatures div { display: inline-block; width: 31%; border-top: 1px solid #59636a; padding-top: 5px; }
+        @page {
+            size: A4 landscape;
+            margin: 7mm 6mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            color: #111;
+            font-size: 7px;
+            margin: 0;
+        }
+
+        .bulletin-sheet {
+            width: 100%;
+            page-break-after: always;
+        }
+
+        .bulletin-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        /* EN-TÊTE OFFICIEL */
+        .official-header {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4px;
+        }
+
+        .official-header td {
+            vertical-align: middle;
+        }
+
+        .header-logo {
+            width: 13%;
+            text-align: left;
+        }
+
+        .header-logo img {
+            width: 55px;
+            height: 55px;
+        }
+
+        .header-text {
+            width: 74%;
+            text-align: center;
+        }
+
+        .header-right {
+            width: 13%;
+            text-align: right;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .country-name {
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .ministry-name {
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .education-name {
+            font-size: 7px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+
+        .document-title {
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            border: 1.5px solid #111;
+            padding: 5px;
+            margin: 4px 0;
+        }
+
+        .school-name {
+            font-size: 9px;
+            font-weight: bold;
+            text-align: center;
+            margin: 4px 0 6px;
+        }
+
+        /* IDENTIFICATION */
+        .student-info {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+
+        .student-info td {
+            border: 1px solid #111;
+            padding: 4px;
+            height: 19px;
+            font-size: 7px;
+        }
+
+        .student-label {
+            font-weight: bold;
+        }
+
+        .student-info strong {
+            text-transform: uppercase;
+        }
+
+        .results-title {
+            text-align: center;
+            font-size: 8px;
+            font-weight: bold;
+            border: 1px solid #111;
+            padding: 5px;
+            background: #ddd;
+        }
+
+        /* TABLEAU PRINCIPAL */
+        .bulletin-grades {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 6px;
+            border: 1.5px solid #000;
+        }
+
+        .bulletin-grades th,
+        .bulletin-grades td {
+            border: 1px solid #000;
+            padding: 3px 2px;
+            text-align: center;
+            vertical-align: middle;
+            height: 19px;
+        }
+
+        .bulletin-grades thead th {
+            background: #dedede;
+            font-weight: bold;
+            border: 1px solid #000;
+        }
+
+        .bulletin-grades .course-column {
+            width: 17%;
+            text-align: left;
+            padding-left: 4px;
+        }
+
+        .bulletin-grades .domain-row th {
+            background: #c8c8c8;
+            text-align: left;
+            padding-left: 5px;
+            font-size: 7px;
+            border: 1.5px solid #000;
+        }
+
+        .bulletin-grades .subtotal-row th,
+        .bulletin-grades .subtotal-row td {
+            background: #e5e5e5;
+            font-weight: bold;
+            border: 1.2px solid #000;
+        }
+
+        .bulletin-grades .total-row th,
+        .bulletin-grades .total-row td {
+            background: #bdbdbd;
+            font-weight: bold;
+            border: 1.5px solid #000;
+            height: 22px;
+        }
+
+        .bulletin-grades .cumul-column {
+            background: #ededed;
+            font-weight: bold;
+        }
+
+        .bulletin-grades .rep-heading,
+        .bulletin-grades .rep-subtitle,
+        .bulletin-grades .rep-cell {
+            border-left: 2px solid #000;
+        }
+
+        .bulletin-grades .rep-heading,
+        .bulletin-grades .rep-subtitle {
+            background: #d0d0d0;
+        }
+
+        .bulletin-grades .rep-signature {
+            height: 25px;
+        }
+
+        .bulletin-grades .black-cell {
+            background: #111;
+        }
+
+        /* RESULTAT */
+        .bulletin-result {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 7px;
+        }
+
+        .bulletin-result td {
+            border: 1px solid #111;
+            padding: 5px;
+            text-align: center;
+            font-size: 7px;
+        }
+
+        .bulletin-result strong {
+            display: block;
+            font-size: 9px;
+            margin-top: 4px;
+        }
+
+        .signatures {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 28px;
+        }
+
+        .signatures td {
+            width: 33.33%;
+            text-align: center;
+            font-size: 7px;
+            font-weight: bold;
+            padding-top: 5px;
+        }
+
+        .signature-space {
+            height: 35px;
+        }
+
+        .footer-note {
+            font-size: 6px;
+            margin-top: 5px;
+        }
+
+        .decision {
+            text-transform: uppercase;
+        }
     </style>
 </head>
+
 <body>
     {% for bulletin in bulletins %}
         {% include 'bulletin_annuel/_fiche.html.twig' with {
