@@ -125,11 +125,16 @@
                                         <button
                                             type="button"
                                             class="btn btn-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#accountModal-professeur-{{ professeur.id }}"
+                                            onclick="resetAccountPassword(
+                                                    '{{ path('app_account_reset_password', {
+                                                        type: 'professeur',
+                                                        id: professeur.id
+                                                    }) }}',
+                                                    '{{ csrf_token('reset_password_professeur_' ~ professeur.id) }}'
+                                                )"
                                         >
                                             <i class="ti ti-key me-1"></i>
-                                            Gérer les identifiants
+                                            Réinitialiser le mot de passe
                                         </button>
                                     {% endif %}
 
@@ -556,18 +561,236 @@
 
     </div>
 
-    {% if is_granted('ROLE_ADMIN') %}
-        {% include 'account/_manage_modal.html.twig' with {
-            accountType: 'professeur',
-            accountId: professeur.id,
-            accountLabel: 'Professeur',
-            displayName: professeur.prenom ~ ' ' ~ professeur.nom,
-            username: professeur.matricule,
-            email: professeur.email,
-            accountUser: professeur.user,
-            routePrefix: 'app_professeur',
-            returnTo: 'show'
-        } %}
-    {% endif %}
+    
+<script>
+    async function resetAccountPassword(url, csrfToken) {
+
+        const confirmation = await Swal.fire({
+            title: "Réinitialiser le mot de passe ?",
+            text: "Le mot de passe actuel sera remplacé par un nouveau.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Oui, réinitialiser",
+            cancelButtonText: "Annuler",
+            confirmButtonColor: "#dc3545",
+            cancelButtonColor: "#6c757d"
+        });
+
+        if (!confirmation.isConfirmed) {
+            return;
+        }
+
+        Swal.fire({
+            title: "Réinitialisation...",
+            text: "Veuillez patienter.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                body: new URLSearchParams({
+                    _token: csrfToken
+                })
+            });
+
+            const responseText = await response.text();
+
+            console.log("Statut HTTP :", response.status);
+            console.log("Réponse serveur :", responseText);
+
+            let data;
+
+            try {
+                data = JSON.parse(responseText);
+            } catch (error) {
+                throw new Error("Réponse invalide du serveur.");
+            }
+
+            Swal.close();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Erreur HTTP : " + response.status
+                );
+            }
+
+            if (data.success) {
+
+                const username = data.username ?? "Non disponible";
+                const password = data.password ?? "Non disponible";
+
+                await Swal.fire({
+                    icon: "success",
+                    title: "Réinitialisation réussie",
+
+                    html: `
+                        <div class="text-start mt-3">
+
+                            <p class="text-muted mb-3">
+                                Les identifiants du compte ont été renouvelés avec succès.
+                            </p>
+
+                            <!-- Nom d'utilisateur -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="ti ti-user me-1"></i>
+                                    Nom d'utilisateur
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="resetUsername"
+                                        readonly
+                                    >
+
+                                    <button
+                                        class="btn btn-outline-primary"
+                                        type="button"
+                                        id="copyUsername"
+                                        title="Copier le nom d'utilisateur"
+                                    >
+                                        <i class="ti ti-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nouveau mot de passe -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="ti ti-lock me-1"></i>
+                                    Nouveau mot de passe
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="resetPassword"
+                                        readonly
+                                    >
+
+                                    <button
+                                        class="btn btn-outline-primary"
+                                        type="button"
+                                        id="copyPassword"
+                                        title="Copier le mot de passe"
+                                    >
+                                        <i class="ti ti-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Statut de l'envoi du mail -->
+                            <div class="alert ${data.mailSent ? 'alert-success' : 'alert-warning'} d-flex align-items-start gap-2 mt-3 mb-0">
+
+                                <i class="ti ${data.mailSent ? 'ti-mail-check' : 'ti-alert-triangle'} fs-4"></i>
+
+                                <div class="text-start small">
+                                    ${data.mailSent
+                                        ? "Les nouveaux identifiants ont également été envoyés par e-mail."
+                                        : "Le mot de passe a été modifié, mais le courriel n’a pas pu être envoyé."
+                                    }
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted small mt-3 mb-0">
+                                Veuillez communiquer ces identifiants au titulaire
+                                du compte de manière sécurisée.
+                            </p>
+
+                        </div>
+                    `,
+
+                    width: "520px",
+                    confirmButtonText: "Fermer",
+                    confirmButtonColor: "#25324B",
+
+                    didOpen: () => {
+
+                        // Afficher les identifiants
+                        document.getElementById("resetUsername").value = username;
+                        document.getElementById("resetPassword").value = password;
+
+                        // Copier le nom d'utilisateur
+                        document.getElementById("copyUsername").addEventListener("click", async () => {
+                            await copyCredential(username);
+                        });
+
+                        // Copier le mot de passe
+                        document.getElementById("copyPassword").addEventListener("click", async () => {
+                            await copyCredential(password);
+                        });
+                    }
+                });
+
+            } else {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Échec de la réinitialisation",
+                    text: data.message || "Une erreur est survenue."
+                });
+
+            }
+
+        } catch (error) {
+
+            Swal.close();
+
+            console.error("Erreur de réinitialisation :", error);
+
+            Swal.fire({
+                icon: "error",
+                title: "Erreur de communication",
+                text: error.message || "Impossible de contacter le serveur. Veuillez réessayer."
+            });
+
+        }
+    }
+
+    // Fonction de copie des identifiants
+    async function copyCredential(value) {
+
+        try {
+
+            await navigator.clipboard.writeText(value);
+
+        } catch (error) {
+
+            const textarea = document.createElement("textarea");
+            textarea.value = value;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            textarea.remove();
+
+        }
+
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: "Copié dans le presse-papiers",
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+</script>
 
 {% endblock %}
+

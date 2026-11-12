@@ -35,14 +35,22 @@ class JwtTokenService
      */
     public function extractTokenFromRequest(Request $request): ?string
     {
-        $authHeader = $request->headers->get('Authorization')
-            ?? $request->headers->get('x-api-token');
+        $authHeader = trim((string) $request->headers->get('Authorization', ''));
 
-        if (!$authHeader) {
+        if ($authHeader === '') {
+            $authHeader = trim((string) $request->headers->get('x-api-token', ''));
+        }
+
+        if ($authHeader === '') {
             return null;
         }
 
-        return preg_replace('/^Bearer\s+/i', '', trim($authHeader)) ?: null;
+        // Supprimer le préfixe Bearer si présent.
+        if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {
+            $authHeader = trim($matches[1]);
+        }
+
+        return $authHeader !== '' ? $authHeader : null;
     }
 
     /**

@@ -329,114 +329,95 @@
             </div>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const resetPasswordUrl =
+                "{{ path('app_user_reset_password', {'id': user.id}) }}";
+            const csrfToken = "{{ csrf_token('reset_password_' ~ user.id) }}";
 
-     <script>
+            const resetButton = document.getElementById("btnResetPassword");
 
-        const userId = {{ user.id }};
+            if (!resetButton) {
+                return;
+            }
 
-        const resetButton = document.getElementById('btnResetPassword');
-
-        if (resetButton) {
-
-            resetButton.addEventListener('click', async function () {
-
+            resetButton.addEventListener("click", async function () {
                 const result = await Swal.fire({
-                    title: 'Réinitialiser le mot de passe ?',
-                    text: 'Le mot de passe actuel sera remplacé.',
-                    icon: 'warning',
+                    title: "Réinitialiser le mot de passe ?",
+                    text: "Le mot de passe actuel sera remplacé par un nouveau.",
+                    icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: 'Oui, réinitialiser',
-                    cancelButtonText: 'Annuler',
-                    confirmButtonColor: '#dc3545'
+                    confirmButtonText: "Oui, réinitialiser",
+                    cancelButtonText: "Annuler",
+                    confirmButtonColor: "#dc3545",
+                    cancelButtonColor: "#6c757d",
                 });
 
                 if (!result.isConfirmed) {
                     return;
                 }
 
+                resetButton.disabled = true;
+
                 Swal.fire({
-                    title: 'Réinitialisation...',
-                    text: 'Veuillez patienter quelques instants.',
+                    title: "Réinitialisation...",
+                    text: "Veuillez patienter quelques instants.",
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
+                    didOpen: () => Swal.showLoading(),
                 });
 
                 try {
-
-                    const response = await fetch(
-                        '/api/rest/v1/users/' + userId + '/reset-password',
-                        {
-                            method: 'POST'
-                        }
-                    );
+                    const response = await fetch(resetPasswordUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            Accept: "application/json",
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        body: new URLSearchParams({
+                            _token: csrfToken,
+                        }),
+                    });
 
                     const data = await response.json();
 
                     Swal.close();
 
-                    if (response.ok && data.code === "0") {
-
+                    if (response.ok && data.success) {
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Mot de passe réinitialisé',
-                            html: `
-                                <div class="text-start">
-
-                                    <div class="mb-3">
-                                        <label class="fw-bold">
-                                            Nom d'utilisateur
-                                        </label>
-
-                                        <div class="form-control bg-light text-break">
-                                            ${data.data.username}
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="fw-bold">
-                                            Nouveau mot de passe
-                                        </label>
-
-                                        <div class="form-control bg-light text-break">
-                                            ${data.data.password}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            `,
-                            confirmButtonText: '<i class="ti ti-check"></i> Fermer',
-                            confirmButtonColor: '#198754'
+                            icon: data.mailSent ? "success" : "warning",
+                            title: data.mailSent
+                                ? "Mot de passe réinitialisé"
+                                : "Réinitialisation effectuée",
+                            text: data.message,
+                            confirmButtonText: "Fermer",
+                            confirmButtonColor: "#198754",
                         });
-
                     } else {
-
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Erreur',
-                            text: data.message || 'Une erreur est survenue.'
+                            icon: "error",
+                            title: "Erreur",
+                            text: data.message || "Une erreur est survenue.",
                         });
-
                     }
-
                 } catch (error) {
-
                     Swal.close();
 
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Erreur',
-                        text: error.message
+                        icon: "error",
+                        title: "Erreur de communication",
+                        text: "Impossible de contacter le serveur. Veuillez réessayer.",
                     });
 
+                    console.error("Erreur réinitialisation mot de passe :", error);
+                } finally {
+                    resetButton.disabled = false;
                 }
-
             });
-
-        }
-
+        });
     </script>
+
 
 {% endblock %}

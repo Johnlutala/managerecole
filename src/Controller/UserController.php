@@ -142,6 +142,85 @@ final class UserController extends AbstractController
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
 
+
+    #[Route('/{id}/reset-password', name: 'reset_password', methods: ['POST'])]
+    public function resetPassword(
+        Request $request,
+        User $user,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        PasswordGenerator $passwordGenerator,
+        MailerInterface $mailer,
+        LoggerInterface $logger,
+    ): Response {
+        if (!$this->isCsrfTokenValid(
+            'reset_password_' . $user->getId(),
+            $request->getPayload()->getString('_token')
+        )) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Jeton CSRF invalide.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        try {
+            $plainPassword = $passwordGenerator->generate();
+
+            $user->setPassword(
+                $passwordHasher->hashPassword($user, $plainPassword)
+            );
+            $user->setUpdatedAt(new \DateTime());
+
+            $entityManager->flush();
+
+            $mailSent = false;
+
+            try {
+                $mailer->send(
+                    (new TemplatedEmail())
+                        ->from(new Address(
+                            $_ENV['SENDER_EMAIL'],
+                            $_ENV['SENDER_NAME']
+                        ))
+                        ->to($user->getEmail())
+                        ->subject('Vos nouveaux identifiants de connexion')
+                        ->htmlTemplate('email/user_update.html.twig')
+                        ->context([
+                            'user' => $user,
+                            'username' => $user->getUsername(),
+                            'password' => $plainPassword,
+                            'operation' => 'Réinitialisation du mot de passe',
+                        ])
+                );
+
+                $mailSent = true;
+            } catch (\Throwable $e) {
+                $logger->error('Échec de l’envoi du mail de réinitialisation.', [
+                    'user_id' => $user->getId(),
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return $this->json([
+                'success' => true,
+                'mailSent' => $mailSent,
+                'message' => $mailSent
+                    ? 'Le nouveau mot de passe a été envoyé par e-mail.'
+                    : 'Mot de passe renouvelé, mais l’envoi du mail a échoué.',
+            ], $mailSent ? Response::HTTP_OK : Response::HTTP_SERVICE_UNAVAILABLE);
+        } catch (\Throwable $e) {
+            $logger->error('Échec de la réinitialisation du mot de passe.', [
+                'user_id' => $user->getId(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return $this->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la réinitialisation.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private function createCredentials(
         User $user,
         UsernameGenerator $usernameGenerator,
