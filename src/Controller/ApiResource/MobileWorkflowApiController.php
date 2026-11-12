@@ -34,6 +34,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Entity\MessageProfesseur;
+use App\Repository\ProfesseurMessageRepository;
 
 #[Route('/api/rest/v1/mobile')]
 final class MobileWorkflowApiController extends AbstractApiController
@@ -1135,4 +1137,188 @@ final class MobileWorkflowApiController extends AbstractApiController
     {
         return (bool) array_intersect(['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'], $user->getRoles());
     }
+
+
+    #[Route('/professeur/messages', name: 'api_mobile_teacher_messages', methods: ['GET'])]
+    public function teacherMessages(
+        Request $request,
+        ProfesseurMessageRepository $messages
+    ): JsonResponse {
+        $auth = $this->checkAuthentication($request);
+
+        if (!$auth['status']) {
+            return $this->error(
+                $auth['message'],
+                [],
+                'Messages professeur',
+                $auth['code']
+            );
+        }
+
+        $professeur = $auth['user']->getProfesseur();
+
+        if (
+            !$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR'])
+            || !$professeur instanceof Professeur
+        ) {
+            return $this->error(
+                'Cet espace est réservé aux comptes professeurs.',
+                [],
+                'Messages professeur',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        $items = $messages->findBy(
+            ['professeur' => $professeur],
+            ['envoyeLe' => 'DESC']
+        );
+
+        return $this->success([
+            'total' => count($items),
+            'nonLus' => $messages->countUnreadFor($professeur),
+
+            'messages' => array_map(
+                static fn(MessageProfesseur $message): array => [
+                    'id' => $message->getId(),
+                    'expediteur' => $message->getExpediteurNom(),
+                    'expediteurEmail' => $message->getExpediteurEmail(),
+                    'sujet' => $message->getSujet(),
+                    'contenu' => $message->getContenu(),
+                    'envoyeLe' => $message->getEnvoyeLe()->format(DATE_ATOM),
+                    'lu' => $message->getLuLe() !== null,
+                    'luLe' => $message->getLuLe()?->format(DATE_ATOM),
+
+                    'cours' => $message->getCours() ? [
+                        'id' => $message->getCours()->getId(),
+                        'nom' => $message->getCours()->getNom(),
+                    ] : null,
+                ],
+                $items
+            ),
+        ], 'Messages professeur');
+    }
+
+    #[Route('/professeur/messages/{id}', name: 'api_mobile_teacher_message_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function teacherMessageShow(
+        Request $request,
+        int $id,
+        ProfesseurMessageRepository $messages
+    ): JsonResponse {
+        $auth = $this->checkAuthentication($request);
+
+        if (!$auth['status']) {
+            return $this->error(
+                $auth['message'],
+                [],
+                'Détail message',
+                $auth['code']
+            );
+        }
+
+        $professeur = $auth['user']->getProfesseur();
+
+        if (
+            !$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR'])
+            || !$professeur instanceof Professeur
+        ) {
+            return $this->error(
+                'Cet espace est réservé aux comptes professeurs.',
+                [],
+                'Détail message',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        // Le message doit appartenir au professeur connecté.
+        $message = $messages->findOneBy([
+            'id' => $id,
+            'professeur' => $professeur,
+        ]);
+
+        if (!$message instanceof MessageProfesseur) {
+            return $this->error(
+                'Message introuvable.',
+                [],
+                'Détail message',
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        return $this->success([
+            'id' => $message->getId(),
+            'expediteur' => $message->getExpediteurNom(),
+            'expediteurEmail' => $message->getExpediteurEmail(),
+            'sujet' => $message->getSujet(),
+            'contenu' => $message->getContenu(),
+            'envoyeLe' => $message->getEnvoyeLe()->format(DATE_ATOM),
+            'lu' => $message->getLuLe() !== null,
+            'luLe' => $message->getLuLe()?->format(DATE_ATOM),
+
+            'cours' => $message->getCours() ? [
+                'id' => $message->getCours()->getId(),
+                'nom' => $message->getCours()->getNom(),
+            ] : null,
+        ], 'Détail message');
+    }
+
+    #[Route('/professeur/messages/{id}/lu', name: 'api_mobile_teacher_message_read', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function markTeacherMessageAsRead(
+        Request $request,
+        int $id,
+        ProfesseurMessageRepository $messages,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $auth = $this->checkAuthentication($request);
+
+        if (!$auth['status']) {
+            return $this->error(
+                $auth['message'],
+                [],
+                'Lecture message',
+                $auth['code']
+            );
+        }
+
+        $professeur = $auth['user']->getProfesseur();
+
+        if (
+            !$this->userHasAnyRole($auth['user'], ['ROLE_PROFESSEUR'])
+            || !$professeur instanceof Professeur
+        ) {
+            return $this->error(
+                'Cet espace est réservé aux comptes professeurs.',
+                [],
+                'Lecture message',
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
+        $message = $messages->findOneBy([
+            'id' => $id,
+            'professeur' => $professeur,
+        ]);
+
+        if (!$message instanceof MessageProfesseur) {
+            return $this->error(
+                'Message introuvable.',
+                [],
+                'Lecture message',
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
+        if ($message->getLuLe() === null) {
+            $message->setLuLe(new \DateTimeImmutable());
+            $entityManager->flush();
+        }
+
+        return $this->success([
+            'id' => $message->getId(),
+            'lu' => true,
+            'luLe' => $message->getLuLe()?->format(DATE_ATOM),
+            'nonLus' => $messages->countUnreadFor($professeur),
+        ], 'Message marqué comme lu');
+    }
+
 }
